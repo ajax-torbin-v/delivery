@@ -9,4 +9,3 @@ data class CreateUserDTO(
     ){
     fun toEntity() = MongoUser(null, fullName, phone, password, mutableListOf())
 }
-

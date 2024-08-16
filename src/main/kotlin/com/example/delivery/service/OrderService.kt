@@ -16,7 +16,8 @@ class OrderService(
     private val productRepository: ProductRepository) {
 
     fun findById(id: String): OrderDTO {
-        val order: MongoOrder = orderRepository.findById(id) ?: throw NotFoundException("Order with id $id doesn't exists")
+        val order: MongoOrder = orderRepository.findById(id)
+            ?: throw NotFoundException("Order with id $id doesn't exists")
         return order.toDTO()
     }
 
@@ -25,13 +26,13 @@ class OrderService(
         createOrderDTO.items.mapNotNull { (productId, amount) ->
             val product: MongoProduct = productRepository.findById(productId)
                 ?: throw NotFoundException("Product with id $productId doesn't exists")
-            val availableAmount = product.amountAvailable ?:
-            throw IllegalStateException("Product with id $productId has no available amount")
+            val availableAmount = product.amountAvailable
+                ?: throw IllegalStateException("Product with id $productId has no available amount")
             if (availableAmount < amount) {
                 throw ArithmeticException("Not enough items")
             }
-            val price = product.price ?:
-            throw IllegalStateException("Product with id $productId has no price")
+            val price = product.price
+                ?: throw IllegalStateException("Product with id $productId has no price")
             sum += price * amount
             product to amount
         }.toMap()
@@ -43,10 +44,10 @@ class OrderService(
         return order.toDTO()
     }
 
-    fun updateStatus(updateOrderDTO: UpdateOrderDTO) {
-        if (!orderRepository.existsById(updateOrderDTO.id))
-            throw NotFoundException("Order with id " + updateOrderDTO.id + "doesn't exists")
-        orderRepository.updateOrderStatus(updateOrderDTO.id, updateOrderDTO.status)
+    fun updateStatus(updateOrderDTO: UpdateOrderDTO) : OrderDTO {
+        val updatedOrder = orderRepository.updateOrderStatus(updateOrderDTO.id, updateOrderDTO.status)
+            ?: throw NotFoundException("Order with id " + updateOrderDTO.id + "doesn't exists")
+        return updatedOrder.toDTO()
     }
 
     fun deleteById(id: String) =

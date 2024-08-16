@@ -2,6 +2,7 @@ package com.example.delivery.repository.impl
 
 import com.example.delivery.model.MongoUser
 import com.example.delivery.repository.UserRepository
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -19,17 +20,16 @@ class UserRepositoryImpl(val mongoTemplate: MongoTemplate) : UserRepository {
         return mongoTemplate.save(user)
     }
 
-    override fun findById(id: String): MongoUser? = mongoTemplate.findById(id, MongoUser::class.java)
+    override fun findById(id: String): MongoUser? = mongoTemplate.findById(id, className)
 
-    override fun addOrder(userId: String, orderId: String) {
+    override fun addOrder(userId: String, orderId: String): MongoUser? {
         val query = Query().addCriteria(Criteria.where("_id").`is`(userId))
         val update = Update().push("orderIds", orderId)
-        mongoTemplate.updateFirst(query, update, MongoUser::class.java)
+        return mongoTemplate.findAndModify(
+            query, update, FindAndModifyOptions().returnNew(true), className)
     }
 
     override fun deleteById(id: String) {
         TODO("Not yet implemented")
     }
-
-
 }

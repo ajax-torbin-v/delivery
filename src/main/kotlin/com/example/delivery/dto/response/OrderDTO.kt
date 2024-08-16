@@ -9,5 +9,4 @@ data class OrderDTO(
     val shipmentDetails: MongoOrder.ShipmentDetails,
     val status: MongoOrder.Status
 ) {
-
 }

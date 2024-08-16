@@ -25,5 +25,3 @@ data class MongoProduct(
         const val COLLECTION_NAME = "product"
     }
 }
-
-

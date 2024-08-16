@@ -2,6 +2,7 @@ package com.example.delivery.repository.impl
 
 import com.example.delivery.model.MongoOrder
 import com.example.delivery.repository.OrderRepository
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
     private val className = MongoOrder::class.java
+
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").`is`(id))
         return mongoTemplate.exists(query, className)
@@ -23,10 +25,12 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
         return mongoTemplate.save(order)
     }
 
-    override fun updateOrderStatus(id: String, status: MongoOrder.Status) {
+    override fun updateOrderStatus(id: String, status: MongoOrder.Status): MongoOrder?{
         val query = Query.query(Criteria.where("_id").`is`(id))
         val update = Update.update("status", status)
-        mongoTemplate.updateFirst(query, update, className)
+        return mongoTemplate.findAndModify(
+            query, update, FindAndModifyOptions().returnNew(true), className)
+
     }
 
     override fun deleteById(id: String) {

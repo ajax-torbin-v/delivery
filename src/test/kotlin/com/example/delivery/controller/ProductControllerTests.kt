@@ -7,8 +7,10 @@ import com.example.delivery.service.ProductService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,10 +18,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import kotlin.test.Test
 
+@ExtendWith(MockitoExtension::class)
 @WebMvcTest(ProductController::class)
 class ProductControllerTests {
     @MockBean
@@ -36,11 +43,10 @@ class ProductControllerTests {
     }
 
     @Test
-    @DisplayName("Find existing product")
     fun `should return product when product exists` () {
         Mockito.`when`(productService.findById("123")).thenReturn(productDTO)
 
-        mockMvc.perform(get("/api/products/findById/{id}", "123"))
+        mockMvc.perform(get("/api/products/{id}", "123"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.name").value(productDTO.name))
@@ -50,23 +56,21 @@ class ProductControllerTests {
     }
 
     @Test
-    @DisplayName("Get all products")
     fun `should return list of all products`() {
         Mockito.`when`(productService.findAll()).thenReturn(products)
 
-        mockMvc.perform(get("/api/products/find/all"))
+        mockMvc.perform(get("/api/products/all"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.length()").value(products.size))
     }
 
     @Test
-    @DisplayName("Add new product")
     fun `should add product and return status created`() {
         Mockito.`when`(productService.add(createProductDTO)).thenReturn(productDTO)
 
         mockMvc.perform(
-            post("/api/products/add")
+            post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createProductDTO))
         )
@@ -75,10 +79,10 @@ class ProductControllerTests {
     }
 
     @Test
-    @DisplayName("Delete product by ID")
     fun `should delete product and return no content`() {
         doNothing().`when`(productService).deleteById("123")
-        mockMvc.perform(delete("/api/products/deleteById/{id}", "123"))
+
+        mockMvc.perform(delete("/api/products/{id}", "123"))
             .andExpect(status().isNoContent)
 
         verify(productService).deleteById("123")

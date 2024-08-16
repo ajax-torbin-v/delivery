@@ -10,8 +10,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,9 +21,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+@ExtendWith(MockitoExtension::class)
 @WebMvcTest(OrderController::class)
 class OrderControllerTests {
     @MockBean
@@ -38,11 +46,10 @@ class OrderControllerTests {
     }
 
     @Test
-    @DisplayName("Add valid order")
     fun `should add order and return status is created` () {
         Mockito.`when`(orderService.add(createOrderDTO)).thenReturn(order.toDTO())
 
-        mockMvc.perform(post("/api/orders/add")
+        mockMvc.perform(post("/api/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createOrderDTO)))
             .andExpect(status().isCreated)
@@ -58,11 +65,10 @@ class OrderControllerTests {
     }
 
     @Test
-    @DisplayName("Find existing order")
     fun `should return order when order exists` () {
         Mockito.`when`(orderService.findById("1")).thenReturn(order.toDTO())
 
-        mockMvc.perform(get("/api/orders/find/{id}", "1"))
+        mockMvc.perform(get("/api/orders/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.items").value(mutableMapOf("1" to 2)))
@@ -77,25 +83,25 @@ class OrderControllerTests {
     }
 
     @Test
-    @DisplayName("Update status of existing user")
-    fun `should update status when user exists` () {
-        Mockito.`when`(orderService.findById("1")).thenReturn(order.toDTO())
+    fun `should update status when user exists and return it` () {
         val updateOrderDTO = UpdateOrderDTO("1", MongoOrder.Status.CANCELED)
+        val updatedOrder = order.toDTO().copy(status = MongoOrder.Status.CANCELED)
+        Mockito.`when`(orderService.updateStatus(updateOrderDTO)).thenReturn(updatedOrder)
 
-        mockMvc.perform(put("/api/orders/update")
+        mockMvc.perform(put("/api/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updateOrderDTO)))
             .andExpect(status().isOk)
+            .andExpect(jsonPath("$.status").value("CANCELED"))
 
         verify(orderService).updateStatus(updateOrderDTO)
     }
 
     @Test
-    @DisplayName("Delete order when order exists")
     fun `should delete order when order exists` () {
         doNothing().`when`(orderService).deleteById("1")
 
-        mockMvc.perform(delete("/api/orders/deleteById/{id}", "1"))
+        mockMvc.perform(delete("/api/orders/{id}", "1"))
             .andExpect(status().isNoContent)
 
         verify(orderService).deleteById("1")

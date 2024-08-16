@@ -13,19 +13,21 @@ class UserService(
     private val userRepository: UserRepository,
     private val orderRepository: OrderRepository) {
 
-    fun add(createUserDTO: CreateUserDTO): UserDTO {
-        return userRepository.save(createUserDTO.toEntity()).toDTO()
-    }
+    fun add(createUserDTO: CreateUserDTO): UserDTO = userRepository.save(createUserDTO.toEntity()).toDTO()
+
 
     fun findById(id: String): UserDTO {
-        val user: MongoUser = userRepository.findById(id) ?: throw NotFoundException("User with id $id doesn't exists")
+        val user: MongoUser = userRepository.findById(id)
+            ?: throw NotFoundException("User with id $id doesn't exists")
         return user.toDTO()
     }
 
-    fun addOrder(userId: String, orderId: String) {
-        if (!userRepository.existsById(userId)) throw NotFoundException("User with id $userId doesn't exists")
-        if (!orderRepository.existsById(orderId)) throw NotFoundException("Order with id $orderId doesn't exists")
-        userRepository.addOrder(userId, orderId)
+    fun addOrder(userId: String, orderId: String): UserDTO {
+        if (!orderRepository.existsById(orderId))
+            throw NotFoundException("Order with id $orderId doesn't exists")
+        val updatedUser = userRepository.addOrder(userId, orderId)
+            ?: throw NotFoundException("User with id $userId doesn't exists")
+        return updatedUser.toDTO()
     }
 
     fun deleteById(id: String) =
