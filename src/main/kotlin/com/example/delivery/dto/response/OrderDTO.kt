@@ -1,12 +1,11 @@
 package com.example.delivery.dto.response
 
-import com.example.delivery.model.MongoOrder
+import java.math.BigDecimal
 
 data class OrderDTO(
     val id: String,
     val items: Map<String, Int>, //TODO: Use List<Product> instead, fetched from a db
-    val totalPrice: Double,
-    val shipmentDetails: MongoOrder.ShipmentDetails,
-    val status: MongoOrder.Status
-) {
-}
+    val totalPrice: BigDecimal,
+    val shipmentDetails: ShipmentDetailsDTO,
+    val status: String
+)

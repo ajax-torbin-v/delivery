@@ -1,9 +1,6 @@
 package com.example.delivery.dto.request
 
-import com.example.delivery.model.MongoOrder
-
-data class UpdateOrderDTO (
+data class UpdateOrderDTO(
     val id: String,
-    val status: MongoOrder.Status
-) {
-}
+    val status: String
+)

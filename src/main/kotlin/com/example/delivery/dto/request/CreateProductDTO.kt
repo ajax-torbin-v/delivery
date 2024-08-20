@@ -1,12 +1,10 @@
 package com.example.delivery.dto.request
 
-import com.example.delivery.model.MongoProduct
+import java.math.BigDecimal
 
 data class CreateProductDTO(
     val name: String,
-    val price: Double,
+    val price: BigDecimal,
     val amount: Int,
     val measurement: String
-) {
-    fun toModel(): MongoProduct = MongoProduct(null, name, price, amount, measurement)
-}
+)

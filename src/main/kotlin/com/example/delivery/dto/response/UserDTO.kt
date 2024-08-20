@@ -5,5 +5,4 @@ data class UserDTO(
     val fullName: String,
     val phone: String,
     val orderIds: List<String>
-) {
-}
+)

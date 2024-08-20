@@ -1,9 +1,11 @@
 package com.example.delivery.dto.response
 
+import java.math.BigDecimal
+
 data class ProductDTO(
     val id: String,
     val name: String,
-    val price: Double,
+    val price: BigDecimal,
     val amount: Int,
-    val measurement: String) {
-}
+    val measurement: String
+)
