@@ -1,7 +1,7 @@
 package com.example.delivery.repository
 
 
-import com.example.delivery.model.MongoProduct
+import com.example.delivery.mongo.MongoProduct
 import org.springframework.stereotype.Repository
 
 @Repository
