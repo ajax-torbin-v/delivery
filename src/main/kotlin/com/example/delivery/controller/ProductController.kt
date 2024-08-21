@@ -2,6 +2,7 @@ package com.example.delivery.controller
 
 import com.example.delivery.dto.request.CreateProductDTO
 import com.example.delivery.dto.response.ProductDTO
+import com.example.delivery.mapper.ProductMapper.toDTO
 import com.example.delivery.service.ProductService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,18 +21,18 @@ class ProductController(private val productService: ProductService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): ResponseEntity<ProductDTO> {
-        return ResponseEntity.ok(productService.findById(id))
+        return ResponseEntity.ok(productService.findById(id).toDTO())
     }
 
     @GetMapping("/all")
     fun getAll(): ResponseEntity<List<ProductDTO>> {
-        return ResponseEntity.ok(productService.findAll())
+        return ResponseEntity.ok(productService.findAll().map { it.toDTO() })
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createProductDTO: CreateProductDTO): ResponseEntity<ProductDTO> {
-        return ResponseEntity(productService.add(createProductDTO), HttpStatus.CREATED)
+        return ResponseEntity(productService.add(createProductDTO).toDTO(), HttpStatus.CREATED)
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

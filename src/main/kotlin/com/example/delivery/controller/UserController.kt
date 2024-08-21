@@ -2,6 +2,7 @@ package com.example.delivery.controller
 
 import com.example.delivery.dto.request.CreateUserDTO
 import com.example.delivery.dto.response.UserDTO
+import com.example.delivery.mapper.UserMapper.toDTO
 import com.example.delivery.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,12 +21,12 @@ class UserController(private val userService: UserService) {
 
     @PostMapping
     fun add(@RequestBody createUserDTO: CreateUserDTO): ResponseEntity<UserDTO> {
-        return ResponseEntity.ok(userService.add(createUserDTO))
+        return ResponseEntity.ok(userService.add(createUserDTO).toDTO())
     }
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): ResponseEntity<UserDTO> {
-        return ResponseEntity.ok(userService.findById(id))
+        return ResponseEntity.ok(userService.findById(id).toDTO())
     }
 
     @DeleteMapping("/{id}")

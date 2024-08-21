@@ -3,6 +3,7 @@ package com.example.delivery.controller
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
+import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.service.OrderService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,18 +23,18 @@ class OrderController(private val orderService: OrderService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): ResponseEntity<OrderDTO> {
-        return ResponseEntity.ok(orderService.findById(id))
+        return ResponseEntity.ok(orderService.findById(id).toDTO())
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createOrderDTO: CreateOrderDTO): ResponseEntity<OrderDTO> {
-        return ResponseEntity(orderService.add(createOrderDTO), HttpStatus.CREATED)
+        return ResponseEntity(orderService.add(createOrderDTO).toDTO(), HttpStatus.CREATED)
     }
 
     @PutMapping
     fun update(@RequestBody updateOrderDTO: UpdateOrderDTO): ResponseEntity<OrderDTO> {
-        return ResponseEntity.ok(orderService.updateStatus(updateOrderDTO))
+        return ResponseEntity.ok(orderService.updateStatus(updateOrderDTO).toDTO())
     }
 
     @DeleteMapping("/{id}")

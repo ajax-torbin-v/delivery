@@ -1,9 +1,13 @@
 package com.example.delivery.service
 
+import com.example.delivery.domain.DomainOrder
+import com.example.delivery.domain.DomainUser
 import com.example.delivery.dto.request.CreateUserDTO
-import com.example.delivery.dto.response.UserDTO
 import com.example.delivery.exception.NotFoundException
-import com.example.delivery.model.MongoUser
+import com.example.delivery.mapper.OrderMapper.toDomain
+import com.example.delivery.mapper.UserMapper.toDomain
+import com.example.delivery.mapper.UserMapper.toMongo
+import com.example.delivery.mongo.MongoUser
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -11,23 +15,21 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val orderRepository: OrderRepository) {
+    private val orderRepository: OrderRepository,
+) {
 
-    fun add(createUserDTO: CreateUserDTO): UserDTO = userRepository.save(createUserDTO.toEntity()).toDTO()
+    fun add(createUserDTO: CreateUserDTO): DomainUser = userRepository.save(createUserDTO.toMongo()).toDomain()
 
-
-    fun findById(id: String): UserDTO {
+    fun findById(id: String): DomainUser {
         val user: MongoUser = userRepository.findById(id)
             ?: throw NotFoundException("User with id $id doesn't exists")
-        return user.toDTO()
+        return user.toDomain()
     }
 
-    fun addOrder(userId: String, orderId: String): UserDTO {
-        if (!orderRepository.existsById(orderId))
-            throw NotFoundException("Order with id $orderId doesn't exists")
-        val updatedUser = userRepository.addOrder(userId, orderId)
-            ?: throw NotFoundException("User with id $userId doesn't exists")
-        return updatedUser.toDTO()
+    fun findAllOrders(id: String): List<DomainOrder> {
+        val user: MongoUser = userRepository.findById(id)
+            ?: throw NotFoundException("User with id $id doesn't exists")
+        return orderRepository.findAll(id).map { it.toDomain() }
     }
 
     fun deleteById(id: String) =
