@@ -36,6 +36,7 @@ class OrderService(
         }
 
         productReserveService.reserveProducts(products)
+        products.forEach { productRepository.updateAmount(it.key.id.toString(), -it.value) }
 
         val totalPrice = productReserveService.calculateTotalPrice(products)
 

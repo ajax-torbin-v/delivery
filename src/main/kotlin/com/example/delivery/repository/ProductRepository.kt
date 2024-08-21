@@ -12,4 +12,5 @@ interface ProductRepository {
     fun deleteById(id: String)
     fun findByName(name: String): MongoProduct?
     fun existsById(id: String): Boolean
+    fun updateAmount(id: String, amount: Int): MongoProduct
 }

@@ -1,10 +1,12 @@
 package com.example.delivery.repository.impl
 
+import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
 
@@ -14,6 +16,14 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists(query, className)
+    }
+
+    override fun updateAmount(id: String, amount: Int): MongoProduct {
+        val query = Query(Criteria.where("_id").isEqualTo(id))
+        val update = Update().inc("stock", amount)
+
+        return mongoTemplate.findAndModify(query, update, className)
+            ?: throw NotFoundException("Product with id $id doesn't exist")
     }
 
     override fun findById(id: String): MongoProduct? = mongoTemplate.findById(id, className)

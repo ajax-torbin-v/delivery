@@ -71,6 +71,7 @@ internal class OrderServiceTest {
 
         //THEN
         verify(orderRepository, times(1)).save(any())
+        verify(productRepository, times(order.items!!.size)).updateAmount(any(), any())
         assertEquals(domainOrder, actual)
     }
 
