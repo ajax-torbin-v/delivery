@@ -1,4 +1,4 @@
-package com.example.delivery.dto.response;
+package com.example.delivery.dto.response
 
 data class ShipmentDetailsDTO(
     val city: String = "none",

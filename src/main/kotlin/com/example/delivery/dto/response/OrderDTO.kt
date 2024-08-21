@@ -7,5 +7,5 @@ data class OrderDTO(
     val items: Map<String, Int>, //TODO: Use List<Product> instead, fetched from a db
     val totalPrice: BigDecimal,
     val shipmentDetails: ShipmentDetailsDTO,
-    val status: String
+    val status: String,
 )

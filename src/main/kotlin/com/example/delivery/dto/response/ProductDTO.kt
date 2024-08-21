@@ -7,5 +7,5 @@ data class ProductDTO(
     val name: String,
     val price: BigDecimal,
     val amount: Int,
-    val measurement: String
+    val measurement: String,
 )
