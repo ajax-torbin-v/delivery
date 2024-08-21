@@ -8,4 +8,5 @@ data class OrderDTO(
     val totalPrice: BigDecimal,
     val shipmentDetails: ShipmentDetailsDTO,
     val status: String,
+    val userId: String,
 )

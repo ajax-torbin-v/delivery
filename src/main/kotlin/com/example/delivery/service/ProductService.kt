@@ -22,6 +22,9 @@ class ProductService(private val productRepository: ProductRepository) {
         productRepository.save(createProductDTO.toMongo()).toDomain()
 
     fun deleteById(id: String) =
-        if (productRepository.existsById(id)) productRepository.deleteById(id)
-        else throw NotFoundException("Product with id $id not found")
+        if (productRepository.existsById(id)) {
+            productRepository.deleteById(id)
+        } else {
+            throw NotFoundException("Product with id $id not found")
+        }
 }

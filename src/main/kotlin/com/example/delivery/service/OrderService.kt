@@ -18,7 +18,7 @@ class OrderService(
     private val userRepository: UserRepository,
     private val productReserveService: ProductReserveService,
     private val productRepository: ProductRepository,
-    ) {
+) {
 
     fun findById(id: String): DomainOrder {
         val order: MongoOrder = orderRepository.findById(id)
@@ -49,14 +49,17 @@ class OrderService(
         return savedOrder.toDomain()
     }
 
-    fun updateStatus(updateOrderDTO: UpdateOrderDTO): DomainOrder {
+    fun updateStatus(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
         val updatedOrder =
-            orderRepository.updateOrderStatus(updateOrderDTO.id, MongoOrder.Status.valueOf(updateOrderDTO.status))
-                ?: throw NotFoundException("Order with id " + updateOrderDTO.id + "doesn't exists")
+            orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(updateOrderDTO.status))
+                ?: throw NotFoundException("Order with id " + id + "doesn't exists")
         return updatedOrder.toDomain()
     }
 
     fun deleteById(id: String) =
-        if (orderRepository.existsById(id)) orderRepository.deleteById(id)
-        else throw NotFoundException("Order with id $id doesn't exists")
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id)
+        } else {
+            throw NotFoundException("Order with id $id doesn't exists")
+        }
 }

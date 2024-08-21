@@ -32,7 +32,9 @@ class UserService(
         return orderRepository.findAll(id).map { it.toDomain() }
     }
 
-    fun deleteById(id: String) =
-        if (userRepository.existsById(id)) userRepository.deleteById(id)
-        else throw NotFoundException("User with id $id doesn't exists")
+    fun deleteById(id: String) = if (userRepository.existsById(id)) {
+        userRepository.deleteById(id)
+    } else {
+        throw NotFoundException("User with id $id doesn't exists")
+    }
 }

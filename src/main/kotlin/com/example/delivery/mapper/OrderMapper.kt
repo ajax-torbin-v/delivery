@@ -20,7 +20,8 @@ object OrderMapper {
         items.mapKeys { it.key.toString() },
         totalPrice,
         shipmentDetails.toDTO(),
-        status
+        status,
+        (id ?: "none").toString(),
     )
 
     fun DomainOrder.toMongo(): MongoOrder = MongoOrder(
