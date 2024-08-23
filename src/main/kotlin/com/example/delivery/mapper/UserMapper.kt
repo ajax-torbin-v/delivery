@@ -7,7 +7,7 @@ import com.example.delivery.mongo.MongoUser
 
 object UserMapper {
     fun DomainUser.toDTO(): UserDTO = UserDTO(
-        (id ?: "none").toString(),
+        id.toHexString(),
         fullName,
         phone,
     )
@@ -20,7 +20,7 @@ object UserMapper {
     )
 
     fun MongoUser.toDomain(): DomainUser = DomainUser(
-        id,
+        id!!,
         fullName ?: "none",
         phone ?: "none",
         password ?: ""

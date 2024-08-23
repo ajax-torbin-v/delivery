@@ -16,12 +16,12 @@ object OrderMapper {
     )
 
     fun DomainOrder.toDTO(): OrderDTO = OrderDTO(
-        (id ?: "none").toString(),
+        id.toHexString(),
         items.mapKeys { it.key.toString() },
         totalPrice,
         shipmentDetails.toDTO(),
         status,
-        (id ?: "none").toString(),
+        id.toHexString(),
     )
 
     fun DomainOrder.toMongo(): MongoOrder = MongoOrder(
@@ -29,7 +29,7 @@ object OrderMapper {
     )
 
     fun MongoOrder.toDomain(): DomainOrder = DomainOrder(
-        id,
+        id!!,
         items = items ?: emptyMap(),
         totalPrice = totalPrice ?: BigDecimal.ZERO,
         shipmentDetails = shipmentDetails ?: MongoOrder.MongoShipmentDetails(),

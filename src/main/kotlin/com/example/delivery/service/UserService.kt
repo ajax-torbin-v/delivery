@@ -7,7 +7,6 @@ import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.UserMapper.toDomain
 import com.example.delivery.mapper.UserMapper.toMongo
-import com.example.delivery.mongo.MongoUser
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.UserRepository
 import org.springframework.stereotype.Service
@@ -18,17 +17,17 @@ class UserService(
     private val orderRepository: OrderRepository,
 ) {
 
-    fun add(createUserDTO: CreateUserDTO): DomainUser = userRepository.save(createUserDTO.toMongo()).toDomain()
+    fun add(createUserDTO: CreateUserDTO): DomainUser {
+        return userRepository.save(createUserDTO.toMongo()).toDomain()
+    }
 
     fun getById(id: String): DomainUser {
-        val user: MongoUser = userRepository.findById(id)
+        return userRepository.findById(id)?.toDomain()
             ?: throw NotFoundException("User with id $id doesn't exists")
-        return user.toDomain()
     }
 
     fun findAllOrders(id: String): List<DomainOrder> {
-        val user: MongoUser = userRepository.findById(id)
-            ?: throw NotFoundException("User with id $id doesn't exists")
+        if (!userRepository.existsById(id)) throw NotFoundException("User with id $id doesn't exists")
         return orderRepository.findAll(id).map { it.toDomain() }
     }
 

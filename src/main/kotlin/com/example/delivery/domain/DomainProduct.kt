@@ -4,7 +4,7 @@ import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class DomainProduct(
-    val id: ObjectId? = null,
+    val id: ObjectId,
     val name: String,
     val price: BigDecimal,
     val amountAvailable: Int,

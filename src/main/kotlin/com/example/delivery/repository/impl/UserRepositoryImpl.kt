@@ -26,6 +26,6 @@ class UserRepositoryImpl(val mongoTemplate: MongoTemplate) : UserRepository {
 
     override fun deleteById(id: String) {
         val query = Query().addCriteria(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.remove(query, className)
+        mongoTemplate.findAndRemove(query, className)
     }
 }

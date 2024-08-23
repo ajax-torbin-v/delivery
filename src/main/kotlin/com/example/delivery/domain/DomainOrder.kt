@@ -5,7 +5,7 @@ import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class DomainOrder(
-    val id: ObjectId? = null,
+    val id: ObjectId,
     val items: Map<ObjectId, Int>,
     val totalPrice: BigDecimal,
     val shipmentDetails: MongoShipmentDetails,

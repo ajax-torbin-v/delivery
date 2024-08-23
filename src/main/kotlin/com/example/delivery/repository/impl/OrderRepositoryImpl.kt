@@ -38,7 +38,7 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
 
     override fun deleteById(id: String) {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.remove(query)
+        mongoTemplate.findAndRemove(query, className)
     }
 
     override fun findAll(id: String): List<MongoOrder> {

@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service
 class ProductService(private val productRepository: ProductRepository) {
 
     fun getById(id: String): DomainProduct {
-        val product = productRepository.findById(id) ?: throw NotFoundException("Product with id $id not found")
-        return product.toDomain()
+        return productRepository.findById(id)?.toDomain()
+            ?: throw NotFoundException("Product with id $id not found")
     }
 
     fun findAll(): List<DomainProduct> {

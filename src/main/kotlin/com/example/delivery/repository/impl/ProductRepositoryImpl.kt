@@ -39,12 +39,12 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
     }
 
     override fun deleteById(id: String) {
-        val query = Query().addCriteria(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.remove(query)
+        val query = Query(Criteria.where("_id").isEqualTo(id))
+        mongoTemplate.findAndRemove(query, className)
     }
 
     override fun findByName(name: String): MongoProduct? {
-        val query = Query().addCriteria(Criteria.where(MongoProduct::name.name).isEqualTo(name))
+        val query = Query.query(Criteria.where(MongoProduct::name.name).isEqualTo(name))
         return mongoTemplate.findOne(query, className)
     }
 }

@@ -21,9 +21,8 @@ class OrderService(
 ) {
 
     fun getById(id: String): DomainOrder {
-        val order: MongoOrder = orderRepository.findById(id)
+        return orderRepository.findById(id)?.toDomain()
             ?: throw NotFoundException("Order with id $id doesn't exists")
-        return order.toDomain()
     }
 
     fun add(createOrderDTO: CreateOrderDTO): DomainOrder {
@@ -42,12 +41,11 @@ class OrderService(
 
         val order = MongoOrder(
             userId = user.id,
-            items = products.associate { it.product.id!! to it.amount },
+            items = products.associate { it.product.id to it.amount },
             totalPrice = totalPrice
         )
 
-        val savedOrder: MongoOrder = orderRepository.save(order)
-        return savedOrder.toDomain()
+        return orderRepository.save(order).toDomain()
     }
 
     fun updateStatus(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
