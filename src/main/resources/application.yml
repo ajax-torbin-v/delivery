@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: delivery
+
+server:
+  servlet:
+    contextPath: /api/v1
