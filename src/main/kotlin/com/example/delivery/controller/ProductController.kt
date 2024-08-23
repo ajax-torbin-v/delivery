@@ -20,7 +20,7 @@ class ProductController(private val productService: ProductService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): ProductDTO {
-        return productService.findById(id).toDTO()
+        return productService.getById(id).toDTO()
     }
 
     @GetMapping
@@ -36,5 +36,7 @@ class ProductController(private val productService: ProductService) {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: String) = productService.deleteById(id)
+    fun delete(@PathVariable id: String) {
+        productService.deleteById(id)
+    }
 }

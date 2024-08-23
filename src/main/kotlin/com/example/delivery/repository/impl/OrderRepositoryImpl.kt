@@ -20,7 +20,9 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
     }
 
     //TODO: use aggregation to fetch all products
-    override fun findById(id: String): MongoOrder? = mongoTemplate.findById(id, className)
+    override fun findById(id: String): MongoOrder? {
+        return mongoTemplate.findById(id, className)
+    }
 
     override fun save(order: MongoOrder): MongoOrder {
         return mongoTemplate.save(order)
@@ -43,5 +45,4 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
         val query = Query.query(Criteria.where(MongoOrder::userId.name).isEqualTo(id))
         return mongoTemplate.find(query, className)
     }
-
 }

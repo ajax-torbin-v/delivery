@@ -12,7 +12,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: NotFoundException, request: WebRequest): ResponseEntity<ErrorDetails> {
         val errorDetails = ErrorDetails(
-            message = ex.message ?: "Something went wrong",
+            message = ex.message!!,
             details = request.getDescription(false)
         )
         return ResponseEntity(errorDetails, HttpStatus.NOT_FOUND)

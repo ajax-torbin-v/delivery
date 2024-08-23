@@ -35,9 +35,9 @@ internal class ProductControllerTest {
     @Test
     fun `should return product when product exists`() {
         //GIVEN
-        Mockito.`when`(productService.findById("123")).thenReturn(domainProduct)
+        Mockito.`when`(productService.getById("123")).thenReturn(domainProduct)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(get("/products/{id}", "123"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -52,7 +52,7 @@ internal class ProductControllerTest {
         //GIVEN
         Mockito.`when`(productService.findAll()).thenReturn(products)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(get("/products"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -64,7 +64,7 @@ internal class ProductControllerTest {
         //GIVEN
         Mockito.`when`(productService.add(createProductDTO)).thenReturn(domainProduct)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(
             post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,10 +79,11 @@ internal class ProductControllerTest {
         //GIVEN
         doNothing().`when`(productService).deleteById("123")
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(delete("/products/{id}", "123"))
             .andExpect(status().isNoContent)
 
+        //AND THEN
         verify(productService).deleteById("123")
     }
 }

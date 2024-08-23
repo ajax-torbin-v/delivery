@@ -25,12 +25,12 @@ class UserController(private val userService: UserService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): UserDTO {
-        return userService.findById(id).toDTO()
+        return userService.getById(id).toDTO()
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteById(@PathVariable id: String) = userService.deleteById(id)
-
-
+    fun deleteById(@PathVariable id: String) {
+        userService.deleteById(id)
+    }
 }

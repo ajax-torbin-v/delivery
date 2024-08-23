@@ -47,8 +47,8 @@ internal class UserServiceTest {
         //GIVEN
         Mockito.`when`(userRepository.findById("2")).thenReturn(user)
 
-        //THEN
-        assertEquals(domainUser, userService.findById("2"))
+        //WHEN //THEN
+        assertEquals(domainUser, userService.getById("2"))
     }
 
     @Test
@@ -56,8 +56,8 @@ internal class UserServiceTest {
         //GIVEN
         Mockito.`when`(userRepository.findById("3")).thenReturn(null)
 
-        //THEN
-        assertThrows<NotFoundException> { userService.findById("3") }
+        //WHEN //THEN
+        assertThrows<NotFoundException> { userService.getById("3") }
     }
 
     @Test
@@ -67,6 +67,7 @@ internal class UserServiceTest {
 
         //WHEN
         userService.deleteById("8")
+
         //THEN
         verify(userRepository, times(1)).deleteById("8")
     }
@@ -76,7 +77,7 @@ internal class UserServiceTest {
         //GIVEN
         Mockito.`when`(userRepository.existsById("8")).thenReturn(false)
 
-        //THEN
+        //WHEN //THEN
         assertThrows<NotFoundException> { userService.deleteById("8") }
     }
 }

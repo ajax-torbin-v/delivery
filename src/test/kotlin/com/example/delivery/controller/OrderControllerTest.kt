@@ -37,7 +37,7 @@ internal class OrderControllerTest {
         //GIVEN
         Mockito.`when`(orderService.add(createOrderDTO)).thenReturn(domainOrder)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(
             post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,9 +62,9 @@ internal class OrderControllerTest {
     @Test
     fun `should return order when order exists`() {
         //GIVEN
-        Mockito.`when`(orderService.findById("1")).thenReturn(domainOrder)
+        Mockito.`when`(orderService.getById("1")).thenReturn(domainOrder)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(get("/orders/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -90,7 +90,7 @@ internal class OrderControllerTest {
         val updateDomainOrder = domainOrder.copy(status = "CANCELED")
         Mockito.`when`(orderService.updateStatus("1", updateOrderDTO)).thenReturn(updateDomainOrder)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(
             put("/orders/{id}", "1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -99,6 +99,7 @@ internal class OrderControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("CANCELED"))
 
+        //AND THEN
         verify(orderService).updateStatus("1", updateOrderDTO)
     }
 
@@ -107,10 +108,11 @@ internal class OrderControllerTest {
         //GIVEN
         doNothing().`when`(orderService).deleteById("1")
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(delete("/orders/{id}", "1"))
             .andExpect(status().isNoContent)
 
+        //AND THEN
         verify(orderService).deleteById("1")
     }
 }

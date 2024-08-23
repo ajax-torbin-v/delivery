@@ -1,5 +1,6 @@
 package com.example.delivery.controller
 
+import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
@@ -20,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/orders")
 class OrderController(private val orderService: OrderService) {
 
+    @LogInvoke
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): OrderDTO {
-        return orderService.findById(id).toDTO()
+        return orderService.getById(id).toDTO()
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -41,5 +43,7 @@ class OrderController(private val orderService: OrderService) {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: String) = orderService.deleteById(id)
+    fun delete(@PathVariable id: String) {
+        return orderService.deleteById(id)
+    }
 }

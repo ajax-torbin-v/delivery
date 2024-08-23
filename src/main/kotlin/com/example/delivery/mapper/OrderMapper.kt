@@ -30,7 +30,7 @@ object OrderMapper {
 
     fun MongoOrder.toDomain(): DomainOrder = DomainOrder(
         id,
-        items = items ?: mutableMapOf(),
+        items = items ?: emptyMap(),
         totalPrice = totalPrice ?: BigDecimal.ZERO,
         shipmentDetails = shipmentDetails ?: MongoOrder.MongoShipmentDetails(),
         status = status?.name ?: "UNKNOWN",

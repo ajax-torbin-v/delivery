@@ -1,5 +1,6 @@
 package com.example.delivery.service
 
+import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
@@ -20,7 +21,8 @@ class OrderService(
     private val productRepository: ProductRepository,
 ) {
 
-    fun findById(id: String): DomainOrder {
+    @LogInvoke
+    fun getById(id: String): DomainOrder {
         val order: MongoOrder = orderRepository.findById(id)
             ?: throw NotFoundException("Order with id $id doesn't exists")
         return order.toDomain()
@@ -33,16 +35,16 @@ class OrderService(
         val products = createOrderDTO.items.mapKeys {
             productRepository.findById(it.key)?.toDomain()
                 ?: throw NotFoundException("Product with id ${it.key} doesn't exist")
-        }
+        }.map { ProductReserveService.AccountedProduct(it.key, it.value) }
 
         productReserveService.reserveProducts(products)
-        products.forEach { productRepository.updateAmount(it.key.id.toString(), -it.value) }
+        products.forEach { productRepository.updateAmount(it.product.id.toString(), -it.amount) }
 
         val totalPrice = productReserveService.calculateTotalPrice(products)
 
         val order = MongoOrder(
             userId = user.id,
-            items = products.mapKeys { it.key.id!! },
+            items = products.associate { it.product.id!! to it.amount },
             totalPrice = totalPrice
         )
 
@@ -57,10 +59,7 @@ class OrderService(
         return updatedOrder.toDomain()
     }
 
-    fun deleteById(id: String) =
-        if (orderRepository.existsById(id)) {
-            orderRepository.deleteById(id)
-        } else {
-            throw NotFoundException("Order with id $id doesn't exists")
-        }
+    fun deleteById(id: String) {
+        orderRepository.deleteById(id)
+    }
 }

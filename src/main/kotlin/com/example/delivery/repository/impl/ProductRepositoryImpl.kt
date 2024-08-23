@@ -26,7 +26,9 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
             ?: throw NotFoundException("Product with id $id doesn't exist")
     }
 
-    override fun findById(id: String): MongoProduct? = mongoTemplate.findById(id, className)
+    override fun findById(id: String): MongoProduct? {
+        return mongoTemplate.findById(id, className)
+    }
 
     override fun findAll(): List<MongoProduct> {
         return mongoTemplate.findAll(className)

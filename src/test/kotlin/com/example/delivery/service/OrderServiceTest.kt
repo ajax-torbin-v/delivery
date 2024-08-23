@@ -45,8 +45,8 @@ internal class OrderServiceTest {
         //GIVEN
         Mockito.`when`(orderRepository.findById("1")).thenReturn(order)
 
-        //THEN
-        assertEquals(orderService.findById("1"), domainOrder)
+        //WHEN //THEN
+        assertEquals(orderService.getById("1"), domainOrder)
     }
 
     @Test
@@ -54,13 +54,12 @@ internal class OrderServiceTest {
         //GIVEN
         Mockito.`when`(orderRepository.findById("1")).thenReturn(null)
 
-        //THEN
-        assertThrows<NotFoundException> { orderService.findById("1") }
+        //WHEN //THEN
+        assertThrows<NotFoundException> { orderService.getById("1") }
     }
 
     @Test
     fun `should add order with proper dto`() {
-
         //GIVEN
         Mockito.`when`(productRepository.findById("123456789011121314151617")).thenReturn(product)
         Mockito.`when`(orderRepository.save(any())).thenReturn(order)

@@ -20,7 +20,7 @@ class UserService(
 
     fun add(createUserDTO: CreateUserDTO): DomainUser = userRepository.save(createUserDTO.toMongo()).toDomain()
 
-    fun findById(id: String): DomainUser {
+    fun getById(id: String): DomainUser {
         val user: MongoUser = userRepository.findById(id)
             ?: throw NotFoundException("User with id $id doesn't exists")
         return user.toDomain()
@@ -32,9 +32,7 @@ class UserService(
         return orderRepository.findAll(id).map { it.toDomain() }
     }
 
-    fun deleteById(id: String) = if (userRepository.existsById(id)) {
+    fun deleteById(id: String) {
         userRepository.deleteById(id)
-    } else {
-        throw NotFoundException("User with id $id doesn't exists")
     }
 }

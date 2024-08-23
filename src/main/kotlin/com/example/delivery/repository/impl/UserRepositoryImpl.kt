@@ -20,7 +20,9 @@ class UserRepositoryImpl(val mongoTemplate: MongoTemplate) : UserRepository {
         return mongoTemplate.save(user)
     }
 
-    override fun findById(id: String): MongoUser? = mongoTemplate.findById(id, className)
+    override fun findById(id: String): MongoUser? {
+        return mongoTemplate.findById(id, className)
+    }
 
     override fun deleteById(id: String) {
         val query = Query().addCriteria(Criteria.where("_id").isEqualTo(id))

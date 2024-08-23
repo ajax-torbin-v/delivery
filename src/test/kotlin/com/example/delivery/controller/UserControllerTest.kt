@@ -35,7 +35,7 @@ internal class UserControllerTest {
         //GIVEN
         Mockito.`when`(userService.add(createUserDTO)).thenReturn(domainUser)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,9 +48,9 @@ internal class UserControllerTest {
     @Test
     fun `should return user when user exists`() {
         //GIVEN
-        Mockito.`when`(userService.findById("1")).thenReturn(domainUser)
+        Mockito.`when`(userService.getById("1")).thenReturn(domainUser)
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(get("/users/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -63,10 +63,11 @@ internal class UserControllerTest {
         //GIVEN
         doNothing().`when`(userService).deleteById("1")
 
-        //THEN
+        //WHEN //THEN
         mockMvc.perform(delete("/users/{id}", "1"))
             .andExpect(status().isNoContent)
 
+        //AND THEN
         verify(userService).deleteById("1")
     }
 }

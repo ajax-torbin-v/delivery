@@ -11,20 +11,20 @@ import org.springframework.stereotype.Service
 @Service
 class ProductService(private val productRepository: ProductRepository) {
 
-    fun findById(id: String): DomainProduct {
+    fun getById(id: String): DomainProduct {
         val product = productRepository.findById(id) ?: throw NotFoundException("Product with id $id not found")
         return product.toDomain()
     }
 
-    fun findAll(): List<DomainProduct> = productRepository.findAll().map { it.toDomain() }
+    fun findAll(): List<DomainProduct> {
+        return productRepository.findAll().map { it.toDomain() }
+    }
 
-    fun add(createProductDTO: CreateProductDTO): DomainProduct =
-        productRepository.save(createProductDTO.toMongo()).toDomain()
+    fun add(createProductDTO: CreateProductDTO): DomainProduct {
+        return productRepository.save(createProductDTO.toMongo()).toDomain()
+    }
 
-    fun deleteById(id: String) =
-        if (productRepository.existsById(id)) {
-            productRepository.deleteById(id)
-        } else {
-            throw NotFoundException("Product with id $id not found")
-        }
+    fun deleteById(id: String) {
+        return productRepository.deleteById(id)
+    }
 }
