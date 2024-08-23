@@ -60,10 +60,7 @@ internal class ProductServiceTest {
 
     @Test
     fun `should be okay when deleting existing product`() {
-        //GIVEN
-        Mockito.`when`(productRepository.existsById("1")).thenReturn(true)
-
-        //WHEN
+        //GIVEN //WHEN
         productService.deleteById("1")
 
         //THEN

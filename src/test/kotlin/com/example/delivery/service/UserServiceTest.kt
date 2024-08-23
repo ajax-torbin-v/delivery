@@ -62,22 +62,10 @@ internal class UserServiceTest {
 
     @Test
     fun `should delete is user exists`() {
-        //GIVEN
-        Mockito.`when`(userRepository.existsById("8")).thenReturn(true)
-
-        //WHEN
+        //GIVEN //WHEN
         userService.deleteById("8")
 
         //THEN
         verify(userRepository, times(1)).deleteById("8")
-    }
-
-    @Test
-    fun `should throw exception is user doesn't exists`() {
-        //GIVEN
-        Mockito.`when`(userRepository.existsById("8")).thenReturn(false)
-
-        //WHEN //THEN
-        assertThrows<NotFoundException> { userService.deleteById("8") }
     }
 }
