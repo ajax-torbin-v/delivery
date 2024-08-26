@@ -1,6 +1,7 @@
 package com.example.delivery.repository
 
 import com.example.delivery.mongo.MongoUser
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -9,4 +10,5 @@ interface UserRepository {
     fun save(user: MongoUser): MongoUser
     fun findById(id: String): MongoUser?
     fun deleteById(id: String)
+    fun update(id: String, update: Update): MongoUser?
 }

@@ -30,7 +30,7 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
 
     override fun updateOrderStatus(id: String, status: MongoOrder.Status): MongoOrder? {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        val update = Update.update("status", MongoOrder::status.name)
+        val update = Update.update(MongoOrder::status.name, status)
         return mongoTemplate.findAndModify(
             query, update, FindAndModifyOptions().returnNew(true), className
         )
@@ -39,6 +39,11 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
     override fun deleteById(id: String) {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         mongoTemplate.findAndRemove(query, className)
+    }
+
+    override fun updateOrder(id: String, update: Update): MongoOrder? {
+        val query = Query.query(Criteria.where("_id").isEqualTo(id))
+        return mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), className)
     }
 
     override fun findAll(id: String): List<MongoOrder> {

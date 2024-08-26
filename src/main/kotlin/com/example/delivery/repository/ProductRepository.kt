@@ -2,6 +2,7 @@ package com.example.delivery.repository
 
 
 import com.example.delivery.mongo.MongoProduct
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -12,5 +13,6 @@ interface ProductRepository {
     fun save(product: MongoProduct): MongoProduct
     fun deleteById(id: String)
     fun existsById(id: String): Boolean
-    fun updateAmount(id: String, amount: Int): MongoProduct
+    fun update(id: String, update: Update): MongoProduct?
+    fun updateProductsAmount(products: Map<String, Int>)
 }

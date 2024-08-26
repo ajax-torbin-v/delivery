@@ -1,8 +1,9 @@
 package com.example.delivery.repository.impl
 
-import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
+import org.springframework.data.mongodb.core.BulkOperations
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -13,17 +14,27 @@ import org.springframework.stereotype.Repository
 @Repository
 class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepository {
     private val className = MongoProduct::class.java
+
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists(query, className)
     }
 
-    override fun updateAmount(id: String, amount: Int): MongoProduct {
-        val query = Query(Criteria.where("_id").isEqualTo(id))
-        val update = Update().inc("stock", amount)
+    override fun update(id: String, update: Update): MongoProduct? {
+        val query = Query.query(Criteria.where("_id").isEqualTo(id))
+        return mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), className)
+    }
 
-        return mongoTemplate.findAndModify(query, update, className)
-            ?: throw NotFoundException("Product with id $id doesn't exist")
+    override fun updateProductsAmount(products: Map<String, Int>) {
+        val bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, className)
+
+        products.forEach { (productId, newQuantity) ->
+            val query = Query(Criteria.where("_id").`is`(productId))
+            val update = Update().set("stock", newQuantity)
+            bulkOperations.updateOne(query, update)
+        }
+
+        bulkOperations.execute()
     }
 
     override fun findById(id: String): MongoProduct? {

@@ -37,10 +37,10 @@ object OrderMapper {
         userId = userId,
     )
 
-    private fun ShipmentDetailsDTO.toModel(): MongoOrder.MongoShipmentDetails =
+    fun ShipmentDetailsDTO.toModel(): MongoOrder.MongoShipmentDetails =
         MongoOrder.MongoShipmentDetails(city, street, building, index)
 
-    private fun MongoOrder.MongoShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
+    fun MongoOrder.MongoShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
         city ?: "none",
         street ?: "none",
         building ?: "none",
