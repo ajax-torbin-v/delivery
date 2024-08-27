@@ -6,12 +6,12 @@ import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.OrderMapper.toModel
+import com.example.delivery.mapper.OrderMapper.toUpdate
 import com.example.delivery.mapper.ProductMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 
 @Service
@@ -58,16 +58,13 @@ class OrderService(
     }
 
     fun updateOrder(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
-        return orderRepository.updateOrder(id, createUpdateObject(updateOrderDTO))?.toDomain()
+        return orderRepository.updateOrder(id, updateOrderDTO.toUpdate())?.toDomain()
             ?: throw NotFoundException("Order with id $id doesn't exist")
     }
 
-    private fun createUpdateObject(updateOrderDTO: UpdateOrderDTO): Update {
-        val update = Update()
-        with(updateOrderDTO) {
-            status?.let { update.set(MongoOrder::status.name, MongoOrder.Status.valueOf(status)) }
-            shipmentDetails?.let { update.set(MongoOrder::shipmentDetails.name, shipmentDetails) }
-        }
-        return update
+    fun updateOrderStatus(id: String, status: String): DomainOrder {
+        return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))?.toDomain()
+            ?: throw NotFoundException("Order with id $id doesn't exist")
+
     }
 }

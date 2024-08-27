@@ -3,11 +3,14 @@ package com.example.delivery.service
 import com.example.delivery.OrderFixture.createOrderDTO
 import com.example.delivery.OrderFixture.domainOrder
 import com.example.delivery.OrderFixture.order
+import com.example.delivery.OrderFixture.orderUpdateObject
+import com.example.delivery.OrderFixture.reservedProducts
+import com.example.delivery.OrderFixture.updateOrderDTO
+import com.example.delivery.OrderFixture.updatedDomainOrder
+import com.example.delivery.OrderFixture.updatedOrder
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.UserFixture.user
-import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.exception.NotFoundException
-import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
@@ -19,6 +22,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import kotlin.test.assertEquals
@@ -70,26 +74,42 @@ internal class OrderServiceTest {
 
         //THEN
         verify(orderRepository, times(1)).save(any())
-        verify(productRepository, times(order.items!!.size)).updateAmount(any(), any())
+        verify(productRepository, times(order.items!!.size)).updateProductsAmount(reservedProducts)
         assertEquals(domainOrder, actual)
     }
 
     @Test
-    fun `should update when order exists`() {
+    fun `should update order with proper dto when product exists`() {
         //GIVEN
-        val updatedOrder = order.copy(status = MongoOrder.Status.CANCELED)
-        Mockito.`when`(orderRepository.updateOrderStatus(any(), any())).thenReturn(updatedOrder)
+        Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(updatedOrder)
 
         //WHEN
-        orderService.updateStatus("1", UpdateOrderDTO("CANCELED"))
+        val actual = orderService.updateOrder("1", updateOrderDTO)
 
         //THEN
-        verify(orderRepository, times(1)).updateOrderStatus("1", MongoOrder.Status.CANCELED)
+        verify(orderRepository, times(1)).updateOrder("1", orderUpdateObject)
+        assertEquals(updatedDomainOrder, actual)
     }
 
     @Test
-    fun `should throw exception when order doesn't exists while update`() {
-        assertThrows<NotFoundException> { orderService.updateStatus("1", UpdateOrderDTO("CANCELED")) }
+    fun `should throw exception if order not exists on update`() {
+        //GIVEN
+        Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(null)
+
+        //WHEN //THEN
+        assertThrows<NotFoundException> { orderService.updateOrder("1", updateOrderDTO) }
     }
 
+
+    @Test
+    fun `should delete order`() {
+        //GIVEN
+        doNothing().`when`(orderRepository).deleteById("1")
+
+        //WHEN
+        orderService.deleteById("1")
+
+        //THEN
+        verify(orderRepository, times(1)).deleteById("1")
+    }
 }

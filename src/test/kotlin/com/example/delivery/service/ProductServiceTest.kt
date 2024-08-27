@@ -3,6 +3,10 @@ package com.example.delivery.service
 import com.example.delivery.ProductFixture.createProductDTO
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
+import com.example.delivery.ProductFixture.updateProductDTO
+import com.example.delivery.ProductFixture.updateProductObject
+import com.example.delivery.ProductFixture.updatedDomainProduct
+import com.example.delivery.ProductFixture.updatedProduct
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.repository.ProductRepository
 import org.junit.jupiter.api.Test
@@ -43,10 +47,10 @@ internal class ProductServiceTest {
         Mockito.`when`(productRepository.findById("1")).thenReturn(product)
 
         //WHEN
-        val expected = productService.getById("1")
+        val actual = productService.getById("1")
 
         //THEN
-        assertEquals(expected, domainProduct)
+        assertEquals(domainProduct, actual)
     }
 
     @Test
@@ -56,6 +60,28 @@ internal class ProductServiceTest {
 
         //WHEN //THEN
         assertThrows<NotFoundException> { productService.getById("13") }
+    }
+
+    @Test
+    fun `should update product with proper dto when product exists`() {
+        //GIVEN
+        Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(updatedProduct)
+
+        //WHEN
+        val actual = productService.update("1", updateProductDTO)
+
+        //THEN
+        verify(productRepository, times(1)).update("1", updateProductObject)
+        assertEquals(updatedDomainProduct, actual)
+    }
+
+    @Test
+    fun `should throw exception if product doesn't exists on update`() {
+        //GIVEN
+        Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(null)
+
+        //WHEN //THEN
+        assertThrows<NotFoundException> { productService.update("1", updateProductDTO) }
     }
 
     @Test

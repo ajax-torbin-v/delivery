@@ -8,10 +8,9 @@ import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.UserMapper.toDomain
 import com.example.delivery.mapper.UserMapper.toMongo
-import com.example.delivery.mongo.MongoUser
+import com.example.delivery.mapper.UserMapper.toUpdate
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.UserRepository
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
 
 @Service
@@ -30,17 +29,8 @@ class UserService(
     }
 
     fun update(id: String, updateUserDTO: UpdateUserDTO): DomainUser {
-        return userRepository.update(id, createUpdateObject(updateUserDTO))?.toDomain()
+        return userRepository.update(id, updateUserDTO.toUpdate())?.toDomain()
             ?: throw NotFoundException("User with id $id doesn't exists")
-    }
-
-    private fun createUpdateObject(updateUserDTO: UpdateUserDTO): Update {
-        val update = Update()
-        with(updateUserDTO) {
-            fullName?.let { update.set(MongoUser::fullName.name, fullName) }
-            phone?.let { update.set(MongoUser::phone.name, phone) }
-        }
-        return update
     }
 
     fun getAllOrders(id: String): List<DomainOrder> {

@@ -4,6 +4,8 @@ import com.example.delivery.ProductFixture.createProductDTO
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.productDTO
 import com.example.delivery.ProductFixture.products
+import com.example.delivery.ProductFixture.updateProductDTO
+import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.service.ProductService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.mockito.Mockito
@@ -17,9 +19,11 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.math.BigDecimal
 import kotlin.test.Test
 
 @WebMvcTest(ProductController::class)
@@ -73,6 +77,26 @@ internal class ProductControllerTest {
             .andExpect(status().isCreated)
 
     }
+
+    @Test
+    fun `should update product with proper dto`() {
+        //GIVEN
+        Mockito.`when`(productService.update("1", updateProductDTO)).thenReturn(updatedDomainProduct)
+
+        //WHEN //THEN
+        mockMvc.perform(
+            put("/products/{id}", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateProductDTO))
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.name").value("Coca-cola"))
+            .andExpect(jsonPath("$.price").value(BigDecimal.TEN))
+            .andExpect(jsonPath("$.amount").value(1000))
+            .andExpect(jsonPath("$.measurement").value("0.5L"))
+    }
+
 
     @Test
     fun `should delete product and return no content`() {
