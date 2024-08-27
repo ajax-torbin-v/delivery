@@ -5,6 +5,8 @@ import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.mapper.OrderMapper.toDomain
+import com.example.delivery.mapper.OrderMapper.toModel
+import com.example.delivery.mapper.OrderMapper.toUpdate
 import com.example.delivery.mapper.ProductMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
@@ -35,27 +37,34 @@ class OrderService(
         }.map { ProductReserveService.AccountedProduct(it.key, it.value) }
 
         productReserveService.reserveProducts(products)
-        products.forEach { productRepository.updateAmount(it.product.id.toString(), -it.amount) }
+
+        productRepository.updateProductsAmount(products.associate { it.product.id.toString() to -it.amount })
 
         val totalPrice = productReserveService.calculateTotalPrice(products)
 
         val order = MongoOrder(
             userId = user.id,
             items = products.associate { it.product.id to it.amount },
-            totalPrice = totalPrice
+            totalPrice = totalPrice,
+            status = MongoOrder.Status.NEW,
+            shipmentDetails = createOrderDTO.shipmentDetails.toModel()
         )
 
         return orderRepository.save(order).toDomain()
     }
 
-    fun updateStatus(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
-        val updatedOrder =
-            orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(updateOrderDTO.status))
-                ?: throw NotFoundException("Order with id " + id + "doesn't exists")
-        return updatedOrder.toDomain()
-    }
-
     fun deleteById(id: String) {
         orderRepository.deleteById(id)
+    }
+
+    fun updateOrder(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
+        return orderRepository.updateOrder(id, updateOrderDTO.toUpdate())?.toDomain()
+            ?: throw NotFoundException("Order with id $id doesn't exist")
+    }
+
+    fun updateOrderStatus(id: String, status: String): DomainOrder {
+        return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))?.toDomain()
+            ?: throw NotFoundException("Order with id $id doesn't exist")
+
     }
 }

@@ -2,6 +2,8 @@ package com.example.delivery.controller
 
 import com.example.delivery.UserFixture.createUserDTO
 import com.example.delivery.UserFixture.domainUser
+import com.example.delivery.UserFixture.updateUserDTO
+import com.example.delivery.UserFixture.updatedDomainUser
 import com.example.delivery.service.UserService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -16,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -57,6 +60,24 @@ internal class UserControllerTest {
             .andExpect(jsonPath("$.fullName").value("FULL NAME"))
             .andExpect(jsonPath("$.phone").value("+31243123"))
     }
+
+    @Test
+    fun `should update user`() {
+        //GIVEN
+        Mockito.`when`(userService.update("1", updateUserDTO)).thenReturn(updatedDomainUser)
+
+        //WHEN //THEN
+        mockMvc.perform(
+            put("/users/{id}", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateUserDTO))
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.fullName").value("new full name"))
+            .andExpect(jsonPath("$.phone").value("new phone"))
+    }
+
 
     @Test
     fun `should delete existing user and return no content`() {

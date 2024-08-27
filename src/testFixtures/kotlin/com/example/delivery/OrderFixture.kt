@@ -2,10 +2,13 @@ package com.example.delivery
 
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.dto.request.CreateOrderDTO
+import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
 import com.example.delivery.dto.response.ShipmentDetailsDTO
+import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mongo.MongoOrder
 import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderFixture {
@@ -63,4 +66,24 @@ object OrderFixture {
         userId = ObjectId("123456789011121314151617")
     )
 
+    val reservedProducts = domainOrder.items.map { it.key.toString() to -it.value }.toMap()
+
+    val updatedShipmentDetails = domainOrder.shipmentDetails.copy(
+        city = "Dnipro",
+        building = "1b",
+        index = "01222"
+    )
+
+    val updateOrderDTO = UpdateOrderDTO(
+        shipmentDetails = updatedShipmentDetails.toDTO()
+    )
+
+    val orderUpdateObject = Update()
+        .set("shipmentDetails", updatedShipmentDetails.toDTO())
+
+    val updatedOrder = order.copy(
+        shipmentDetails = updatedShipmentDetails
+    )
+
+    val updatedDomainOrder = domainOrder.copy(shipmentDetails = updatedShipmentDetails)
 }

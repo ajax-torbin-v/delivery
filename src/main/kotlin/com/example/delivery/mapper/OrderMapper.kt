@@ -2,10 +2,12 @@ package com.example.delivery.mapper
 
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.dto.request.CreateOrderDTO
+import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
 import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.mongo.MongoOrder
 import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderMapper {
@@ -37,13 +39,19 @@ object OrderMapper {
         userId = userId,
     )
 
-    private fun ShipmentDetailsDTO.toModel(): MongoOrder.MongoShipmentDetails =
+    fun ShipmentDetailsDTO.toModel(): MongoOrder.MongoShipmentDetails =
         MongoOrder.MongoShipmentDetails(city, street, building, index)
 
-    private fun MongoOrder.MongoShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
+    fun MongoOrder.MongoShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
         city ?: "none",
         street ?: "none",
         building ?: "none",
         index ?: "none",
     )
+
+    fun UpdateOrderDTO.toUpdate(): Update {
+        val update = Update()
+        shipmentDetails?.let { update.set(MongoOrder::shipmentDetails.name, it) }
+        return update
+    }
 }

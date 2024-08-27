@@ -2,7 +2,11 @@ package com.example.delivery.service
 
 import com.example.delivery.UserFixture.createUserDTO
 import com.example.delivery.UserFixture.domainUser
+import com.example.delivery.UserFixture.updateUserDTO
+import com.example.delivery.UserFixture.updatedDomainUser
+import com.example.delivery.UserFixture.updatedUser
 import com.example.delivery.UserFixture.user
+import com.example.delivery.UserFixture.userUpdateObject
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.UserRepository
@@ -58,6 +62,29 @@ internal class UserServiceTest {
 
         //WHEN //THEN
         assertThrows<NotFoundException> { userService.getById("3") }
+    }
+
+    @Test
+    fun `should update user with proper dto when user exists`() {
+        //GIVEN
+        Mockito.`when`(userRepository.update("1", userUpdateObject)).thenReturn(updatedUser)
+
+        //WHEN
+        val actual = userService.update("1", updateUserDTO)
+
+        //THEN
+        verify(userRepository, times(1)).update("1", userUpdateObject)
+        assertEquals(updatedDomainUser, actual)
+    }
+
+    @Test
+    fun `should throw exception when user doesn't exists on update`() {
+        //GIVEN
+        Mockito.`when`(userRepository.update("1", userUpdateObject)).thenReturn(null)
+
+        //WHEN //THEN
+        assertThrows<NotFoundException> { userService.update("1", updateUserDTO) }
+
     }
 
     @Test

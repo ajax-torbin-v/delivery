@@ -2,7 +2,8 @@ package com.example.delivery.controller
 
 import com.example.delivery.OrderFixture.createOrderDTO
 import com.example.delivery.OrderFixture.domainOrder
-import com.example.delivery.dto.request.UpdateOrderDTO
+import com.example.delivery.OrderFixture.updateOrderDTO
+import com.example.delivery.OrderFixture.updatedDomainOrder
 import com.example.delivery.service.OrderService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -84,11 +86,9 @@ internal class OrderControllerTest {
     }
 
     @Test
-    fun `should update status when user exists and return it`() {
+    fun `should update order with proper dto`() {
         //GIVEN
-        val updateOrderDTO = UpdateOrderDTO("CANCELED")
-        val updateDomainOrder = domainOrder.copy(status = "CANCELED")
-        Mockito.`when`(orderService.updateStatus("1", updateOrderDTO)).thenReturn(updateDomainOrder)
+        Mockito.`when`(orderService.updateOrder("1", updateOrderDTO)).thenReturn(updatedDomainOrder)
 
         //WHEN //THEN
         mockMvc.perform(
@@ -96,11 +96,37 @@ internal class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateOrderDTO))
         )
-            .andExpect(status().isOk)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items").value(mutableMapOf("123456789011121314151617" to 2)))
+            .andExpect(jsonPath("$.totalPrice").value(100.0))
+            .andExpect(
+                jsonPath("$.shipmentDetails").value(
+                    mutableMapOf(
+                        "city" to "Dnipro",
+                        "street" to "street",
+                        "building" to "1b",
+                        "index" to "01222"
+                    )
+                )
+            )
+            .andExpect(jsonPath("$.status").value("NEW"))
+    }
+
+    @Test
+    fun `should update order's status`() {
+        //GIVEN
+        Mockito.`when`(orderService.updateOrderStatus("1", "CANCELED"))
+            .thenReturn(domainOrder.copy(status = "CANCELED"))
+
+        //WHEN //THEN
+        mockMvc.perform(
+            patch("/orders/{id}?status={status}", "1", "CANCELED")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateOrderDTO))
+        )
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("CANCELED"))
 
-        //AND THEN
-        verify(orderService).updateStatus("1", updateOrderDTO)
     }
 
     @Test

@@ -20,11 +20,7 @@ data class MongoOrder(
         NEW,
         SHIPPING,
         COMPLETED,
-        CANCELED;
-
-        fun fromValue(value: String): Status? {
-            return entries.find { it.name.equals(this.name, ignoreCase = true) }
-        }
+        CANCELED,
     }
 
     companion object {
