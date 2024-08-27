@@ -43,7 +43,7 @@ class UserService(
         return update
     }
 
-    fun findAllOrders(id: String): List<DomainOrder> {
+    fun getAllOrders(id: String): List<DomainOrder> {
         if (!userRepository.existsById(id)) throw NotFoundException("User with id $id doesn't exists")
         return orderRepository.findAll(id).map { it.toDomain() }
     }

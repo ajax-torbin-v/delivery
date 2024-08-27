@@ -30,7 +30,7 @@ class UserController(private val userService: UserService) {
         return userService.getById(id).toDTO()
     }
 
-    @PatchMapping("/id")
+    @PatchMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody updateUserDTO: UpdateUserDTO): UserDTO {
         return userService.update(id, updateUserDTO).toDTO()
     }
