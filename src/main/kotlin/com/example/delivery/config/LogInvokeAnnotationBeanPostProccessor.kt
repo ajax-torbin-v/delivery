@@ -23,15 +23,14 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
     private val beans = HashMap<String, AnnotationTarget>()
 
     override fun postProcessBeforeInitialization(bean: Any, beanName: String): Any? {
-        if (bean.javaClass.isAnnotationPresent(InvokeLog::class.java)) {
-            beans[beanName] = AnnotationTarget.CLASS
-            return bean
-        }
-        val methods = bean.javaClass.declaredMethods
-        for (method in methods) {
-            if (method.isAnnotationPresent(InvokeLog::class.java)) {
+        val beanClass = bean.javaClass
+        when {
+            beanClass.isAnnotationPresent(InvokeLog::class.java) -> {
+                beans[beanName] = AnnotationTarget.CLASS
+            }
+
+            beanClass.declaredMethods.any { it.isAnnotationPresent(InvokeLog::class.java) } -> {
                 beans[beanName] = AnnotationTarget.FUNCTION
-                return bean
             }
         }
         return bean
