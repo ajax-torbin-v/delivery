@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController
 class OrderController(private val orderService: OrderService) {
 
     @GetMapping("/{id}")
-    fun findById() {//@PathVariable id: String): OrderDTO {
-//        return orderService.getById(id).toDTO()
+    fun findById(@PathVariable id: String): OrderDTO {
+        return orderService.getById(id).toDTO()
     }
 
     @ResponseStatus(HttpStatus.CREATED)
