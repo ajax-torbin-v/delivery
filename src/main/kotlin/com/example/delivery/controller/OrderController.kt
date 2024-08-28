@@ -1,5 +1,6 @@
 package com.example.delivery.controller
 
+import com.example.delivery.annotaion.InvokeLog
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
@@ -18,13 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
+@InvokeLog
 @RestController
 @RequestMapping("/orders")
 class OrderController(private val orderService: OrderService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): OrderDTO {
-        return orderService.getById(id).toDTO()
+    fun findById() {//@PathVariable id: String): OrderDTO {
+//        return orderService.getById(id).toDTO()
     }
 
     @ResponseStatus(HttpStatus.CREATED)

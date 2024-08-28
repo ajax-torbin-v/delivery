@@ -37,16 +37,14 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
     }
 
     override fun postProcessAfterInitialization(bean: Any, beanName: String): Any {
-        if (beans.containsKey(beanName)) {
-            return createProxy(bean, beanName)
+        return if (beans.containsKey(beanName)) {
+            createProxy(bean, beanName)
+        } else {
+            bean
         }
-        return bean
     }
 
     private fun createProxy(bean: Any, beanName: String): Any {
-        val enhancer = Enhancer()
-        enhancer.setSuperclass(bean.javaClass)
-
         bean::class.memberProperties.forEach {
             it.isAccessible = true
         }
@@ -55,7 +53,9 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
         val argumentTypes: Array<Class<*>> = constructorParams.map { it.type.jvmErasure.java }.toTypedArray()
         val arguments: Array<Any> = constructorParams.map { extractValue(it, bean) }.toTypedArray()
 
-        enhancer.setCallback(createInterceptor(beans[beanName]!!))
+        val enhancer = Enhancer()
+        enhancer.setSuperclass(bean.javaClass)
+        enhancer.setCallback(createInterceptor(beans.getValue(beanName)))
 
         return enhancer.create(argumentTypes, arguments)
     }
@@ -73,23 +73,16 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
         }
     }
 
-    private fun logMethod(method: Method, args: Array<out Any>?) {
+    private fun logMethod(method: Method, args: Array<out Any>) {
         val className = method.declaringClass.name.substringAfterLast(".")
-        val sb = StringBuilder().apply {
-            if (args != null) {
-                for (i in args.indices) {
-                    append(method.parameters[i].name)
-                    append(":")
-                    append(args[i]).append(", ")
-                }
-            }
+        val message = method.parameters
+            .withIndex()
+            .joinToString(separator = ",") { (index, param) -> "${param.name} : ${args[index]}" }
 
-        }.replace(Regex(", $"), "")
-
-        log.info("Method called: {}.{} ({})", className, method.name, sb)
+        log.info("Method called: {}.{}({})", className, method.name, message)
     }
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(LogInvokeAnnotationBeanPostProcessor::class.java)
+        private val log: Logger = LoggerFactory.getLogger(LogInvokeAnnotationBeanPostProcessor::class.java)
     }
 }

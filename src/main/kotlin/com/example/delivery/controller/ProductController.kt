@@ -1,5 +1,6 @@
 package com.example.delivery.controller
 
+import com.example.delivery.annotaion.InvokeLog
 import com.example.delivery.dto.request.CreateProductDTO
 import com.example.delivery.dto.request.UpdateProductDTO
 import com.example.delivery.dto.response.ProductDTO
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/products")
 class ProductController(private val productService: ProductService) {
 
+    @InvokeLog
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): ProductDTO {
         return productService.getById(id).toDTO()
