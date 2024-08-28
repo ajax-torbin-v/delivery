@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.cglib.proxy.Enhancer
 import org.springframework.cglib.proxy.MethodInterceptor
-import org.springframework.cglib.proxy.MethodProxy
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -18,8 +17,7 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmErasure
 
 @Component
-//For testing purposes
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
 
     private val beans = HashMap<String, AnnotationTarget>()
@@ -68,28 +66,28 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
     }
 
     private fun createInterceptor(target: AnnotationTarget): MethodInterceptor {
-        return object : MethodInterceptor {
-            override fun intercept(obj: Any?, method: Method?, args: Array<out Any>?, proxy: MethodProxy?): Any? {
-                if (!method!!.isAnnotationPresent(InvokeLog::class.java) && target != AnnotationTarget.CLASS) {
-                    return proxy?.invokeSuper(obj, args)
-                } else {
-                    logMethod(method, args)
-                    return proxy?.invokeSuper(obj, args)
-                }
+        return MethodInterceptor { obj, method, args, proxy ->
+            if (target == AnnotationTarget.CLASS || method.isAnnotationPresent(InvokeLog::class.java)) {
+                logMethod(method, args)
             }
+            proxy.invokeSuper(obj, args)
         }
     }
 
     private fun logMethod(method: Method, args: Array<out Any>?) {
         val className = method.declaringClass.name.substringAfterLast(".")
-        val sb = StringBuilder("Method called: ${className}.${method.name}").append("(")
-        if (args != null) {
-            for (i in args.indices) {
-                sb.append(method.parameters[i].name).append(":").append(args[i]).append(", ")
+        val sb = StringBuilder().apply {
+            if (args != null) {
+                for (i in args.indices) {
+                    append(method.parameters[i].name)
+                    append(":")
+                    append(args[i]).append(", ")
+                }
             }
-        }
-        sb.append(")")
-        log.info(sb.toString().replace(", )", ")"))
+
+        }.replace(Regex(", $"), "")
+
+        log.info("Method called: {}.{} ({})", className, method.name, sb)
     }
 
     companion object {
