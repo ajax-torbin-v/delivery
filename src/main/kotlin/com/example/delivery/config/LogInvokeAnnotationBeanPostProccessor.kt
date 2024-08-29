@@ -9,6 +9,7 @@ import org.springframework.cglib.proxy.MethodInterceptor
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import java.lang.invoke.MethodHandles
 import java.lang.reflect.Method
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.memberProperties
@@ -53,15 +54,14 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
         val argumentTypes: Array<Class<*>> = constructorParams.map { it.type.jvmErasure.java }.toTypedArray()
         val arguments: Array<Any> = constructorParams.map { extractValue(it, bean) }.toTypedArray()
 
-        val enhancer = Enhancer()
-        enhancer.setSuperclass(bean.javaClass)
-        enhancer.setCallback(createInterceptor(beans.getValue(beanName)))
-
-        return enhancer.create(argumentTypes, arguments)
+        return Enhancer().apply {
+            setSuperclass(bean.javaClass)
+            setCallback(createInterceptor(beans.getValue(beanName)))
+        }.create(argumentTypes, arguments)
     }
 
     private fun extractValue(param: KParameter, bean: Any): Any {
-        return bean::class.memberProperties.find { it.name == param.name }!!.call(bean)!!
+        return bean::class.memberProperties.first { it.name == param.name }.call(bean)!!
     }
 
     private fun createInterceptor(target: AnnotationTarget): MethodInterceptor {
@@ -75,14 +75,18 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
 
     private fun logMethod(method: Method, args: Array<out Any>) {
         val className = method.declaringClass.name.substringAfterLast(".")
-        val message = method.parameters
+        val arguments = method.parameters
             .withIndex()
             .joinToString(separator = ",") { (index, param) -> "${param.name} : ${args[index]}" }
-
-        log.info("Method called: {}.{}({})", className, method.name, message)
+        log.atInfo()
+            .setMessage("Method called: {}.{}({})")
+            .addArgument { className }
+            .addArgument { method.name }
+            .addArgument { arguments }
+            .log()
     }
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(LogInvokeAnnotationBeanPostProcessor::class.java)
+        private val log: Logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass())
     }
 }
