@@ -1,6 +1,6 @@
 package com.example.delivery.service
 
-import com.example.delivery.annotaion.InvokeLog
+import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
@@ -16,7 +16,6 @@ import com.example.delivery.repository.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
-@InvokeLog
 class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
@@ -24,6 +23,7 @@ class OrderService(
     private val productRepository: ProductRepository,
 ) {
 
+    @LogInvoke
     fun getById(id: String): DomainOrder {
         return orderRepository.findById(id)?.toDomain()
             ?: throw NotFoundException("Order with id $id doesn't exists")
