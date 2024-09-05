@@ -2,12 +2,9 @@ package com.example.delivery.bpp
 
 import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.config.LogInvokeAnnotationBeanPostProcessor
-import io.mockk.mockkStatic
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
-import org.slf4j.LoggerFactory
 import org.springframework.aop.support.AopUtils
 
 @ExtendWith(MockitoExtension::class)
@@ -15,14 +12,8 @@ class LogInvokeTest {
 
     private val beanPostProcessor = LogInvokeAnnotationBeanPostProcessor()
 
-    @BeforeEach
-    fun setUp() {
-        mockkStatic(LoggerFactory::class)
-    }
-
     companion object {
         const val FOO_MESSAGE = "I AM ANNOTATED FOO WITH NO ARGUMENTS"
-        const val BAR_MESSAGE = "I AM NOT ANNOTATED BAR WITH ARGUMENTS"
         const val QUX_MESSAGE = "I AM QUX IN NOT ANNOTATED CLASS"
     }
 
@@ -30,10 +21,6 @@ class LogInvokeTest {
         @LogInvoke
         fun foo(): String {
             return FOO_MESSAGE
-        }
-
-        fun bar(i: Int, s: String): String {
-            return BAR_MESSAGE
         }
     }
 
@@ -49,8 +36,10 @@ class LogInvokeTest {
         val bean = AnnotatedClass()
         val beanName = "annotatedClass"
         beanPostProcessor.postProcessBeforeInitialization(bean, beanName)
+
         //WHEN
-        val proxy = beanPostProcessor.postProcessAfterInitialization(bean, beanName) as AnnotatedClass
+        val proxy = beanPostProcessor.postProcessAfterInitialization(bean, beanName)
+
         //THEN
         assert(AopUtils.isAopProxy(proxy))
     }

@@ -19,7 +19,6 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
         return mongoTemplate.exists(query, className)
     }
 
-    //TODO: use aggregation to fetch all products
     override fun findById(id: String): MongoOrder? {
         return mongoTemplate.findById(id, className)
     }
