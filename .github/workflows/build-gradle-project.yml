@@ -43,8 +43,17 @@ jobs:
         if: ${{ github.event_name == 'pull_request' && !cancelled() }}
         run: ./gradlew deltaCoverage -PdiffBase="refs/remotes/origin/$GITHUB_BASE_REF"
 
-      - name: Post comment
+      - name: Append Delta Coverage
+        if: ${{ github.event_name == 'pull_request' && !cancelled() }}
+        continue-on-error: true
         uses: gw-kit/delta-coverage-plugin/actions/delta-coverage-report@main
         with:
-          title: 'Delta Coverage Report'
           delta-coverage-report: build/reports/coverage-reports/delta-coverage/report.md
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2.15.1
+        if: ${{ github.event_name == 'pull_request' && !cancelled() }}
+        continue-on-error: true
+        with:
+          check_name: 'Unit Tests Report'
+          files: '**/build/test-results/*/TEST-*.xml'
