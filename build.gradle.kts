@@ -67,7 +67,7 @@ configure<DeltaCoverageConfiguration> {
         compareWith(targetBranch)
     }
 
-    violationRules.failIfCoverageLessThan(0.4)
+    violationRules.failIfCoverageLessThan(0.6)
     reports {
         html.set(true)
     }
