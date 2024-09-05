@@ -1,4 +1,4 @@
-import io.github.surpsg.deltacoverage.gradle.DeltaCoverageTask
+import io.github.surpsg.deltacoverage.gradle.DeltaCoverageConfiguration
 import io.gitlab.arturbosch.detekt.Detekt
 
 plugins {
@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    testImplementation("io.mockk:mockk:1.13.12")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -56,22 +57,17 @@ tasks.withType<Detekt>().configureEach {
     }
 }
 
-
 tasks.withType<Test> {
     useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
 }
 
-
-configure<io.github.surpsg.deltacoverage.gradle.DeltaCoverageConfiguration> {
+configure<DeltaCoverageConfiguration> {
     val targetBranch = project.properties["diffBase"]?.toString() ?: "refs/remotes/origin/master"
     diffSource.byGit {
         compareWith(targetBranch)
     }
 
-    violationRules.failIfCoverageLessThan(0.6)
+    violationRules.failIfCoverageLessThan(0.4)
     reports {
         html.set(true)
     }

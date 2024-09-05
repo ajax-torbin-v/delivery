@@ -27,6 +27,7 @@ internal class UserServiceTest {
     @Mock
     private lateinit var userRepository: UserRepository
 
+    @SuppressWarnings("UnusedPrivateProperty")
     @Mock
     private lateinit var orderRepository: OrderRepository
 

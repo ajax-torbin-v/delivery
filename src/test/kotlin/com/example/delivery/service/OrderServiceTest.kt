@@ -35,6 +35,7 @@ internal class OrderServiceTest {
     @Mock
     private lateinit var productRepository: ProductRepository
 
+    @SuppressWarnings("UnusedPrivateProperty")
     @Mock
     private lateinit var productReserveService: ProductReserveService
 

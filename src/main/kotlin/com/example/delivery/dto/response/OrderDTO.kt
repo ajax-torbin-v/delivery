@@ -4,7 +4,7 @@ import java.math.BigDecimal
 
 data class OrderDTO(
     val id: String,
-    val items: Map<String, Int>, //TODO: Use List<Product> instead, fetched from a db
+    val items: Map<String, Int>,
     val totalPrice: BigDecimal,
     val shipmentDetails: ShipmentDetailsDTO,
     val status: String,
