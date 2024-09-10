@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   delivery:
-    container_name: delivery
+    container_name: delivery-app
     build:
       context: .
     env_file:
@@ -20,6 +20,9 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
     env_file: .env
     volumes:
-      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - mongo_db:/data/db
     ports:
       - "27017:27017"
+
+volumes:
+  mongo_db:
