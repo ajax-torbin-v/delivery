@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-app-deployment
+  labels:
+    app: delivery
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: delivery
+  template:
+    metadata:
+      labels:
+        app: delivery
+    spec:
+      containers:
+        - name: delivery-app
+          image: delivery:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongodb-root-username
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongodb-root-password
+            - name: HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: delivery-configmap
+                  key: host
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: delivery-configmap
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: delivery-configmap
+                  key: db_name
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-app-service
+  labels:
+    app: delivery-app-service
+spec:
+  selector:
+    app: delivery
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
