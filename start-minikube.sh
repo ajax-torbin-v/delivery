@@ -28,7 +28,6 @@ minikube addons enable ingress
 docker build -t delivery:latest .
 
 kubectl apply -f k8s/config/mongo-secret.yaml
-kubectl apply -f k8s/config/mongo-express-configmap.yaml
 kubectl apply -f k8s/config/delivery-configmap.yaml
 kubectl apply -f k8s/config/mongo-deployment.yaml
 
