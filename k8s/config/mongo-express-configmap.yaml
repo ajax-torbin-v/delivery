@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mongodb-configmap
+  name: mongo-express-configmap
 data:
-  database_server: mongodb-service
   mongodb-url: "mongodb://root:12345@mongodb-service:27017/?authSource=admin"
 
