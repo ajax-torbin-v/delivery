@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  delivery:
+    container_name: delivery-app
+    build:
+      context: .
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
+    env_file: .env
+    volumes:
+      - mongo_db:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongo_db:
