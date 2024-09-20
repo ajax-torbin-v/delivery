@@ -29,6 +29,9 @@ docker build -t delivery:latest .
 
 kubectl apply -f k8s/config/mongo-secret.yaml
 kubectl apply -f k8s/config/delivery-configmap.yaml
+kubectl apply -f k8s/config/pv.yaml
+kubectl apply -f k8s/config/pvc.yaml
+
 kubectl apply -f k8s/config/mongo-deployment.yaml
 
 kubectl wait --for=condition=ready pod -l app=mongodb --timeout=300s

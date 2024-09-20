@@ -19,6 +19,8 @@ object ProductFixture {
             measurement = "0.5L"
         )
 
+    val unsavedProduct = product.copy(id = null)
+
     val domainProduct = DomainProduct(
         id = ObjectId("123456789011121314151617"),
         name = "Coca-cola",

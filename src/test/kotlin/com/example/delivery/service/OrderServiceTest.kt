@@ -2,9 +2,10 @@ package com.example.delivery.service
 
 import com.example.delivery.OrderFixture.createOrderDTO
 import com.example.delivery.OrderFixture.domainOrder
+import com.example.delivery.OrderFixture.domainOrderWithProduct
+import com.example.delivery.OrderFixture.mongoOrderWithProduct
 import com.example.delivery.OrderFixture.order
 import com.example.delivery.OrderFixture.orderUpdateObject
-import com.example.delivery.OrderFixture.reservedProducts
 import com.example.delivery.OrderFixture.updateOrderDTO
 import com.example.delivery.OrderFixture.updatedDomainOrder
 import com.example.delivery.OrderFixture.updatedOrder
@@ -32,6 +33,7 @@ internal class OrderServiceTest {
     @Mock
     private lateinit var orderRepository: OrderRepository
 
+    @SuppressWarnings("UnusedPrivateProperty")
     @Mock
     private lateinit var productRepository: ProductRepository
 
@@ -48,10 +50,10 @@ internal class OrderServiceTest {
     @Test
     fun `should return order when order exists`() {
         //GIVEN
-        Mockito.`when`(orderRepository.findById("1")).thenReturn(order)
+        Mockito.`when`(orderRepository.findById("1")).thenReturn(mongoOrderWithProduct)
 
         //WHEN //THEN
-        assertEquals(orderService.getById("1"), domainOrder)
+        assertEquals(orderService.getById("1"), domainOrderWithProduct)
     }
 
     @Test
@@ -66,16 +68,16 @@ internal class OrderServiceTest {
     @Test
     fun `should add order with proper dto`() {
         //GIVEN
-        Mockito.`when`(productRepository.findById("123456789011121314151617")).thenReturn(product)
         Mockito.`when`(orderRepository.save(any())).thenReturn(order)
         Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
+        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+            .thenReturn(listOf(product))
 
         //WHEN
         val actual = orderService.add(createOrderDTO)
 
         //THEN
         verify(orderRepository, times(1)).save(any())
-        verify(productRepository, times(order.items!!.size)).updateProductsAmount(reservedProducts)
         assertEquals(domainOrder, actual)
     }
 

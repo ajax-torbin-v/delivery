@@ -10,8 +10,7 @@ import java.math.BigDecimal
 @Document(collection = MongoOrder.COLLECTION_NAME)
 data class MongoOrder(
     @Id val id: ObjectId? = null,
-    val items: Map<ObjectId, Int>? = null,
-    val totalPrice: BigDecimal? = null,
+    val items: List<MongoOrderItem>? = null,
     val shipmentDetails: MongoShipmentDetails? = null,
     val status: Status? = null,
     val userId: ObjectId? = null,
@@ -33,5 +32,12 @@ data class MongoOrder(
         val street: String? = null,
         val building: String? = null,
         val index: String? = null,
+    )
+
+    @TypeAlias("OrderItem")
+    data class MongoOrderItem(
+        val productId: ObjectId? = null,
+        val price: BigDecimal? = null,
+        val amount: Int? = null,
     )
 }

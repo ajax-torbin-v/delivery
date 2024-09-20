@@ -85,7 +85,6 @@ internal class UserServiceTest {
 
         //WHEN //THEN
         assertThrows<NotFoundException> { userService.update("1", updateUserDTO) }
-
     }
 
     @Test

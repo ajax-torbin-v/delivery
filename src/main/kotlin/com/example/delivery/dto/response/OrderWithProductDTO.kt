@@ -1,8 +1,8 @@
 package com.example.delivery.dto.response
 
-data class OrderDTO(
+data class OrderWithProductDTO(
     val id: String,
-    val items: List<OrderItemDTO>,
+    val items: List<OrderItemWithProductDTO>,
     val shipmentDetails: ShipmentDetailsDTO,
     val status: String,
     val userId: String,

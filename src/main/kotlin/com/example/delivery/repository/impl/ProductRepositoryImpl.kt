@@ -1,5 +1,6 @@
 package com.example.delivery.repository.impl
 
+import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.BulkOperations
@@ -25,12 +26,11 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
         return mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), className)
     }
 
-    override fun updateProductsAmount(products: Map<String, Int>) {
+    override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>) {
         val bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, className)
-
-        products.forEach { (productId, newQuantity) ->
-            val query = Query(Criteria.where("_id").`is`(productId))
-            val update = Update().set("stock", newQuantity)
+        products.forEach { (productId, _, requestedAmount) ->
+            val query = Query(Criteria.where("_id").isEqualTo(productId))
+            val update = Update().inc("amountAvailable", -requestedAmount!!)
             bulkOperations.updateOne(query, update)
         }
 
@@ -52,10 +52,5 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
     override fun deleteById(id: String) {
         val query = Query(Criteria.where("_id").isEqualTo(id))
         mongoTemplate.findAndRemove(query, className)
-    }
-
-    override fun findByName(name: String): MongoProduct? {
-        val query = Query.query(Criteria.where(MongoProduct::name.name).isEqualTo(name))
-        return mongoTemplate.findOne(query, className)
     }
 }

@@ -2,12 +2,15 @@ package com.example.delivery.controller
 
 import com.example.delivery.OrderFixture.createOrderDTO
 import com.example.delivery.OrderFixture.domainOrder
+import com.example.delivery.OrderFixture.domainOrderWithProduct
 import com.example.delivery.OrderFixture.updateOrderDTO
 import com.example.delivery.OrderFixture.updatedDomainOrder
+import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.service.OrderService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +40,7 @@ internal class OrderControllerTest {
     @Test
     fun `should add order and return status is created`() {
         //GIVEN
-        Mockito.`when`(orderService.add(createOrderDTO)).thenReturn(domainOrder)
+        Mockito.`when`(orderService.add(any())).thenReturn(domainOrder)
 
         //WHEN //THEN
         mockMvc.perform(
@@ -46,8 +49,9 @@ internal class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(createOrderDTO))
         )
             .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.items").value(mutableMapOf("123456789011121314151617" to 2)))
-            .andExpect(jsonPath("$.totalPrice").value(100.0))
+            .andExpect(jsonPath("$.items[0].productId").value(domainOrder.items[0].productId.toString()))
+            .andExpect(jsonPath("$.items[0].price").value(domainOrder.items[0].price))
+            .andExpect(jsonPath("$.items[0].amount").value(domainOrder.items[0].amount))
             .andExpect(
                 jsonPath("$.shipmentDetails").value(
                     mutableMapOf(
@@ -64,14 +68,19 @@ internal class OrderControllerTest {
     @Test
     fun `should return order when order exists`() {
         //GIVEN
-        Mockito.`when`(orderService.getById("1")).thenReturn(domainOrder)
+        Mockito.`when`(orderService.getById("1")).thenReturn(domainOrderWithProduct)
 
         //WHEN //THEN
         mockMvc.perform(get("/orders/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.items").value(mutableMapOf("123456789011121314151617" to 2)))
-            .andExpect(jsonPath("$.totalPrice").value(100.0))
+            .andExpect(jsonPath("$.items[0].product.id").value(domainProduct.id.toString()))
+            .andExpect(jsonPath("$.items[0].product.name").value(domainProduct.name))
+            .andExpect(jsonPath("$.items[0].product.amount").value(domainProduct.amountAvailable))
+            .andExpect(jsonPath("$.items[0].product.price").value(domainProduct.price))
+            .andExpect(jsonPath("$.items[0].product.measurement").value(domainProduct.measurement))
+            .andExpect(jsonPath("$.items[0].amount").value(0))
+            .andExpect(jsonPath("$.items[0].price").value(0))
             .andExpect(
                 jsonPath("$.shipmentDetails").value(
                     mutableMapOf(
@@ -97,8 +106,6 @@ internal class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(updateOrderDTO))
         )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.items").value(mutableMapOf("123456789011121314151617" to 2)))
-            .andExpect(jsonPath("$.totalPrice").value(100.0))
             .andExpect(
                 jsonPath("$.shipmentDetails").value(
                     mutableMapOf(

@@ -1,5 +1,5 @@
 # Use a base image with JDK and Gradle
-FROM amazoncorretto
+FROM amazoncorretto:22-alpine3.17-jdk
 
 # Set the working directory for the runtime environment
 WORKDIR /app
