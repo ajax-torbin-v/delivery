@@ -41,7 +41,6 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
             .foreignField("_id")
             .`as`("fetchedProducts")
 
-
         val addFieldsStage = Aggregation.addFields()
             .addFieldWithValue(
                 "items",
