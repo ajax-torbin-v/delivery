@@ -15,66 +15,66 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
 
     @Test
     fun `save should save product and assign id`() {
-        //GIVEN //WHEN
+        // GIVEN // WHEN
         val actual = productRepository.save(unsavedProduct)
 
-        //THEN
+        // THEN
         assertTrue(actual.id != null, "Id should not be null after save!")
     }
 
     @Test
     fun `findById should return saved product`() {
-        //GIVEN
+        // GIVEN
         val savedProduct = productRepository.save(unsavedProduct)
 
-        //WHEN
+        // WHEN
         val actual = productRepository.findById(savedProduct.id.toString())
 
-        //THEN
+        // THEN
         assertEquals(savedProduct, actual)
     }
 
     @Test
     fun `existById should return if product exist`() {
-        //GIVEN
+        // GIVEN
         val savedProduct = productRepository.save(unsavedProduct)
 
-        //WHEN
+        // WHEN
         val actual = productRepository.existsById(savedProduct.id.toString())
 
-        //THEN
+        // THEN
         assertTrue(actual, "Product should exist!")
     }
 
     @Test
     fun `findAll should return all saved products `() {
-        //GIVEN
+        // GIVEN
         val savedProduct1 = productRepository.save(unsavedProduct)
         val savedProduct2 = productRepository.save(unsavedProduct)
 
-        //WHEN
+        // WHEN
         val actual = productRepository.findAll().contains(savedProduct1) &&
-                productRepository.findAll().contains(savedProduct2)
+            productRepository.findAll().contains(savedProduct2)
 
-        //THEN
+        // THEN
         assertTrue(actual)
     }
 
     @Test
     fun `deleteById should delete product by id`() {
-        //GIVEN
+        // GIVEN
         val savedProduct = productRepository.save(unsavedProduct)
 
-        //WHEN
+        // WHEN
         productRepository.deleteById(savedProduct.id.toString())
 
-        //THEN
+        // THEN
         assertTrue(!productRepository.existsById(savedProduct.id.toString()))
     }
 
     @Test
     fun `update should update product`() {
-        //GIVEN
+        // GIVEN
         val savedProduct = productRepository.save(unsavedProduct)
         val update = Update()
             .set("name", "UpdatedName")
@@ -82,13 +82,13 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
             .set("amountAvailable", 999)
             .set("measurement", "99L")
 
-        //WHEN
+        // WHEN
         val actual = productRepository.update(
             savedProduct.id.toString(),
             update = update
         )
 
-        //THEN
+        // THEN
         assertEquals(
             savedProduct.copy(
                 savedProduct.id,
@@ -96,22 +96,23 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
                 BigDecimal.valueOf(99.99),
                 999,
                 "99L"
-            ), actual
+            ),
+            actual
         )
     }
 
     @Test
     fun `updateProductsAmount should update products`() {
-        //GIVEN
+        // GIVEN
         val savedProduct1 = productRepository.save(unsavedProduct)
         val savedProduct2 = productRepository.save(unsavedProduct)
         val mongoOrderItem1 = MongoOrder.MongoOrderItem(savedProduct1.id, null, 1)
         val mongoOrderItem2 = MongoOrder.MongoOrderItem(savedProduct2.id, null, 1)
 
-        //WHEN
+        // WHEN
         productRepository.updateProductsAmount(listOf(mongoOrderItem1, mongoOrderItem2))
 
-        //THEN
+        // THEN
         assertEquals(
             savedProduct1.amountAvailable!! - 1,
             productRepository.findById(savedProduct1.id.toString())?.amountAvailable

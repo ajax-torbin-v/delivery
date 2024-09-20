@@ -92,7 +92,7 @@ object OrderFixture {
             building = "3a",
             index = "54890",
         ),
-        status = "NEW",
+        status = DomainOrder.Status.NEW,
         userId = ObjectId("123456789011121314151617")
     )
 

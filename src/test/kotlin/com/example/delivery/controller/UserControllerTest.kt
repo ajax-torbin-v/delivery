@@ -35,10 +35,10 @@ internal class UserControllerTest {
 
     @Test
     fun `should add user and return created`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(userService.add(createUserDTO)).thenReturn(domainUser)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -50,10 +50,10 @@ internal class UserControllerTest {
 
     @Test
     fun `should return user when user exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(userService.getById("1")).thenReturn(domainUser)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(get("/users/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -63,10 +63,10 @@ internal class UserControllerTest {
 
     @Test
     fun `should update user`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(userService.update("1", updateUserDTO)).thenReturn(updatedDomainUser)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             put("/users/{id}", "1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -78,17 +78,16 @@ internal class UserControllerTest {
             .andExpect(jsonPath("$.phone").value("new phone"))
     }
 
-
     @Test
     fun `should delete existing user and return no content`() {
-        //GIVEN
+        // GIVEN
         doNothing().`when`(userService).deleteById("1")
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(delete("/users/{id}", "1"))
             .andExpect(status().isNoContent)
 
-        //AND THEN
+        // AND THEN
         verify(userService).deleteById("1")
     }
 }

@@ -6,8 +6,9 @@ import com.example.delivery.domain.DomainOrderWithProduct
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.exception.NotFoundException
+import com.example.delivery.exception.ProductAmountException
 import com.example.delivery.mapper.OrderMapper.toDomain
-import com.example.delivery.mapper.OrderMapper.toMongo
+import com.example.delivery.mapper.OrderMapper.toMongoModel
 import com.example.delivery.mapper.OrderMapper.toUpdate
 import com.example.delivery.mapper.OrderWithProductMapper.toDomain
 import com.example.delivery.mapper.ProductMapper.toDomain
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service
 class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
-    private val productReserveService: ProductReserveService,
     private val productRepository: ProductRepository,
 ) {
 
@@ -32,21 +32,46 @@ class OrderService(
             ?: throw NotFoundException("Order with id $id doesn't exists")
     }
 
+    @SuppressWarnings("ThrowsCount")
     fun add(createOrderDTO: CreateOrderDTO): DomainOrder {
-
         val user = userRepository.findById(createOrderDTO.userId)
             ?: throw NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")
 
         val products = orderRepository.fetchProducts(createOrderDTO.items.map { it.productId }).map { it.toDomain() }
-        val productMap = products.associateBy { it.id.toString() }
 
-        productReserveService.reserveProducts(createOrderDTO.items, productMap)
+        if (products.size != createOrderDTO.items.size) {
+            val missingProductId = createOrderDTO.items
+                .map { it.productId }
+                .first { itemId -> !products.map { it.id.toString() }.contains(itemId) }
+            throw NotFoundException("Product with id $missingProductId")
+        }
 
-        val mongoOrderItems = createOrderDTO.items.map {
+        createOrderDTO.items.forEach { orderItem ->
+            val product = products.first { orderItem.productId == it.id.toString() }
+            if (orderItem.amount > product.amountAvailable) {
+                throw ProductAmountException(
+                    "Insufficient stock for product ${product.name}. " +
+                        "Available: ${product.amountAvailable}, " +
+                        "Requested: ${orderItem.amount}"
+                )
+            }
+        }
+
+        productRepository.updateProductsAmount(
+            createOrderDTO.items.map {
+                MongoOrder.MongoOrderItem(
+                    ObjectId(it.productId),
+                    null,
+                    it.amount
+                )
+            }
+        )
+
+        val mongoOrderItems = createOrderDTO.items.map { item ->
             MongoOrder.MongoOrderItem(
-                ObjectId(it.productId),
-                productMap.getValue(it.productId).price,
-                it.amount
+                ObjectId(item.productId),
+                products.first { it.id.toString() == item.productId }.price,
+                item.amount
             )
         }
 
@@ -54,7 +79,7 @@ class OrderService(
 
         val order = MongoOrder(
             items = mongoOrderItems,
-            shipmentDetails = createOrderDTO.shipmentDetails.toMongo(),
+            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
             status = MongoOrder.Status.NEW,
             userId = user.id
         )

@@ -27,8 +27,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.testcontainers:mongodb:1.20.1")
-    testImplementation("io.mockk:mockk:1.13.12")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -36,6 +35,8 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.testcontainers:mongodb:1.20.1")
+    testImplementation("io.mockk:mockk:1.13.12")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

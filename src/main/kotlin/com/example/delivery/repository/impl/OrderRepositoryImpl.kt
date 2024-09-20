@@ -15,8 +15,9 @@ import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq
 import org.springframework.data.mongodb.core.aggregation.LookupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation
 import org.springframework.data.mongodb.core.aggregation.VariableOperators
+import org.springframework.data.mongodb.core.exists
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -25,11 +26,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
-    private val className = MongoOrder::class.java
 
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.exists(query, className)
+        return mongoTemplate.exists<MongoOrder>(query)
     }
 
     override fun findById(id: String): MongoOrderWithProduct? {
@@ -41,58 +41,29 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
             .foreignField("_id")
             .`as`("fetchedProducts")
 
-        val filter = ArrayOperators.Filter
-            .filter("\$fetchedProducts")
-            .`as`("product")
-            .by(
-                Eq
-                    .valueOf("$\$product._id")
-                    .equalTo("$\$item.productId")
-            )
-            .toDocument()
-            .toJson()
-
-        val elementAt = ArrayOperators.ArrayElemAt
-            .arrayOf(AggregationExpression.from(MongoExpression.create(filter)))
-            .elementAt(0)
-            .toDocument()
-
-        val mapBody = Document("price", "$\$item.price")
-            .append("amount", "$\$item.amount")
-            .append("product", elementAt)
-
-        val map = VariableOperators.Map
-            .itemsOf("\$items")
-            .`as`("item")
-            .andApply(AggregationExpression.from(MongoExpression.create(mapBody.toJson())))
 
         val addFieldsStage = Aggregation.addFields()
             .addFieldWithValue(
                 "items",
                 AggregationExpression.from(
                     MongoExpression.create(
-                        map.toDocument().toJson()
+                        mapOperation()
                     )
                 )
             ).build()
-
-        val projectionStage = ProjectionOperation()
-            .andExclude("fetchedProducts")
 
         val pipeline = Aggregation.newAggregation(
             matchStage,
             lookupStage,
             addFieldsStage,
-            projectionStage
+            Aggregation.project().andExclude("fetchedProducts")
         )
 
         val results: AggregationResults<MongoOrderWithProduct> = mongoTemplate.aggregate(
             pipeline,
-            className,
+            MongoOrder::class.java,
             MongoOrderWithProduct::class.java
         )
-        println(results.uniqueMappedResult)
-
         return results.uniqueMappedResult
     }
 
@@ -104,22 +75,60 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         val update = Update.update(MongoOrder::status.name, status)
         return mongoTemplate.findAndModify(
-            query, update, FindAndModifyOptions().returnNew(true), className
+            query,
+            update,
+            FindAndModifyOptions().returnNew(true),
+            MongoOrder::class.java
         )
     }
 
     override fun deleteById(id: String) {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.findAndRemove(query, className)
+        mongoTemplate.findAndRemove(query, MongoOrder::class.java)
     }
 
     override fun updateOrder(id: String, update: Update): MongoOrder? {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.findAndModify(query, update, FindAndModifyOptions.options().returnNew(true), className)
+        return mongoTemplate.findAndModify(
+            query,
+            update,
+            FindAndModifyOptions.options().returnNew(true),
+            MongoOrder::class.java
+        )
     }
 
     override fun fetchProducts(productIds: List<String>): List<MongoProduct> {
         val query = Query(Criteria.where("_id").`in`(productIds))
-        return mongoTemplate.find(query, MongoProduct::class.java)
+        return mongoTemplate.find<MongoProduct>(query)
+    }
+
+    private fun elementAtOperation(): Document {
+        val filter = ArrayOperators.Filter
+            .filter("\$fetchedProducts")
+            .`as`("product")
+            .by(
+                Eq
+                    .valueOf("$\$product._id")
+                    .equalTo("$\$item.productId")
+            )
+            .toDocument()
+            .toJson()
+
+        return ArrayOperators.ArrayElemAt
+            .arrayOf(AggregationExpression.from(MongoExpression.create(filter)))
+            .elementAt(0)
+            .toDocument()
+    }
+
+    private fun mapOperation(): String {
+        val mapBody = Document("price", "$\$item.price")
+            .append("amount", "$\$item.amount")
+            .append("product", elementAtOperation())
+
+        val map = VariableOperators.Map
+            .itemsOf("\$items")
+            .`as`("item")
+            .andApply(AggregationExpression.from(MongoExpression.create(mapBody.toJson())))
+        return map.toDocument().toJson()
     }
 }

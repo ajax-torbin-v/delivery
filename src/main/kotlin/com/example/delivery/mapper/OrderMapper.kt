@@ -16,7 +16,7 @@ object OrderMapper {
         id.toHexString(),
         items.map { it.toDTO() },
         shipmentDetails.toDTO(),
-        status,
+        status.name,
         userId.toHexString(),
     )
 
@@ -24,23 +24,19 @@ object OrderMapper {
         id!!,
         items = items?.map { it.toDomain() } ?: emptyList(),
         shipmentDetails = shipmentDetails?.toDomain() ?: DomainOrder.DomainShipmentDetails(),
-        status = status?.name ?: "UNKNOWN",
+        status = DomainOrder.Status.valueOf(status?.name ?: "UNKNOWN"),
         userId = userId!!,
     )
 
-    fun ShipmentDetailsDTO.toMongo(): MongoOrder.MongoShipmentDetails =
+    fun ShipmentDetailsDTO.toMongoModel(): MongoOrder.MongoShipmentDetails =
         MongoOrder.MongoShipmentDetails(city, street, building, index)
-
-    fun DomainOrder.DomainShipmentDetails.toMongo() = MongoOrder.MongoShipmentDetails(
-        city, street, building, index
-    )
 
     fun MongoOrder.MongoShipmentDetails.toDomain(): DomainOrder.DomainShipmentDetails =
         DomainOrder.DomainShipmentDetails(
-            city ?: "none",
-            street ?: "none",
-            building ?: "none",
-            index ?: "none",
+            city ?: "",
+            street ?: "",
+            building ?: "",
+            index ?: "",
         )
 
     fun MongoOrder.MongoOrderItem.toDomain(): DomainOrder.DomainOrderItem =
@@ -51,11 +47,16 @@ object OrderMapper {
         )
 
     fun DomainOrder.DomainShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
-        city, street, building, index
+        city,
+        street,
+        building,
+        index
     )
 
     fun DomainOrder.DomainOrderItem.toDTO(): OrderItemDTO = OrderItemDTO(
-        price, amount, productId.toString()
+        price,
+        amount,
+        productId.toString()
     )
 
     fun UpdateOrderDTO.toUpdate(): Update {

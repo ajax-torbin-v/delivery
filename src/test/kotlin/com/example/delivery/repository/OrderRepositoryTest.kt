@@ -57,7 +57,8 @@ class OrderRepositoryTest : AbstractMongoTestContainer {
                         product.amountAvailable
                     )
                 )
-            ), actual
+            ),
+            actual
         )
     }
 

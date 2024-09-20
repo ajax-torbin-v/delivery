@@ -29,7 +29,10 @@ object UserMapper {
     )
 
     fun DomainUser.toMongo(): MongoUser = MongoUser(
-        id, fullName, phone, password
+        id,
+        fullName,
+        phone,
+        password
     )
 
     fun UpdateUserDTO.toUpdate(): Update {
@@ -38,5 +41,4 @@ object UserMapper {
         phone?.let { update.set(MongoUser::phone.name, it) }
         return update
     }
-
 }

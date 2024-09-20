@@ -36,6 +36,8 @@ object OrderWithProductMapper {
     )
 
     fun DomainOrderWithProduct.DomainOrderItemWithProduct.toDTO() = OrderItemWithProductDTO(
-        product.toDTO(), price, amount
+        product.toDTO(),
+        price,
+        amount
     )
 }

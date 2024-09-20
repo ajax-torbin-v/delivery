@@ -37,10 +37,6 @@ internal class OrderServiceTest {
     @Mock
     private lateinit var productRepository: ProductRepository
 
-    @SuppressWarnings("UnusedPrivateProperty")
-    @Mock
-    private lateinit var productReserveService: ProductReserveService
-
     @Mock
     private lateinit var userRepository: UserRepository
 
@@ -49,70 +45,69 @@ internal class OrderServiceTest {
 
     @Test
     fun `should return order when order exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderRepository.findById("1")).thenReturn(mongoOrderWithProduct)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertEquals(orderService.getById("1"), domainOrderWithProduct)
     }
 
     @Test
     fun `should throw exception when order doesn't exists while find`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderRepository.findById("1")).thenReturn(null)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows<NotFoundException> { orderService.getById("1") }
     }
 
     @Test
     fun `should add order with proper dto`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderRepository.save(any())).thenReturn(order)
         Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
         Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
             .thenReturn(listOf(product))
 
-        //WHEN
+        // WHEN
         val actual = orderService.add(createOrderDTO)
 
-        //THEN
+        // THEN
         verify(orderRepository, times(1)).save(any())
         assertEquals(domainOrder, actual)
     }
 
     @Test
     fun `should update order with proper dto when product exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(updatedOrder)
 
-        //WHEN
+        // WHEN
         val actual = orderService.updateOrder("1", updateOrderDTO)
 
-        //THEN
+        // THEN
         verify(orderRepository, times(1)).updateOrder("1", orderUpdateObject)
         assertEquals(updatedDomainOrder, actual)
     }
 
     @Test
     fun `should throw exception if order not exists on update`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(null)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows<NotFoundException> { orderService.updateOrder("1", updateOrderDTO) }
     }
 
-
     @Test
     fun `should delete order`() {
-        //GIVEN
+        // GIVEN
         doNothing().`when`(orderRepository).deleteById("1")
 
-        //WHEN
+        // WHEN
         orderService.deleteById("1")
 
-        //THEN
+        // THEN
         verify(orderRepository, times(1)).deleteById("1")
     }
 }

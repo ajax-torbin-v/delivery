@@ -10,4 +10,3 @@ data class DomainProduct(
     val amountAvailable: Int,
     val measurement: String,
 )
-

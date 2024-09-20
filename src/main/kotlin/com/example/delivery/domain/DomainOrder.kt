@@ -7,15 +7,22 @@ data class DomainOrder(
     val id: ObjectId,
     val items: List<DomainOrderItem>,
     val shipmentDetails: DomainShipmentDetails,
-    val status: String,
+    val status: Status,
     val userId: ObjectId,
 ) {
+    enum class Status {
+        NEW,
+        SHIPPING,
+        COMPLETED,
+        CANCELED,
+        UNKNOWN
+    }
 
     data class DomainShipmentDetails(
-        val city: String = "none",
-        val street: String = "none",
-        val building: String = "none",
-        val index: String = "none",
+        val city: String = "",
+        val street: String = "",
+        val building: String = "",
+        val index: String = "",
     )
 
     data class DomainOrderItem(

@@ -33,9 +33,9 @@ class LogInvokeAnnotationBeanPostProcessor : BeanPostProcessor {
     }
 
     fun Method.signatureEqual(method: Method): Boolean {
-        return this.name == method.name
-                && this.parameters.contentEquals(method.parameters)
-                && this.returnType == method.returnType
+        return this.name == method.name &&
+            this.parameters.contentEquals(method.parameters) &&
+            this.returnType == method.returnType
     }
 
     private fun createProxy(bean: Any, annotatedMethods: List<Method>): Any {

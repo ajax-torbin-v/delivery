@@ -6,6 +6,7 @@ import com.example.delivery.OrderFixture.domainOrderWithProduct
 import com.example.delivery.OrderFixture.updateOrderDTO
 import com.example.delivery.OrderFixture.updatedDomainOrder
 import com.example.delivery.ProductFixture.domainProduct
+import com.example.delivery.domain.DomainOrder
 import com.example.delivery.service.OrderService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -39,10 +40,10 @@ internal class OrderControllerTest {
 
     @Test
     fun `should add order and return status is created`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderService.add(any())).thenReturn(domainOrder)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             post("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -67,10 +68,10 @@ internal class OrderControllerTest {
 
     @Test
     fun `should return order when order exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderService.getById("1")).thenReturn(domainOrderWithProduct)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(get("/orders/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -96,10 +97,10 @@ internal class OrderControllerTest {
 
     @Test
     fun `should update order with proper dto`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderService.updateOrder("1", updateOrderDTO)).thenReturn(updatedDomainOrder)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             put("/orders/{id}", "1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -121,11 +122,11 @@ internal class OrderControllerTest {
 
     @Test
     fun `should update order's status`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(orderService.updateOrderStatus("1", "CANCELED"))
-            .thenReturn(domainOrder.copy(status = "CANCELED"))
+            .thenReturn(domainOrder.copy(status = DomainOrder.Status.CANCELED))
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             patch("/orders/{id}?status={status}", "1", "CANCELED")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,19 +134,18 @@ internal class OrderControllerTest {
         )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("CANCELED"))
-
     }
 
     @Test
     fun `should delete order when order exists`() {
-        //GIVEN
+        // GIVEN
         doNothing().`when`(orderService).deleteById("1")
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(delete("/orders/{id}", "1"))
             .andExpect(status().isNoContent)
 
-        //AND THEN
+        // AND THEN
         verify(orderService).deleteById("1")
     }
 }

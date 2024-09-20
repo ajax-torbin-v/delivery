@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class UserRepositoryTest : AbstractMongoTestContainer {
@@ -50,7 +51,7 @@ class UserRepositoryTest : AbstractMongoTestContainer {
         userRepository.deleteById(savedUser.id.toString())
 
         // THEN
-        assertTrue(!userRepository.existsById(savedUser.id.toString()))
+        assertFalse(userRepository.existsById(savedUser.id.toString()))
     }
 
     @Test
@@ -73,7 +74,8 @@ class UserRepositoryTest : AbstractMongoTestContainer {
                 id = savedUser.id,
                 fullName = "UpdatedName",
                 phone = "+38-new-phone"
-            ), actual
+            ),
+            actual
         )
     }
 }
