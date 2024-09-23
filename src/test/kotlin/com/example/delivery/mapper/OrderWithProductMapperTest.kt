@@ -1,10 +1,10 @@
 package com.example.delivery.mapper
 
 import com.example.delivery.ProductFixture.product
-import com.example.delivery.domain.DomainOrderWithProduct
+import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.OrderWithProductMapper.toDomain
 import com.example.delivery.mapper.ProductMapper.toDomain
-import com.example.delivery.mongo.MongoOrderWithProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import kotlin.test.assertEquals

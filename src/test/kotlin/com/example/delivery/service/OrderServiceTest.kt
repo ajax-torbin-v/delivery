@@ -12,6 +12,7 @@ import com.example.delivery.OrderFixture.updatedOrder
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.UserFixture.user
 import com.example.delivery.exception.NotFoundException
+import com.example.delivery.exception.ProductAmountException
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
@@ -75,6 +76,28 @@ internal class OrderServiceTest {
         // THEN
         verify(orderRepository, times(1)).save(any())
         assertEquals(domainOrder, actual)
+    }
+
+    @Test
+    fun `should throw exception when product doesn't exist`() {
+        // GIVEN
+        Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
+        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+            .thenReturn(emptyList())
+
+        // WHEN // THEN
+        assertThrows<NotFoundException> { orderService.add(createOrderDTO) }
+    }
+
+    @Test
+    fun `should throw exception when not sufficient product`() {
+        // GIVEN
+        Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
+        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+            .thenReturn(listOf(product.copy(amountAvailable = -1)))
+
+        // WHEN // THEN
+        assertThrows<ProductAmountException> { orderService.add(createOrderDTO) }
     }
 
     @Test

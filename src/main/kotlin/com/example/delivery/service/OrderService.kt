@@ -2,7 +2,7 @@ package com.example.delivery.service
 
 import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.domain.DomainOrder
-import com.example.delivery.domain.DomainOrderWithProduct
+import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.exception.NotFoundException

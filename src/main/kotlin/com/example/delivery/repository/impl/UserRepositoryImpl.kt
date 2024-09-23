@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
 
 @Repository
-class UserRepositoryImpl(val mongoTemplate: MongoTemplate) : UserRepository {
+internal class UserRepositoryImpl(val mongoTemplate: MongoTemplate) : UserRepository {
     override fun existsById(id: String): Boolean {
         val query = Query().addCriteria(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists(query, MongoUser.COLLECTION_NAME)

@@ -6,7 +6,6 @@ import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findAndRemove
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
@@ -16,7 +15,7 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
 
 @Repository
-class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepository {
+internal class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepository {
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists(query, MongoProduct::class.java)
@@ -45,10 +44,6 @@ class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepositor
 
     override fun findById(id: String): MongoProduct? {
         return mongoTemplate.findById<MongoProduct>(id)
-    }
-
-    override fun findAll(): List<MongoProduct> {
-        return mongoTemplate.findAll<MongoProduct>()
     }
 
     override fun save(product: MongoProduct): MongoProduct {

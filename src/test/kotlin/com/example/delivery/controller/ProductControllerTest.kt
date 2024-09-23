@@ -3,7 +3,6 @@ package com.example.delivery.controller
 import com.example.delivery.ProductFixture.createProductDTO
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.productDTO
-import com.example.delivery.ProductFixture.products
 import com.example.delivery.ProductFixture.updateProductDTO
 import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.service.ProductService
@@ -49,18 +48,6 @@ internal class ProductControllerTest {
             .andExpect(jsonPath("$.price").value(productDTO.price))
             .andExpect(jsonPath("$.amount").value(productDTO.amount))
             .andExpect(jsonPath("$.measurement").value(productDTO.measurement))
-    }
-
-    @Test
-    fun `should return list of all products`() {
-        // GIVEN
-        Mockito.`when`(productService.findAll()).thenReturn(products)
-
-        // WHEN // THEN
-        mockMvc.perform(get("/products"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.length()").value(products.size))
     }
 
     @Test

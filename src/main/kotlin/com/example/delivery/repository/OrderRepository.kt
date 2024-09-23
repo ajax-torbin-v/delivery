@@ -1,8 +1,8 @@
 package com.example.delivery.repository
 
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoOrderWithProduct
 import com.example.delivery.mongo.MongoProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 

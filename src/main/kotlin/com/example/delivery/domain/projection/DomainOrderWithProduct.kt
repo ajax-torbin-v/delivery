@@ -1,5 +1,7 @@
-package com.example.delivery.domain
+package com.example.delivery.domain.projection
 
+import com.example.delivery.domain.DomainOrder
+import com.example.delivery.domain.DomainProduct
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 

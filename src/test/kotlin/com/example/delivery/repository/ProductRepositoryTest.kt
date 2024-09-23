@@ -47,20 +47,6 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
     }
 
     @Test
-    fun `findAll should return all saved products `() {
-        // GIVEN
-        val savedProduct1 = productRepository.save(unsavedProduct)
-        val savedProduct2 = productRepository.save(unsavedProduct)
-
-        // WHEN
-        val actual = productRepository.findAll().contains(savedProduct1) &&
-            productRepository.findAll().contains(savedProduct2)
-
-        // THEN
-        assertTrue(actual)
-    }
-
-    @Test
     fun `deleteById should delete product by id`() {
         // GIVEN
         val savedProduct = productRepository.save(unsavedProduct)

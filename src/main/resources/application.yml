@@ -6,3 +6,6 @@ spring:
 server:
   servlet:
     contextPath: /api/v1
+
+mongock:
+  migration-scan-package: com.example.delivery.config

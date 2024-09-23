@@ -3,7 +3,7 @@ package com.example.delivery
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.domain.DomainOrder
-import com.example.delivery.domain.DomainOrderWithProduct
+import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.CreateOrderItemDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
@@ -12,7 +12,7 @@ import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoOrderWithProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal

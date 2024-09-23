@@ -1,14 +1,14 @@
 package com.example.delivery.mapper
 
 import com.example.delivery.domain.DomainOrder
-import com.example.delivery.domain.DomainOrderWithProduct
+import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.dto.response.OrderItemWithProductDTO
 import com.example.delivery.dto.response.OrderWithProductDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.ProductMapper.toDTO
 import com.example.delivery.mapper.ProductMapper.toDomain
-import com.example.delivery.mongo.MongoOrderWithProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import java.math.BigDecimal
 
 object OrderWithProductMapper {

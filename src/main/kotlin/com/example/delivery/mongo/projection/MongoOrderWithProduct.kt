@@ -1,5 +1,7 @@
-package com.example.delivery.mongo
+package com.example.delivery.mongo.projection
 
+import com.example.delivery.mongo.MongoOrder
+import com.example.delivery.mongo.MongoProduct
 import org.bson.types.ObjectId
 import java.math.BigDecimal
 

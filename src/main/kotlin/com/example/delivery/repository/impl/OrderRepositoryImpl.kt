@@ -1,8 +1,8 @@
 package com.example.delivery.repository.impl
 
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoOrderWithProduct
 import com.example.delivery.mongo.MongoProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import com.example.delivery.repository.OrderRepository
 import org.bson.Document
 import org.springframework.data.mongodb.MongoExpression
@@ -25,7 +25,7 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
 
 @Repository
-class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
+internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
 
     override fun existsById(id: String): Boolean {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
@@ -101,6 +101,18 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
         return mongoTemplate.find<MongoProduct>(query)
     }
 
+    private fun mapOperation(): String {
+        val mapBody = Document("price", "$\$item.price")
+            .append("amount", "$\$item.amount")
+            .append("product", elementAtOperation())
+
+        val map = VariableOperators.Map
+            .itemsOf("\$items")
+            .`as`("item")
+            .andApply(AggregationExpression.from(MongoExpression.create(mapBody.toJson())))
+        return map.toDocument().toJson()
+    }
+
     private fun elementAtOperation(): Document {
         val filter = ArrayOperators.Filter
             .filter("\$fetchedProducts")
@@ -117,17 +129,5 @@ class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
             .arrayOf(AggregationExpression.from(MongoExpression.create(filter)))
             .elementAt(0)
             .toDocument()
-    }
-
-    private fun mapOperation(): String {
-        val mapBody = Document("price", "$\$item.price")
-            .append("amount", "$\$item.amount")
-            .append("product", elementAtOperation())
-
-        val map = VariableOperators.Map
-            .itemsOf("\$items")
-            .`as`("item")
-            .andApply(AggregationExpression.from(MongoExpression.create(mapBody.toJson())))
-        return map.toDocument().toJson()
     }
 }

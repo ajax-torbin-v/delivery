@@ -26,11 +26,6 @@ class ProductController(private val productService: ProductService) {
         return productService.getById(id).toDTO()
     }
 
-    @GetMapping
-    fun getAll(): List<ProductDTO> {
-        return productService.findAll().map { it.toDTO() }
-    }
-
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createProductDTO: CreateProductDTO): ProductDTO {

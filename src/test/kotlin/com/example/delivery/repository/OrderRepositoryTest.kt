@@ -4,10 +4,11 @@ import com.example.delivery.OrderFixture.mongoOrderWithProduct
 import com.example.delivery.OrderFixture.unsavedOrder
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoOrderWithProduct
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Update
+import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -36,7 +37,7 @@ class OrderRepositoryTest : AbstractMongoTestContainer {
                 items = listOf(
                     MongoOrder.MongoOrderItem(
                         product.id,
-                        product.price,
+                        BigDecimal.TEN,
                         product.amountAvailable
                     )
                 )
@@ -53,7 +54,7 @@ class OrderRepositoryTest : AbstractMongoTestContainer {
                 items = listOf(
                     MongoOrderWithProduct.MongoOrderItemWithProduct(
                         product,
-                        product.price,
+                        BigDecimal.TEN,
                         product.amountAvailable
                     )
                 )
