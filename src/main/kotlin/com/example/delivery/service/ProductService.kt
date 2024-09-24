@@ -17,10 +17,6 @@ class ProductService(private val productRepository: ProductRepository) {
             ?: throw NotFoundException("Product with id $id not found")
     }
 
-    fun findAll(): List<DomainProduct> {
-        return productRepository.findAll().map { it.toDomain() }
-    }
-
     fun add(createProductDTO: CreateProductDTO): DomainProduct {
         return productRepository.save(createProductDTO.toMongo()).toDomain()
     }

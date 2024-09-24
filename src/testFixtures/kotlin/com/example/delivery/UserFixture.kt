@@ -21,8 +21,10 @@ object UserFixture {
         password = "password",
     )
 
+    val unsavedUser = user.copy(id = null)
+
     val domainUser = DomainUser(
-        ObjectId("123456789011121314151617"),
+        id = "123456789011121314151617",
         fullName = "FULL NAME",
         phone = "+31243123",
         password = "password",

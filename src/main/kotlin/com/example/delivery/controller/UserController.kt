@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/users")
 class UserController(private val userService: UserService) {
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createUserDTO: CreateUserDTO): UserDTO {
         return userService.add(createUserDTO).toDTO()

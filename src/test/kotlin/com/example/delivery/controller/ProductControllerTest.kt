@@ -2,10 +2,9 @@ package com.example.delivery.controller
 
 import com.example.delivery.ProductFixture.createProductDTO
 import com.example.delivery.ProductFixture.domainProduct
-import com.example.delivery.ProductFixture.productDTO
-import com.example.delivery.ProductFixture.products
 import com.example.delivery.ProductFixture.updateProductDTO
 import com.example.delivery.ProductFixture.updatedDomainProduct
+import com.example.delivery.mapper.ProductMapper.toDTO
 import com.example.delivery.service.ProductService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.mockito.Mockito
@@ -21,9 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.math.BigDecimal
 import kotlin.test.Test
 
 @WebMvcTest(ProductController::class)
@@ -38,52 +35,38 @@ internal class ProductControllerTest {
 
     @Test
     fun `should return product when product exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productService.getById("123")).thenReturn(domainProduct)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(get("/products/{id}", "123"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.name").value(productDTO.name))
-            .andExpect(jsonPath("$.price").value(productDTO.price))
-            .andExpect(jsonPath("$.amount").value(productDTO.amount))
-            .andExpect(jsonPath("$.measurement").value(productDTO.measurement))
-    }
-
-    @Test
-    fun `should return list of all products`() {
-        //GIVEN
-        Mockito.`when`(productService.findAll()).thenReturn(products)
-
-        //WHEN //THEN
-        mockMvc.perform(get("/products"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.length()").value(products.size))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainProduct.toDTO())))
     }
 
     @Test
     fun `should add product and return status created`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productService.add(createProductDTO)).thenReturn(domainProduct)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createProductDTO))
         )
             .andExpect(status().isCreated)
-
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainProduct.toDTO())))
     }
 
     @Test
     fun `should update product with proper dto`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productService.update("1", updateProductDTO)).thenReturn(updatedDomainProduct)
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(
             put("/products/{id}", "1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -91,23 +74,19 @@ internal class ProductControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.name").value("Coca-cola"))
-            .andExpect(jsonPath("$.price").value(BigDecimal.TEN))
-            .andExpect(jsonPath("$.amount").value(1000))
-            .andExpect(jsonPath("$.measurement").value("0.5L"))
+            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainProduct.toDTO())))
     }
-
 
     @Test
     fun `should delete product and return no content`() {
-        //GIVEN
+        // GIVEN
         doNothing().`when`(productService).deleteById("123")
 
-        //WHEN //THEN
+        // WHEN // THEN
         mockMvc.perform(delete("/products/{id}", "123"))
             .andExpect(status().isNoContent)
 
-        //AND THEN
+        // AND THEN
         verify(productService).deleteById("123")
     }
 }

@@ -4,7 +4,9 @@ import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
+import com.example.delivery.dto.response.OrderWithProductDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
+import com.example.delivery.mapper.OrderWithProductMapper.toDTO
 import com.example.delivery.service.OrderService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -25,7 +27,7 @@ class OrderController(private val orderService: OrderService) {
 
     @LogInvoke
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): OrderDTO {
+    fun findById(@PathVariable id: String): OrderWithProductDTO {
         return orderService.getById(id).toDTO()
     }
 
@@ -55,5 +57,10 @@ class OrderController(private val orderService: OrderService) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String) {
         return orderService.deleteById(id)
+    }
+
+    @GetMapping("/user/{id}")
+    fun findAllByUserId(@PathVariable id: String): List<OrderDTO> {
+        return orderService.getAllByUserId(id).map { it.toDTO() }
     }
 }

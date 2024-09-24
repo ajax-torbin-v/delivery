@@ -28,68 +28,67 @@ internal class ProductServiceTest {
     @InjectMocks
     lateinit var productService: ProductService
 
-
     @Test
     fun `should add product with proper dto`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productRepository.save(product.copy(id = null))).thenReturn(product)
 
-        //WHEN
+        // WHEN
         productService.add(createProductDTO)
 
-        //THEN
+        // THEN
         verify(productRepository, times(1)).save(product.copy(id = null))
     }
 
     @Test
     fun `should return product when product exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productRepository.findById("1")).thenReturn(product)
 
-        //WHEN
+        // WHEN
         val actual = productService.getById("1")
 
-        //THEN
+        // THEN
         assertEquals(domainProduct, actual)
     }
 
     @Test
     fun `should throw an exception when product don't exist`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productRepository.findById("13")).thenReturn(null)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows<NotFoundException> { productService.getById("13") }
     }
 
     @Test
     fun `should update product with proper dto when product exists`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(updatedProduct)
 
-        //WHEN
+        // WHEN
         val actual = productService.update("1", updateProductDTO)
 
-        //THEN
+        // THEN
         verify(productRepository, times(1)).update("1", updateProductObject)
         assertEquals(updatedDomainProduct, actual)
     }
 
     @Test
     fun `should throw exception if product doesn't exists on update`() {
-        //GIVEN
+        // GIVEN
         Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(null)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows<NotFoundException> { productService.update("1", updateProductDTO) }
     }
 
     @Test
     fun `should be okay when deleting existing product`() {
-        //GIVEN //WHEN
+        // GIVEN // WHEN
         productService.deleteById("1")
 
-        //THEN
+        // THEN
         verify(productRepository, times(1)).deleteById("1")
     }
 }

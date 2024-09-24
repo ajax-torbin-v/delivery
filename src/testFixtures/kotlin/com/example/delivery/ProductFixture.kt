@@ -19,8 +19,10 @@ object ProductFixture {
             measurement = "0.5L"
         )
 
+    val unsavedProduct = product.copy(id = null)
+
     val domainProduct = DomainProduct(
-        id = ObjectId("123456789011121314151617"),
+        id = "123456789011121314151617",
         name = "Coca-cola",
         price = BigDecimal.valueOf(24.50),
         amountAvailable = 69,
@@ -44,14 +46,14 @@ object ProductFixture {
 
     val products = listOf(
         DomainProduct(
-            ObjectId("123456789011121314151617"),
+            "123456789011121314151617",
             "Coca-cola",
             BigDecimal.valueOf(24.50),
             69,
             "0.5L"
         ),
         DomainProduct(
-            ObjectId("123456789011121314151617".reversed()),
+            "123456789011121314151617".reversed(),
             "Pepsi",
             BigDecimal.valueOf(23.00),
             50,

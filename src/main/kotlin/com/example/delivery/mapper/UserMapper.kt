@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.query.Update
 
 object UserMapper {
     fun DomainUser.toDTO(): UserDTO = UserDTO(
-        id.toHexString(),
+        id,
         fullName,
         phone,
     )
@@ -22,14 +22,10 @@ object UserMapper {
     )
 
     fun MongoUser.toDomain(): DomainUser = DomainUser(
-        id!!,
+        id.toString(),
         fullName ?: "none",
         phone ?: "none",
         password ?: ""
-    )
-
-    fun DomainUser.toMongo(): MongoUser = MongoUser(
-        id, fullName, phone, password
     )
 
     fun UpdateUserDTO.toUpdate(): Update {
@@ -38,5 +34,4 @@ object UserMapper {
         phone?.let { update.set(MongoUser::phone.name, it) }
         return update
     }
-
 }

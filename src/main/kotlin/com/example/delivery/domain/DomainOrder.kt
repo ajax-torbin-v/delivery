@@ -1,14 +1,32 @@
 package com.example.delivery.domain
 
-import com.example.delivery.mongo.MongoOrder.MongoShipmentDetails
-import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class DomainOrder(
-    val id: ObjectId,
-    val items: Map<ObjectId, Int>,
-    val totalPrice: BigDecimal,
-    val shipmentDetails: MongoShipmentDetails,
-    val status: String,
-    val userId: ObjectId?,
-)
+    val id: String,
+    val items: List<DomainOrderItem>,
+    val shipmentDetails: DomainShipmentDetails,
+    val status: Status,
+    val userId: String,
+) {
+    enum class Status {
+        NEW,
+        SHIPPING,
+        COMPLETED,
+        CANCELED,
+        UNKNOWN
+    }
+
+    data class DomainShipmentDetails(
+        val city: String = "",
+        val street: String = "",
+        val building: String = "",
+        val index: String = "",
+    )
+
+    data class DomainOrderItem(
+        val price: BigDecimal = BigDecimal.ZERO,
+        val amount: Int = 0,
+        val productId: String = "",
+    )
+}

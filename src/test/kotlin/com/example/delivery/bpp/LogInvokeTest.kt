@@ -32,29 +32,29 @@ class LogInvokeTest {
 
     @Test
     fun `should create proxy on class with annotations`() {
-        //GIVEN
+        // GIVEN
         val bean = AnnotatedClass()
         val beanName = "annotatedClass"
         beanPostProcessor.postProcessBeforeInitialization(bean, beanName)
 
-        //WHEN
+        // WHEN
         val proxy = beanPostProcessor.postProcessAfterInitialization(bean, beanName)
 
-        //THEN
+        // THEN
         assert(AopUtils.isAopProxy(proxy))
     }
 
     @Test
     fun `should not create proxy on class without annotations`() {
-        //GIVEN
+        // GIVEN
         val bean = NotAnnotatedClass()
         val beanName = "notAnnotatedClass"
         beanPostProcessor.postProcessBeforeInitialization(bean, beanName)
 
-        //WHEN
+        // WHEN
         val proxy = beanPostProcessor.postProcessAfterInitialization(bean, beanName)
 
-        //THEN
+        // THEN
         assert(!AopUtils.isAopProxy(proxy))
     }
 }

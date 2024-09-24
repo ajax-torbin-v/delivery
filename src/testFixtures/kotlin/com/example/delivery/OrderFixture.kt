@@ -1,21 +1,38 @@
 package com.example.delivery
 
+import com.example.delivery.ProductFixture.domainProduct
+import com.example.delivery.ProductFixture.product
 import com.example.delivery.domain.DomainOrder
+import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.dto.request.CreateOrderDTO
+import com.example.delivery.dto.request.CreateOrderItemDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
 import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
+import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
+import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderFixture {
-    val order = MongoOrder(
+    val mongoOrderItem = MongoOrder.MongoOrderItem(
+        ObjectId("123456789011121314151617"),
+        BigDecimal.TEN,
+        2
+    )
+
+    val mongoOrderItemWithProduct = MongoOrderWithProduct.MongoOrderItemWithProduct(
+        product,
+        BigDecimal.ZERO,
+        amount = 0
+    )
+
+    val mongoOrderWithProduct = MongoOrderWithProduct(
         id = ObjectId("123456789011121314151617"),
-        items = mutableMapOf(ObjectId("123456789011121314151617") to 2),
-        totalPrice = BigDecimal.valueOf(100),
+        items = listOf(mongoOrderItemWithProduct),
         shipmentDetails = MongoOrder.MongoShipmentDetails(
             city = "city",
             street = "street",
@@ -26,10 +43,24 @@ object OrderFixture {
         userId = ObjectId("123456789011121314151617")
     )
 
+    val order = MongoOrder(
+        id = ObjectId("123456789011121314151617"),
+        items = listOf(mongoOrderItem),
+        shipmentDetails = MongoOrder.MongoShipmentDetails(
+            city = "city",
+            street = "street",
+            building = "3a",
+            index = "54890",
+        ),
+        status = MongoOrder.Status.NEW,
+        userId = ObjectId("123456789011121314151617")
+    )
+
+    val unsavedOrder = order.copy(id = null)
+
     val orderDTO = OrderDTO(
         id = "123456789011121314151617",
-        items = mutableMapOf("1" to 2),
-        totalPrice = BigDecimal.valueOf(100),
+        items = listOf(mongoOrderItem.toDomain().toDTO()),
         shipmentDetails = ShipmentDetailsDTO(
             city = "city",
             street = "street",
@@ -42,7 +73,7 @@ object OrderFixture {
     )
 
     val createOrderDTO = CreateOrderDTO(
-        items = mutableMapOf("123456789011121314151617" to 2),
+        items = listOf(CreateOrderItemDTO("123456789011121314151617", 0)),
         shipmentDetails = ShipmentDetailsDTO(
             city = "city",
             street = "street",
@@ -53,37 +84,56 @@ object OrderFixture {
     )
 
     val domainOrder = DomainOrder(
-        id = ObjectId("123456789011121314151617"),
-        items = mutableMapOf(ObjectId("123456789011121314151617") to 2),
-        totalPrice = BigDecimal.valueOf(100),
-        shipmentDetails = MongoOrder.MongoShipmentDetails(
+        id = "123456789011121314151617",
+        items = listOf(mongoOrderItem.toDomain()),
+        shipmentDetails = DomainOrder.DomainShipmentDetails(
+            city = "city",
+            street = "street",
+            building = "3a",
+            index = "54890",
+        ),
+        status = DomainOrder.Status.NEW,
+        userId = "123456789011121314151617"
+    )
+
+
+    val domainOrderWithProduct = DomainOrderWithProduct(
+        id = "123456789011121314151617",
+        items = listOf(
+            DomainOrderWithProduct.DomainOrderItemWithProduct(
+                price = BigDecimal.ZERO,
+                amount = 0,
+                product = domainProduct,
+            ),
+        ),
+        shipmentDetails = DomainOrder.DomainShipmentDetails(
             city = "city",
             street = "street",
             building = "3a",
             index = "54890",
         ),
         status = "NEW",
-        userId = ObjectId("123456789011121314151617")
+        userId = "123456789011121314151617"
     )
 
-    val reservedProducts = domainOrder.items.map { it.key.toString() to -it.value }.toMap()
 
-    val updatedShipmentDetails = domainOrder.shipmentDetails.copy(
+    val updatedShipmentDetails = MongoOrder.MongoShipmentDetails(
         city = "Dnipro",
+        street = "street",
         building = "1b",
         index = "01222"
     )
 
     val updateOrderDTO = UpdateOrderDTO(
-        shipmentDetails = updatedShipmentDetails.toDTO()
+        shipmentDetails = updatedShipmentDetails.toDomain().toDTO()
     )
 
     val orderUpdateObject = Update()
-        .set("shipmentDetails", updatedShipmentDetails.toDTO())
+        .set("shipmentDetails", updatedShipmentDetails.toDomain().toDTO())
 
     val updatedOrder = order.copy(
         shipmentDetails = updatedShipmentDetails
     )
 
-    val updatedDomainOrder = domainOrder.copy(shipmentDetails = updatedShipmentDetails)
+    val updatedDomainOrder = domainOrder.copy(shipmentDetails = updatedShipmentDetails.toDomain())
 }
