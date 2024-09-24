@@ -6,26 +6,25 @@ import com.example.delivery.dto.response.OrderDTO
 import com.example.delivery.dto.response.OrderItemDTO
 import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.mongo.MongoOrder
-import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderMapper {
 
     fun DomainOrder.toDTO(): OrderDTO = OrderDTO(
-        id.toHexString(),
+        id,
         items.map { it.toDTO() },
         shipmentDetails.toDTO(),
         status.name,
-        userId.toHexString(),
+        userId
     )
 
     fun MongoOrder.toDomain(): DomainOrder = DomainOrder(
-        id!!,
+        id.toString(),
         items = items?.map { it.toDomain() } ?: emptyList(),
         shipmentDetails = shipmentDetails?.toDomain() ?: DomainOrder.DomainShipmentDetails(),
         status = DomainOrder.Status.valueOf(status?.name ?: "UNKNOWN"),
-        userId = userId!!,
+        userId = userId.toString(),
     )
 
     fun ShipmentDetailsDTO.toMongoModel(): MongoOrder.MongoShipmentDetails =
@@ -41,7 +40,7 @@ object OrderMapper {
 
     fun MongoOrder.MongoOrderItem.toDomain(): DomainOrder.DomainOrderItem =
         DomainOrder.DomainOrderItem(
-            productId = productId ?: ObjectId(),
+            productId = productId.toString(),
             price = price ?: BigDecimal.ZERO,
             amount = amount ?: 0
         )
@@ -56,7 +55,7 @@ object OrderMapper {
     fun DomainOrder.DomainOrderItem.toDTO(): OrderItemDTO = OrderItemDTO(
         price,
         amount,
-        productId.toString()
+        productId
     )
 
     fun UpdateOrderDTO.toUpdate(): Update {

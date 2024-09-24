@@ -26,7 +26,7 @@ class OrderMapperTest {
         // GIVEN
         val id = ObjectId()
         val mongoOrderItem = MongoOrder.MongoOrderItem(productId = id)
-        val domainOrderItem = DomainOrder.DomainOrderItem(productId = id)
+        val domainOrderItem = DomainOrder.DomainOrderItem(productId = id.toString())
 
         // WHEN
         val actual = mongoOrderItem.toDomain()
@@ -41,11 +41,11 @@ class OrderMapperTest {
         val id = ObjectId()
         val mongoOrder = MongoOrder(id = id, userId = id)
         val domainOrder = DomainOrder(
-            id = id,
+            id = id.toString(),
             emptyList(),
             DomainOrder.DomainShipmentDetails(),
             DomainOrder.Status.UNKNOWN,
-            userId = id
+            userId = id.toString()
         )
 
         // WHEN

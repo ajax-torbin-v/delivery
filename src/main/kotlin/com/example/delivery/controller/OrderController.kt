@@ -58,4 +58,9 @@ class OrderController(private val orderService: OrderService) {
     fun delete(@PathVariable id: String) {
         return orderService.deleteById(id)
     }
+
+    @GetMapping("/user/{id}")
+    fun findAllByUserId(@PathVariable id: String): List<OrderDTO> {
+        return orderService.getAllByUserId(id).map { it.toDTO() }
+    }
 }

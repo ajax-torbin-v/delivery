@@ -6,6 +6,7 @@ import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findAndRemove
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
@@ -29,6 +30,11 @@ internal class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : Product
             FindAndModifyOptions.options().returnNew(true),
             MongoProduct::class.java
         )
+    }
+
+    override fun findAllByIds(productIds: List<String>): List<MongoProduct> {
+        val query = Query(Criteria.where("_id").`in`(productIds))
+        return mongoTemplate.find<MongoProduct>(query)
     }
 
     override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>) {

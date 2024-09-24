@@ -67,7 +67,7 @@ internal class OrderServiceTest {
         // GIVEN
         Mockito.`when`(orderRepository.save(any())).thenReturn(order)
         Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
             .thenReturn(listOf(product))
 
         // WHEN
@@ -82,7 +82,7 @@ internal class OrderServiceTest {
     fun `should throw exception when product doesn't exist`() {
         // GIVEN
         Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
             .thenReturn(emptyList())
 
         // WHEN // THEN
@@ -93,7 +93,7 @@ internal class OrderServiceTest {
     fun `should throw exception when not sufficient product`() {
         // GIVEN
         Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(orderRepository.fetchProducts(listOf("123456789011121314151617")))
+        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
             .thenReturn(listOf(product.copy(amountAvailable = -1)))
 
         // WHEN // THEN

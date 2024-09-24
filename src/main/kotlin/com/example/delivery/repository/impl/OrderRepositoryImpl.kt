@@ -1,10 +1,10 @@
 package com.example.delivery.repository.impl
 
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import com.example.delivery.repository.OrderRepository
 import org.bson.Document
+import org.bson.types.ObjectId
 import org.springframework.data.mongodb.MongoExpression
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -36,14 +36,14 @@ internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepo
         val matchStage = MatchOperation(Criteria.where("_id").isEqualTo(id))
 
         val lookupStage = LookupOperation.newLookup()
-            .from("product")
-            .localField("items.productId")
+            .from(MongoOrderWithProduct.MongoOrderItemWithProduct::product.name)
+            .localField("items.${MongoOrder.MongoOrderItem::productId.name}")
             .foreignField("_id")
             .`as`("fetchedProducts")
 
         val addFieldsStage = Aggregation.addFields()
             .addFieldWithValue(
-                "items",
+                MongoOrder::items.name,
                 AggregationExpression.from(
                     MongoExpression.create(
                         mapOperation()
@@ -96,31 +96,38 @@ internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepo
         )
     }
 
-    override fun fetchProducts(productIds: List<String>): List<MongoProduct> {
-        val query = Query(Criteria.where("_id").`in`(productIds))
-        return mongoTemplate.find<MongoProduct>(query)
+    override fun findAllByUserId(userId: String): List<MongoOrder> {
+        val query = Query(Criteria.where("userId").isEqualTo(ObjectId(userId)))
+        return mongoTemplate.find<MongoOrder>(query)
     }
 
     private fun mapOperation(): String {
-        val mapBody = Document("price", "$\$item.price")
-            .append("amount", "$\$item.amount")
-            .append("product", elementAtOperation())
+        val price = MongoOrderWithProduct.MongoOrderItemWithProduct::price.name
+        val amount = MongoOrderWithProduct.MongoOrderItemWithProduct::amount.name
+        val product = MongoOrderWithProduct.MongoOrderItemWithProduct::product.name
+        val items = MongoOrder::items.name
+
+        val mapBody = Document(price, "$\$item.$price")
+            .append(amount, "$\$item.$amount")
+            .append(product, elementAtOperation())
 
         val map = VariableOperators.Map
-            .itemsOf("\$items")
+            .itemsOf("\$$items")
             .`as`("item")
             .andApply(AggregationExpression.from(MongoExpression.create(mapBody.toJson())))
         return map.toDocument().toJson()
     }
 
     private fun elementAtOperation(): Document {
+        val productId = MongoOrder.MongoOrderItem::productId.name
+        val product = MongoOrderWithProduct.MongoOrderItemWithProduct::product.name
         val filter = ArrayOperators.Filter
             .filter("\$fetchedProducts")
-            .`as`("product")
+            .`as`(product)
             .by(
                 Eq
-                    .valueOf("$\$product._id")
-                    .equalTo("$\$item.productId")
+                    .valueOf("$\$$product._id")
+                    .equalTo("$\$item.$productId")
             )
             .toDocument()
             .toJson()

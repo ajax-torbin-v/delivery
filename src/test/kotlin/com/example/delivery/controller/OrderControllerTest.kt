@@ -5,8 +5,9 @@ import com.example.delivery.OrderFixture.domainOrder
 import com.example.delivery.OrderFixture.domainOrderWithProduct
 import com.example.delivery.OrderFixture.updateOrderDTO
 import com.example.delivery.OrderFixture.updatedDomainOrder
-import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.domain.DomainOrder
+import com.example.delivery.mapper.OrderMapper.toDTO
+import com.example.delivery.mapper.OrderWithProductMapper.toDTO
 import com.example.delivery.service.OrderService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -25,7 +26,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(OrderController::class)
@@ -50,20 +50,8 @@ internal class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(createOrderDTO))
         )
             .andExpect(status().isCreated)
-            .andExpect(jsonPath("$.items[0].productId").value(domainOrder.items[0].productId.toString()))
-            .andExpect(jsonPath("$.items[0].price").value(domainOrder.items[0].price))
-            .andExpect(jsonPath("$.items[0].amount").value(domainOrder.items[0].amount))
-            .andExpect(
-                jsonPath("$.shipmentDetails").value(
-                    mutableMapOf(
-                        "city" to "city",
-                        "street" to "street",
-                        "building" to "3a",
-                        "index" to "54890"
-                    )
-                )
-            )
-            .andExpect(jsonPath("$.status").value("NEW"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainOrder.toDTO())))
     }
 
     @Test
@@ -75,24 +63,7 @@ internal class OrderControllerTest {
         mockMvc.perform(get("/orders/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.items[0].product.id").value(domainProduct.id.toString()))
-            .andExpect(jsonPath("$.items[0].product.name").value(domainProduct.name))
-            .andExpect(jsonPath("$.items[0].product.amount").value(domainProduct.amountAvailable))
-            .andExpect(jsonPath("$.items[0].product.price").value(domainProduct.price))
-            .andExpect(jsonPath("$.items[0].product.measurement").value(domainProduct.measurement))
-            .andExpect(jsonPath("$.items[0].amount").value(0))
-            .andExpect(jsonPath("$.items[0].price").value(0))
-            .andExpect(
-                jsonPath("$.shipmentDetails").value(
-                    mutableMapOf(
-                        "city" to "city",
-                        "street" to "street",
-                        "building" to "3a",
-                        "index" to "54890"
-                    )
-                )
-            )
-            .andExpect(jsonPath("$.status").value("NEW"))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainOrderWithProduct.toDTO())))
     }
 
     @Test
@@ -107,17 +78,8 @@ internal class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(updateOrderDTO))
         )
             .andExpect(status().isOk())
-            .andExpect(
-                jsonPath("$.shipmentDetails").value(
-                    mutableMapOf(
-                        "city" to "Dnipro",
-                        "street" to "street",
-                        "building" to "1b",
-                        "index" to "01222"
-                    )
-                )
-            )
-            .andExpect(jsonPath("$.status").value("NEW"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainOrder.toDTO())))
     }
 
     @Test
@@ -133,7 +95,14 @@ internal class OrderControllerTest {
                 .content(objectMapper.writeValueAsString(updateOrderDTO))
         )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("CANCELED"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                content().json(
+                    objectMapper.writeValueAsString(
+                        domainOrder.copy(status = DomainOrder.Status.CANCELED).toDTO()
+                    )
+                )
+            )
     }
 
     @Test

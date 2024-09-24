@@ -1,9 +1,7 @@
 package com.example.delivery.domain
 
-import org.bson.types.ObjectId
-
 data class DomainUser(
-    val id: ObjectId,
+    val id: String,
     val fullName: String,
     val phone: String,
     val password: String,

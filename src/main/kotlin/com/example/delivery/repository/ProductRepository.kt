@@ -12,5 +12,6 @@ interface ProductRepository {
     fun deleteById(id: String)
     fun existsById(id: String): Boolean
     fun update(id: String, update: Update): MongoProduct?
+    fun findAllByIds(productIds: List<String>): List<MongoProduct>
     fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>)
 }

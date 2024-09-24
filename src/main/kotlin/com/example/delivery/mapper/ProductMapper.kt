@@ -10,7 +10,7 @@ import java.math.BigDecimal
 
 object ProductMapper {
     fun DomainProduct.toDTO(): ProductDTO = ProductDTO(
-        id.toHexString(),
+        id,
         name,
         price,
         amountAvailable,
@@ -25,16 +25,8 @@ object ProductMapper {
         measurement
     )
 
-    fun DomainProduct.toMongo(): MongoProduct = MongoProduct(
-        id,
-        name,
-        price,
-        amountAvailable,
-        measurement
-    )
-
     fun MongoProduct.toDomain(): DomainProduct = DomainProduct(
-        id!!,
+        id.toString(),
         name ?: "no name",
         price ?: BigDecimal.ZERO,
         amountAvailable ?: 0,

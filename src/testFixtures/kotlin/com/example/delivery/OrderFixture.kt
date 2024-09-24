@@ -84,7 +84,7 @@ object OrderFixture {
     )
 
     val domainOrder = DomainOrder(
-        id = ObjectId("123456789011121314151617"),
+        id = "123456789011121314151617",
         items = listOf(mongoOrderItem.toDomain()),
         shipmentDetails = DomainOrder.DomainShipmentDetails(
             city = "city",
@@ -93,12 +93,12 @@ object OrderFixture {
             index = "54890",
         ),
         status = DomainOrder.Status.NEW,
-        userId = ObjectId("123456789011121314151617")
+        userId = "123456789011121314151617"
     )
 
 
     val domainOrderWithProduct = DomainOrderWithProduct(
-        id = ObjectId("123456789011121314151617"),
+        id = "123456789011121314151617",
         items = listOf(
             DomainOrderWithProduct.DomainOrderItemWithProduct(
                 price = BigDecimal.ZERO,
@@ -113,7 +113,7 @@ object OrderFixture {
             index = "54890",
         ),
         status = "NEW",
-        userId = ObjectId("123456789011121314151617")
+        userId = "123456789011121314151617"
     )
 
 

@@ -123,7 +123,7 @@ class OrderRepositoryTest : AbstractMongoTestContainer {
         val productIds = listOf(product1.id.toString(), product2.id.toString())
 
         // WHEN
-        val products = orderRepository.fetchProducts(productIds)
+        val products = productRepository.findAllByIds(productIds)
 
         // THEN
         assertTrue(products.any { it.id == product1.id } && products.any { it.id == product2.id })

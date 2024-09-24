@@ -1,7 +1,6 @@
 package com.example.delivery.repository
 
 import com.example.delivery.mongo.MongoOrder
-import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
@@ -14,5 +13,5 @@ interface OrderRepository {
     fun updateOrderStatus(id: String, status: MongoOrder.Status): MongoOrder?
     fun deleteById(id: String)
     fun updateOrder(id: String, update: Update): MongoOrder?
-    fun fetchProducts(productIds: List<String>): List<MongoProduct>
+    fun findAllByUserId(userId: String): List<MongoOrder>
 }

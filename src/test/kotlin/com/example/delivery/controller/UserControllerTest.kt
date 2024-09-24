@@ -4,6 +4,7 @@ import com.example.delivery.UserFixture.createUserDTO
 import com.example.delivery.UserFixture.domainUser
 import com.example.delivery.UserFixture.updateUserDTO
 import com.example.delivery.UserFixture.updatedDomainUser
+import com.example.delivery.mapper.UserMapper.toDTO
 import com.example.delivery.service.UserService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -20,7 +21,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(UserController::class)
@@ -44,8 +44,9 @@ internal class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createUserDTO))
         )
-            .andExpect(jsonPath("$.fullName").value("FULL NAME"))
-            .andExpect(jsonPath("$.phone").value("+31243123"))
+            .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainUser.toDTO())))
     }
 
     @Test
@@ -57,8 +58,7 @@ internal class UserControllerTest {
         mockMvc.perform(get("/users/{id}", "1"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.fullName").value("FULL NAME"))
-            .andExpect(jsonPath("$.phone").value("+31243123"))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainUser.toDTO())))
     }
 
     @Test
@@ -74,8 +74,7 @@ internal class UserControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.fullName").value("new full name"))
-            .andExpect(jsonPath("$.phone").value("new phone"))
+            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainUser.toDTO())))
     }
 
     @Test

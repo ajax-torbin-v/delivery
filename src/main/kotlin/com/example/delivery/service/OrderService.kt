@@ -37,17 +37,17 @@ class OrderService(
         val user = userRepository.findById(createOrderDTO.userId)
             ?: throw NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")
 
-        val products = orderRepository.fetchProducts(createOrderDTO.items.map { it.productId }).map { it.toDomain() }
+        val products = productRepository.findAllByIds(createOrderDTO.items.map { it.productId }).map { it.toDomain() }
 
         if (products.size != createOrderDTO.items.size) {
             val missingProductId = createOrderDTO.items
                 .map { it.productId }
-                .first { itemId -> !products.map { it.id.toString() }.contains(itemId) }
+                .first { itemId -> !products.map { it.id }.contains(itemId) }
             throw NotFoundException("Product with id $missingProductId")
         }
 
         createOrderDTO.items.forEach { orderItem ->
-            val product = products.first { orderItem.productId == it.id.toString() }
+            val product = products.first { orderItem.productId == it.id }
             if (orderItem.amount > product.amountAvailable) {
                 throw ProductAmountException(
                     "Insufficient stock for product ${product.name}. " +
@@ -57,20 +57,10 @@ class OrderService(
             }
         }
 
-        productRepository.updateProductsAmount(
-            createOrderDTO.items.map {
-                MongoOrder.MongoOrderItem(
-                    ObjectId(it.productId),
-                    null,
-                    it.amount
-                )
-            }
-        )
-
         val mongoOrderItems = createOrderDTO.items.map { item ->
             MongoOrder.MongoOrderItem(
                 ObjectId(item.productId),
-                products.first { it.id.toString() == item.productId }.price,
+                products.first { it.id == item.productId }.price,
                 item.amount
             )
         }
@@ -99,5 +89,9 @@ class OrderService(
     fun updateOrderStatus(id: String, status: String): DomainOrder {
         return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))?.toDomain()
             ?: throw NotFoundException("Order with id $id doesn't exist")
+    }
+
+    fun getAllByUserId(id: String): List<DomainOrder> {
+        return orderRepository.findAllByUserId(id).map { it.toDomain() }
     }
 }

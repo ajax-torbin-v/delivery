@@ -1,14 +1,13 @@
 package com.example.delivery.domain
 
-import org.bson.types.ObjectId
 import java.math.BigDecimal
 
 data class DomainOrder(
-    val id: ObjectId,
+    val id: String,
     val items: List<DomainOrderItem>,
     val shipmentDetails: DomainShipmentDetails,
     val status: Status,
-    val userId: ObjectId,
+    val userId: String,
 ) {
     enum class Status {
         NEW,
@@ -28,6 +27,6 @@ data class DomainOrder(
     data class DomainOrderItem(
         val price: BigDecimal = BigDecimal.ZERO,
         val amount: Int = 0,
-        val productId: ObjectId = ObjectId(),
+        val productId: String = "",
     )
 }

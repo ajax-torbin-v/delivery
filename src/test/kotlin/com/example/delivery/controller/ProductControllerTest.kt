@@ -2,9 +2,9 @@ package com.example.delivery.controller
 
 import com.example.delivery.ProductFixture.createProductDTO
 import com.example.delivery.ProductFixture.domainProduct
-import com.example.delivery.ProductFixture.productDTO
 import com.example.delivery.ProductFixture.updateProductDTO
 import com.example.delivery.ProductFixture.updatedDomainProduct
+import com.example.delivery.mapper.ProductMapper.toDTO
 import com.example.delivery.service.ProductService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.mockito.Mockito
@@ -20,9 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.math.BigDecimal
 import kotlin.test.Test
 
 @WebMvcTest(ProductController::class)
@@ -44,10 +42,7 @@ internal class ProductControllerTest {
         mockMvc.perform(get("/products/{id}", "123"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.name").value(productDTO.name))
-            .andExpect(jsonPath("$.price").value(productDTO.price))
-            .andExpect(jsonPath("$.amount").value(productDTO.amount))
-            .andExpect(jsonPath("$.measurement").value(productDTO.measurement))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainProduct.toDTO())))
     }
 
     @Test
@@ -62,6 +57,8 @@ internal class ProductControllerTest {
                 .content(objectMapper.writeValueAsString(createProductDTO))
         )
             .andExpect(status().isCreated)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(objectMapper.writeValueAsString(domainProduct.toDTO())))
     }
 
     @Test
@@ -77,10 +74,7 @@ internal class ProductControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.name").value("Coca-cola"))
-            .andExpect(jsonPath("$.price").value(BigDecimal.TEN))
-            .andExpect(jsonPath("$.amount").value(1000))
-            .andExpect(jsonPath("$.measurement").value("0.5L"))
+            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainProduct.toDTO())))
     }
 
     @Test

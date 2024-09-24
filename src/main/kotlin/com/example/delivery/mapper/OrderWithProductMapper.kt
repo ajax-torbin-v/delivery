@@ -13,11 +13,11 @@ import java.math.BigDecimal
 
 object OrderWithProductMapper {
     fun MongoOrderWithProduct.toDomain(): DomainOrderWithProduct = DomainOrderWithProduct(
-        id!!,
+        id.toString(),
         items = items?.map { it.toDomain() } ?: emptyList(),
         shipmentDetails = shipmentDetails?.toDomain() ?: DomainOrder.DomainShipmentDetails(),
         status = status?.name ?: "UNKNOWN",
-        userId = userId!!,
+        userId = userId.toString(),
     )
 
     fun MongoOrderWithProduct.MongoOrderItemWithProduct.toDomain(): DomainOrderWithProduct.DomainOrderItemWithProduct =
@@ -28,11 +28,11 @@ object OrderWithProductMapper {
         )
 
     fun DomainOrderWithProduct.toDTO(): OrderWithProductDTO = OrderWithProductDTO(
-        id = id.toString(),
+        id = id,
         items = items.map { it.toDTO() },
         shipmentDetails = shipmentDetails.toDTO(),
         status = status,
-        userId = userId.toHexString()
+        userId = userId
     )
 
     fun DomainOrderWithProduct.DomainOrderItemWithProduct.toDTO() = OrderItemWithProductDTO(
