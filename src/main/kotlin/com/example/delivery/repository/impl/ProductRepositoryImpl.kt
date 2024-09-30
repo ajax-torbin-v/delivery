@@ -5,7 +5,7 @@ import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.BulkOperations
 import org.springframework.data.mongodb.core.FindAndModifyOptions
-import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findAndRemove
 import org.springframework.data.mongodb.core.findById
@@ -14,15 +14,17 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Repository
-internal class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : ProductRepository {
-    override fun existsById(id: String): Boolean {
+internal class ProductRepositoryImpl(val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
+    override fun existsById(id: String): Mono<Boolean> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists(query, MongoProduct::class.java)
     }
 
-    override fun update(id: String, update: Update): MongoProduct? {
+    override fun update(id: String, update: Update): Mono<MongoProduct> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.findAndModify(
             query,
@@ -32,7 +34,7 @@ internal class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : Product
         )
     }
 
-    override fun findAllByIds(productIds: List<String>): List<MongoProduct> {
+    override fun findAllByIds(productIds: List<String>): Flux<MongoProduct> {
         val query = Query(Criteria.where("_id").`in`(productIds))
         return mongoTemplate.find<MongoProduct>(query)
     }
@@ -48,11 +50,11 @@ internal class ProductRepositoryImpl(val mongoTemplate: MongoTemplate) : Product
         bulkOperations.execute()
     }
 
-    override fun findById(id: String): MongoProduct? {
+    override fun findById(id: String): Mono<MongoProduct> {
         return mongoTemplate.findById<MongoProduct>(id)
     }
 
-    override fun save(product: MongoProduct): MongoProduct {
+    override fun save(product: MongoProduct): Mono<MongoProduct> {
         return mongoTemplate.save(product)
     }
 

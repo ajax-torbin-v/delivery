@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/orders")
@@ -27,30 +29,30 @@ class OrderController(private val orderService: OrderService) {
 
     @LogInvoke
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): OrderWithProductDTO {
-        return orderService.getById(id).toDTO()
+    fun findById(@PathVariable id: String): Mono<OrderWithProductDTO> {
+        return orderService.getById(id).map { it.toDTO() }
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    fun add(@RequestBody createOrderDTO: CreateOrderDTO): OrderDTO {
-        return orderService.add(createOrderDTO).toDTO()
+    fun add(@RequestBody createOrderDTO: CreateOrderDTO): Mono<OrderDTO> {
+        return orderService.add(createOrderDTO).map { it.toDTO() }
     }
 
     @PutMapping("/{id}")
     fun update(
         @PathVariable id: String,
         @RequestBody updateOrderDTO: UpdateOrderDTO,
-    ): OrderDTO {
-        return orderService.updateOrder(id, updateOrderDTO).toDTO()
+    ): Mono<OrderDTO> {
+        return orderService.updateOrder(id, updateOrderDTO).map { it.toDTO() }
     }
 
     @PatchMapping("/{id}")
     fun updateStatus(
         @PathVariable id: String,
         @RequestParam status: String,
-    ): OrderDTO {
-        return orderService.updateOrderStatus(id, status).toDTO()
+    ): Mono<OrderDTO> {
+        return orderService.updateOrderStatus(id, status).map { it.toDTO() }
     }
 
     @DeleteMapping("/{id}")
@@ -60,7 +62,7 @@ class OrderController(private val orderService: OrderService) {
     }
 
     @GetMapping("/user/{id}")
-    fun findAllByUserId(@PathVariable id: String): List<OrderDTO> {
+    fun findAllByUserId(@PathVariable id: String): Flux<OrderDTO> {
         return orderService.getAllByUserId(id).map { it.toDTO() }
     }
 }

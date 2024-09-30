@@ -11,87 +11,92 @@ import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.OrderMapper.toMongoModel
 import com.example.delivery.mapper.OrderMapper.toUpdate
 import com.example.delivery.mapper.OrderWithProductMapper.toDomain
-import com.example.delivery.mapper.ProductMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
+    private val productService: ProductService,
 ) {
 
     @LogInvoke
-    fun getById(id: String): DomainOrderWithProduct {
-        return orderRepository.findById(id)?.toDomain()
-            ?: throw NotFoundException("Order with id $id doesn't exists")
+    fun getById(id: String): Mono<DomainOrderWithProduct> {
+        return orderRepository.findById(id)
+            .map { it.toDomain() }
+            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
     }
 
     @SuppressWarnings("ThrowsCount")
-    fun add(createOrderDTO: CreateOrderDTO): DomainOrder {
-        val user = userRepository.findById(createOrderDTO.userId)
-            ?: throw NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")
+    fun add(createOrderDTO: CreateOrderDTO): Mono<DomainOrder> {
+        return userRepository.findById(createOrderDTO.userId)
+            .switchIfEmpty(Mono.error(NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")))
+            .flatMap { user ->
+                val requestedProductsIds = createOrderDTO.items.map { it.productId }.toMutableList()
 
-        val products = productRepository.findAllByIds(createOrderDTO.items.map { it.productId }).map { it.toDomain() }
-
-        if (products.size != createOrderDTO.items.size) {
-            val missingProductId = createOrderDTO.items
-                .map { it.productId }
-                .first { itemId -> !products.map { it.id }.contains(itemId) }
-            throw NotFoundException("Product with id $missingProductId")
-        }
-
-        createOrderDTO.items.forEach { orderItem ->
-            val product = products.first { orderItem.productId == it.id }
-            if (orderItem.amount > product.amountAvailable) {
-                throw ProductAmountException(
-                    "Insufficient stock for product ${product.name}. " +
-                        "Available: ${product.amountAvailable}, " +
-                        "Requested: ${orderItem.amount}"
-                )
+                Flux.fromIterable(requestedProductsIds)
+                    .concatMap { productId ->
+                        productService.getById(productId)
+                    }.concatMap { product ->
+                        val orderItem = createOrderDTO.items.first { it.productId == product.id }
+                        if (orderItem.amount > product.amountAvailable) {
+                            return@concatMap Flux.error(
+                                ProductAmountException(
+                                    "Insufficient stock for product ${product.name}. " +
+                                        "Available: ${product.amountAvailable}, " +
+                                        "Requested: ${orderItem.amount}"
+                                )
+                            )
+                        }
+                        return@concatMap Flux.just(orderItem to product.price)
+                    }.concatMap { (orderItem, price) ->
+                        Flux.just(
+                            MongoOrder.MongoOrderItem(
+                                ObjectId(orderItem.productId),
+                                price,
+                                orderItem.amount
+                            )
+                        )
+                    }
+                    .collectList()
+                    .flatMap { items ->
+                        productRepository.updateProductsAmount(items)
+                        val order = MongoOrder(
+                            items = items,
+                            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
+                            status = MongoOrder.Status.NEW,
+                            userId = user.id
+                        )
+                        orderRepository.save(order).map { it.toDomain() }
+                    }
             }
-        }
-
-        val mongoOrderItems = createOrderDTO.items.map { item ->
-            MongoOrder.MongoOrderItem(
-                ObjectId(item.productId),
-                products.first { it.id == item.productId }.price,
-                item.amount
-            )
-        }
-
-        productRepository.updateProductsAmount(mongoOrderItems)
-
-        val order = MongoOrder(
-            items = mongoOrderItems,
-            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
-            status = MongoOrder.Status.NEW,
-            userId = user.id
-        )
-
-        return orderRepository.save(order).toDomain()
     }
 
     fun deleteById(id: String) {
         orderRepository.deleteById(id)
     }
 
-    fun updateOrder(id: String, updateOrderDTO: UpdateOrderDTO): DomainOrder {
-        return orderRepository.updateOrder(id, updateOrderDTO.toUpdate())?.toDomain()
-            ?: throw NotFoundException("Order with id $id doesn't exist")
+    fun updateOrder(id: String, updateOrderDTO: UpdateOrderDTO): Mono<DomainOrder> {
+        return orderRepository.updateOrder(id, updateOrderDTO.toUpdate())
+            .map { it.toDomain() }
+            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
     }
 
-    fun updateOrderStatus(id: String, status: String): DomainOrder {
-        return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))?.toDomain()
-            ?: throw NotFoundException("Order with id $id doesn't exist")
+    fun updateOrderStatus(id: String, status: String): Mono<DomainOrder> {
+        return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))
+            .map { it.toDomain() }
+            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
     }
 
-    fun getAllByUserId(id: String): List<DomainOrder> {
+    fun getAllByUserId(id: String): Flux<DomainOrder> {
         return orderRepository.findAllByUserId(id).map { it.toDomain() }
     }
 }
