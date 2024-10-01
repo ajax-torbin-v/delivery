@@ -64,7 +64,7 @@ internal class OrderRepositoryImpl(var mongoTemplate: ReactiveMongoTemplate) : O
             MongoOrder::class.java,
             MongoOrderWithProduct::class.java
         )
-        return results.single()
+        return results.singleOrEmpty()
     }
 
     override fun save(order: MongoOrder): Mono<MongoOrder> {

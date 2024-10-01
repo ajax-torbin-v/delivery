@@ -2,6 +2,7 @@ package com.example.delivery.service
 
 import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.domain.DomainOrder
+import com.example.delivery.domain.DomainProduct
 import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
@@ -11,7 +12,10 @@ import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.OrderMapper.toMongoModel
 import com.example.delivery.mapper.OrderMapper.toUpdate
 import com.example.delivery.mapper.OrderWithProductMapper.toDomain
+import com.example.delivery.mapper.ProductMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
+import com.example.delivery.mongo.MongoProduct
+import com.example.delivery.mongo.MongoUser
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
@@ -25,7 +29,6 @@ class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
-    private val productService: ProductService,
 ) {
 
     @LogInvoke
@@ -40,43 +43,18 @@ class OrderService(
         return userRepository.findById(createOrderDTO.userId)
             .switchIfEmpty(Mono.error(NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")))
             .flatMap { user ->
-                val requestedProductsIds = createOrderDTO.items.map { it.productId }.toMutableList()
-
-                Flux.fromIterable(requestedProductsIds)
-                    .concatMap { productId ->
-                        productService.getById(productId)
-                    }.concatMap { product ->
-                        val orderItem = createOrderDTO.items.first { it.productId == product.id }
-                        if (orderItem.amount > product.amountAvailable) {
-                            return@concatMap Flux.error(
-                                ProductAmountException(
-                                    "Insufficient stock for product ${product.name}. " +
-                                        "Available: ${product.amountAvailable}, " +
-                                        "Requested: ${orderItem.amount}"
-                                )
-                            )
-                        }
-                        return@concatMap Flux.just(orderItem to product.price)
-                    }.concatMap { (orderItem, price) ->
-                        Flux.just(
-                            MongoOrder.MongoOrderItem(
-                                ObjectId(orderItem.productId),
-                                price,
-                                orderItem.amount
-                            )
-                        )
-                    }
+                val requestedProductsIds = createOrderDTO.items.map { it.productId }
+                productRepository.findAllByIds(requestedProductsIds)
                     .collectList()
-                    .flatMap { items ->
-                        productRepository.updateProductsAmount(items)
-                        val order = MongoOrder(
-                            items = items,
-                            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
-                            status = MongoOrder.Status.NEW,
-                            userId = user.id
-                        )
-                        orderRepository.save(order).map { it.toDomain() }
+                    .flatMap { productsList ->
+                        checkProductAvailability(productsList, createOrderDTO, requestedProductsIds)
                     }
+                    .flatMap { domainProducts ->
+                        Flux.fromIterable(domainProducts)
+                            .flatMap { product -> checkProductAmount(createOrderDTO, product) }
+                            .collectList()
+                    }
+                    .flatMap { items -> saveOrder(items, createOrderDTO, user) }
             }
     }
 
@@ -98,5 +76,63 @@ class OrderService(
 
     fun getAllByUserId(id: String): Flux<DomainOrder> {
         return orderRepository.findAllByUserId(id).map { it.toDomain() }
+    }
+
+    private fun checkProductAvailability(
+        productList: List<MongoProduct>,
+        createOrderDTO: CreateOrderDTO,
+        requestedProductsIds: List<String>,
+    ): Mono<List<DomainProduct>> {
+        return if (productList.size != createOrderDTO.items.size) {
+            val productIds = productList.map { it.id.toString() }
+            val notExistingProductId = requestedProductsIds.firstOrNull { !productIds.contains(it) }
+
+            if (notExistingProductId != null) {
+                Mono.error(NotFoundException("Product with id $notExistingProductId doesn't exist"))
+            } else {
+                Mono.just(productList.map { it.toDomain() })
+            }
+        } else {
+            Mono.just(productList.map { it.toDomain() })
+        }
+    }
+
+    private fun checkProductAmount(
+        createOrderDTO: CreateOrderDTO,
+        product: DomainProduct,
+    ): Mono<MongoOrder.MongoOrderItem> {
+        val orderItem = createOrderDTO.items.first { it.productId == product.id }
+
+        if (orderItem.amount > product.amountAvailable) {
+            Mono.error<ProductAmountException>(
+                ProductAmountException(
+                    "Insufficient stock for product ${product.name}. " +
+                        "Available: ${product.amountAvailable}. " +
+                        "Requested: ${orderItem.amount}"
+                )
+            )
+        }
+        return Mono.just(
+            MongoOrder.MongoOrderItem(
+                ObjectId(orderItem.productId),
+                product.price,
+                orderItem.amount
+            )
+        )
+    }
+
+    private fun saveOrder(
+        items: MutableList<MongoOrder.MongoOrderItem>,
+        createOrderDTO: CreateOrderDTO,
+        user: MongoUser,
+    ): Mono<DomainOrder> {
+        productRepository.updateProductsAmount(items)
+        val order = MongoOrder(
+            items = items,
+            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
+            status = MongoOrder.Status.NEW,
+            userId = user.id
+        )
+        return orderRepository.save(order).map { it.toDomain() }
     }
 }

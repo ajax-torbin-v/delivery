@@ -2,10 +2,8 @@ package com.example.delivery.repository
 
 import com.example.delivery.mongo.MongoUser
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 
-@Repository
 interface UserRepository {
     fun existsById(id: String): Mono<Boolean>
     fun save(user: MongoUser): Mono<MongoUser>
