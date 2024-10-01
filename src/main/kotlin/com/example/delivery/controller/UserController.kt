@@ -39,7 +39,7 @@ class UserController(private val userService: UserService) {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteById(@PathVariable id: String) {
-        userService.deleteById(id)
+    fun deleteById(@PathVariable id: String): Mono<Void> {
+        return userService.deleteById(id)
     }
 }

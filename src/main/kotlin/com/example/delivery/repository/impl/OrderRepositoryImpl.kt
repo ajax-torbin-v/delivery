@@ -82,9 +82,9 @@ internal class OrderRepositoryImpl(var mongoTemplate: ReactiveMongoTemplate) : O
         )
     }
 
-    override fun deleteById(id: String) {
+    override fun deleteById(id: String): Mono<Void> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.findAndRemove(query, MongoOrder::class.java)
+        return mongoTemplate.findAndRemove(query, MongoOrder::class.java).then()
     }
 
     override fun updateOrder(id: String, update: Update): Mono<MongoOrder> {

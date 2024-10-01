@@ -30,7 +30,7 @@ class UserService(
             .switchIfEmpty(Mono.error(NotFoundException("User with id $id doesn't exists")))
     }
 
-    fun deleteById(id: String) {
-        userRepository.deleteById(id)
+    fun deleteById(id: String): Mono<Void> {
+        return userRepository.deleteById(id)
     }
 }

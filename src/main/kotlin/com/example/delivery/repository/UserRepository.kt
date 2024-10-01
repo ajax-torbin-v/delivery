@@ -8,6 +8,6 @@ interface UserRepository {
     fun existsById(id: String): Mono<Boolean>
     fun save(user: MongoUser): Mono<MongoUser>
     fun findById(id: String): Mono<MongoUser>
-    fun deleteById(id: String)
+    fun deleteById(id: String): Mono<Void>
     fun update(id: String, update: Update): Mono<MongoUser>
 }
