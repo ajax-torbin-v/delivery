@@ -11,126 +11,214 @@ import com.example.delivery.OrderFixture.updatedDomainOrder
 import com.example.delivery.OrderFixture.updatedOrder
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.UserFixture.user
+import com.example.delivery.dto.request.CreateOrderDTO
+import com.example.delivery.dto.request.CreateOrderItemDTO
+import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.exception.ProductAmountException
+import com.example.delivery.mapper.OrderMapper.toDomain
+import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import kotlin.test.assertEquals
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class OrderServiceTest {
-    @Mock
+    @MockK
     private lateinit var orderRepository: OrderRepository
 
     @SuppressWarnings("UnusedPrivateProperty")
-    @Mock
+    @MockK
     private lateinit var productRepository: ProductRepository
 
-    @Mock
+    @MockK
     private lateinit var userRepository: UserRepository
 
-    @InjectMocks
+    @InjectMockKs
     private lateinit var orderService: OrderService
 
     @Test
     fun `should return order when order exists`() {
         // GIVEN
-        Mockito.`when`(orderRepository.findById("1")).thenReturn(mongoOrderWithProduct)
+        every { orderRepository.findById("1") } returns mongoOrderWithProduct.toMono()
 
-        // WHEN // THEN
-        assertEquals(orderService.getById("1"), domainOrderWithProduct)
+        // WHEN
+        val actual = orderService.getById("1")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainOrderWithProduct)
+            .verifyComplete()
     }
 
     @Test
     fun `should throw exception when order doesn't exists while find`() {
         // GIVEN
-        Mockito.`when`(orderRepository.findById("1")).thenReturn(null)
+        every { orderRepository.findById("1") } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { orderService.getById("1") }
+        // WHEN
+        val actual = orderService.getById("1")
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
     }
 
     @Test
     fun `should add order with proper dto`() {
         // GIVEN
-        Mockito.`when`(orderRepository.save(any())).thenReturn(order)
-        Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
-            .thenReturn(listOf(product))
+        every { orderRepository.save(any()) } returns Mono.just(order)
+        every { userRepository.findById("123456789011121314151617") } returns user.toMono()
+        every { productRepository.findAllByIds(listOf("123456789011121314151617")) } returns Flux.just(product)
+        every { productRepository.updateProductsAmount(any()) } returns Mono.empty()
 
         // WHEN
         val actual = orderService.add(createOrderDTO)
 
         // THEN
-        verify(orderRepository, times(1)).save(any())
-        assertEquals(domainOrder, actual)
+        actual
+            .test()
+            .expectNext(domainOrder)
+            .verifyComplete()
+
+        verify(exactly = 1) { orderRepository.save(any()) }
     }
 
     @Test
     fun `should throw exception when product doesn't exist`() {
         // GIVEN
-        Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
-            .thenReturn(emptyList())
+        val createOrderDTO = CreateOrderDTO(
+            items = listOf(
+                CreateOrderItemDTO("123456789011121314151617".reversed(), 0),
+                CreateOrderItemDTO("123456789011121314151617", 0)
+            ),
+            shipmentDetails = ShipmentDetailsDTO(
+                city = "city",
+                street = "street",
+                building = "3a",
+                index = "54890",
+            ),
+            userId = "123456789011121314151617"
+        )
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { orderService.add(createOrderDTO) }
+        val productsIdsList = listOf("123456789011121314151617".reversed(), "123456789011121314151617")
+        every { userRepository.findById("123456789011121314151617") } returns user.toMono()
+        every { productRepository.findAllByIds(productsIdsList) } returns Flux.just(product)
+
+        // WHEN
+        val actual = orderService.add(createOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
+            .verify()
     }
 
     @Test
     fun `should throw exception when not sufficient product`() {
         // GIVEN
-        Mockito.`when`(userRepository.findById("123456789011121314151617")).thenReturn(user)
-        Mockito.`when`(productRepository.findAllByIds(listOf("123456789011121314151617")))
-            .thenReturn(listOf(product.copy(amountAvailable = -1)))
+        every { userRepository.findById("123456789011121314151617") } returns user.toMono()
+        every { productRepository.findAllByIds(listOf("123456789011121314151617")) }
+            .returns(Flux.just(product.copy(amountAvailable = -1)))
 
-        // WHEN // THEN
-        assertThrows<ProductAmountException> { orderService.add(createOrderDTO) }
+        // WHEN
+        val actual = orderService.add(createOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(ProductAmountException::class.java)
+            .verify()
     }
 
     @Test
     fun `should update order with proper dto when product exists`() {
         // GIVEN
-        Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(updatedOrder)
+        every { orderRepository.updateOrder("1", orderUpdateObject) } returns updatedOrder.toMono()
 
         // WHEN
         val actual = orderService.updateOrder("1", updateOrderDTO)
 
         // THEN
-        verify(orderRepository, times(1)).updateOrder("1", orderUpdateObject)
-        assertEquals(updatedDomainOrder, actual)
+        actual
+            .test()
+            .expectNext(updatedDomainOrder)
+            .verifyComplete()
+        verify(exactly = 1) { orderRepository.updateOrder("1", orderUpdateObject) }
     }
 
     @Test
     fun `should throw exception if order not exists on update`() {
         // GIVEN
-        Mockito.`when`(orderRepository.updateOrder("1", orderUpdateObject)).thenReturn(null)
+        every { orderRepository.updateOrder("1", orderUpdateObject) } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { orderService.updateOrder("1", updateOrderDTO) }
+        // WHEN
+        val actual = orderService.updateOrder("1", updateOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
+            .verify()
     }
 
     @Test
     fun `should delete order`() {
         // GIVEN
-        doNothing().`when`(orderRepository).deleteById("1")
+        every { orderRepository.deleteById("1") } returns Mono.empty()
 
         // WHEN
-        orderService.deleteById("1")
+        val actual = orderService.deleteById("1")
 
         // THEN
-        verify(orderRepository, times(1)).deleteById("1")
+        actual
+            .test()
+            .verifyComplete()
+        verify(exactly = 1) { orderRepository.deleteById("1") }
+    }
+
+    @Test
+    fun `should update order's status`() {
+        // GIVEN
+        every { orderRepository.updateOrderStatus("1", MongoOrder.Status.COMPLETED) }
+            .returns(order.copy(status = MongoOrder.Status.COMPLETED).toMono())
+
+        // WHEN
+        val actual = orderService.updateOrderStatus("1", "COMPLETED")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(order.copy(status = MongoOrder.Status.COMPLETED).toDomain())
+            .verifyComplete()
+    }
+
+    @Test
+    fun `should return all user's orders by user id`() {
+        // GIVEN
+        every { orderRepository.findAllByUserId("1") } returns Flux.just(order)
+
+        // WHEN
+        val actual = orderService.getAllByUserId("1")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainOrder)
+            .verifyComplete()
     }
 }

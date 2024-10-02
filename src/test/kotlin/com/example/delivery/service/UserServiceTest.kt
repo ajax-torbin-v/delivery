@@ -8,91 +8,116 @@ import com.example.delivery.UserFixture.updatedUser
 import com.example.delivery.UserFixture.user
 import com.example.delivery.UserFixture.userUpdateObject
 import com.example.delivery.exception.NotFoundException
-import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.UserRepository
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import kotlin.test.assertEquals
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class UserServiceTest {
-    @Mock
+    @MockK
     private lateinit var userRepository: UserRepository
 
-    @SuppressWarnings("UnusedPrivateProperty")
-    @Mock
-    private lateinit var orderRepository: OrderRepository
-
-    @InjectMocks
+    @InjectMockKs
     private lateinit var userService: UserService
 
     @Test
     fun `should add user with proper DTO`() {
         // GIVEN
         val userWithoutId = user.copy(id = null)
-        Mockito.`when`(userRepository.save(any())).thenReturn(user)
+        every { userRepository.save(any()) } returns user.toMono()
 
         // WHEN
-        userService.add(createUserDTO)
+        val actual = userService.add(createUserDTO)
 
         // THEN
-        verify(userRepository, times(1)).save(userWithoutId)
+        actual
+            .test()
+            .expectNext(domainUser)
+            .expectComplete()
+
+        verify(exactly = 1) { userRepository.save(userWithoutId) }
     }
 
     @Test
     fun `should return user when user exists`() {
         // GIVEN
-        Mockito.`when`(userRepository.findById("2")).thenReturn(user)
+        every { (userRepository.findById("2")) } returns user.toMono()
 
-        // WHEN // THEN
-        assertEquals(domainUser, userService.getById("2"))
+        // WHEN
+        val actual = userService.getById("2")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainUser)
+            .verifyComplete()
     }
 
     @Test
     fun `should throw exception when user doesn't exists`() {
         // GIVEN
-        Mockito.`when`(userRepository.findById("3")).thenReturn(null)
+        every { userRepository.findById("3") } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { userService.getById("3") }
+        // WHEN
+        val actual = userService.getById("3")
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
     }
 
     @Test
     fun `should update user with proper dto when user exists`() {
         // GIVEN
-        Mockito.`when`(userRepository.update("1", userUpdateObject)).thenReturn(updatedUser)
+        every { userRepository.update("1", userUpdateObject) } returns Mono.just(updatedUser)
 
         // WHEN
         val actual = userService.update("1", updateUserDTO)
 
         // THEN
-        verify(userRepository, times(1)).update("1", userUpdateObject)
-        assertEquals(updatedDomainUser, actual)
+        actual
+            .test()
+            .expectNext(updatedDomainUser)
+
+        verify(exactly = 1) { userRepository.update("1", userUpdateObject) }
     }
 
     @Test
     fun `should throw exception when user doesn't exists on update`() {
         // GIVEN
-        Mockito.`when`(userRepository.update("1", userUpdateObject)).thenReturn(null)
+        every { userRepository.update("1", userUpdateObject) } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { userService.update("1", updateUserDTO) }
+        // WHEN
+        val actual = userService.update("1", updateUserDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
     }
 
     @Test
     fun `should delete is user exists`() {
-        // GIVEN // WHEN
-        userService.deleteById("8")
+        // GIVEN
+        every { userRepository.deleteById("8") } returns Mono.empty()
+
+        // WHEN
+        val actual = userService.deleteById("8")
 
         // THEN
-        verify(userRepository, times(1)).deleteById("8")
+        actual
+            .test()
+            .verifyComplete()
+
+        verify(exactly = 1) { userRepository.deleteById("8") }
     }
 }

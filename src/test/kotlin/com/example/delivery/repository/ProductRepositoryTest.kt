@@ -1,13 +1,16 @@
 package com.example.delivery.repository
 
 import com.example.delivery.ProductFixture.unsavedProduct
+import com.example.delivery.ProductFixture.updatedProduct
 import com.example.delivery.mongo.MongoOrder
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Update
+import reactor.kotlin.test.test
+import reactor.test.StepVerifier
 import java.math.BigDecimal
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
 class ProductRepositoryTest : AbstractMongoTestContainer {
     @Autowired
@@ -19,93 +22,131 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
         val actual = productRepository.save(unsavedProduct)
 
         // THEN
-        assertTrue(actual.id != null, "Id should not be null after save!")
+        actual
+            .test()
+            .assertNext { savedProduct ->
+                assertNotNull(savedProduct.id, "Id should be assigned by a db!")
+                assertEquals(unsavedProduct, savedProduct.copy(id = null))
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findById should return saved product`() {
         // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct)
+        val savedProduct = productRepository.save(unsavedProduct).block()
 
         // WHEN
-        val actual = productRepository.findById(savedProduct.id.toString())
+        val actual = productRepository.findById(savedProduct?.id.toString())
 
         // THEN
-        assertEquals(savedProduct, actual)
+        actual
+            .test()
+            .expectNext(savedProduct)
+            .verifyComplete()
     }
 
     @Test
     fun `existById should return if product exist`() {
         // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct)
+        val savedProduct = productRepository.save(unsavedProduct).block()
 
         // WHEN
-        val actual = productRepository.existsById(savedProduct.id.toString())
+        val actual = productRepository.existsById(savedProduct?.id.toString())
 
         // THEN
-        assertTrue(actual, "Product should exist!")
+        actual
+            .test()
+            .expectNext(true)
+            .verifyComplete()
     }
 
     @Test
     fun `deleteById should delete product by id`() {
         // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct)
+        val savedProduct = productRepository.save(unsavedProduct).block()
 
-        // WHEN
-        productRepository.deleteById(savedProduct.id.toString())
+        // WHEN //THEN
+        productRepository.deleteById(savedProduct?.id.toString())
+            .test()
+            .verifyComplete()
 
-        // THEN
-        assertTrue(!productRepository.existsById(savedProduct.id.toString()))
+        // AND THEN
+        productRepository.existsById(savedProduct?.id.toString())
+            .test()
+            .expectNext(false)
+            .verifyComplete()
     }
 
     @Test
     fun `update should update product`() {
         // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct)
+        val savedProduct = productRepository.save(unsavedProduct).block()
         val update = Update()
-            .set("name", "UpdatedName")
+            .set("name", "Coca-cola")
             .set("price", BigDecimal.valueOf(99.99))
             .set("amountAvailable", 999)
             .set("measurement", "99L")
 
         // WHEN
-        val actual = productRepository.update(
-            savedProduct.id.toString(),
-            update = update
-        )
+        val actual = productRepository.update(savedProduct?.id.toString(), update)
 
         // THEN
-        assertEquals(
-            savedProduct.copy(
-                savedProduct.id,
-                "UpdatedName",
-                BigDecimal.valueOf(99.99),
-                999,
-                "99L"
-            ),
-            actual
-        )
+        actual
+            .test()
+            .assertNext { product ->
+                assertEquals(
+                    updatedProduct.copy(id = savedProduct?.id),
+                    product
+                )
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `updateProductsAmount should update products`() {
         // GIVEN
-        val savedProduct1 = productRepository.save(unsavedProduct)
-        val savedProduct2 = productRepository.save(unsavedProduct)
-        val mongoOrderItem1 = MongoOrder.MongoOrderItem(savedProduct1.id, null, 1)
-        val mongoOrderItem2 = MongoOrder.MongoOrderItem(savedProduct2.id, null, 1)
+        val savedProduct1 = productRepository.save(unsavedProduct).block()
+        val savedProduct2 = productRepository.save(unsavedProduct).block()
+        val mongoOrderItem1 = MongoOrder.MongoOrderItem(savedProduct1?.id, null, 1)
+        val mongoOrderItem2 = MongoOrder.MongoOrderItem(savedProduct2?.id, null, 3)
 
         // WHEN
-        productRepository.updateProductsAmount(listOf(mongoOrderItem1, mongoOrderItem2))
+        val actual = productRepository.updateProductsAmount(listOf(mongoOrderItem1, mongoOrderItem2))
 
         // THEN
-        assertEquals(
-            savedProduct1.amountAvailable!! - 1,
-            productRepository.findById(savedProduct1.id.toString())?.amountAvailable
-        )
-        assertEquals(
-            savedProduct2.amountAvailable!! - 1,
-            productRepository.findById(savedProduct2.id.toString())?.amountAvailable
-        )
+        StepVerifier.create(actual)
+            .verifyComplete()
+
+        // AND THEN
+        productRepository.findById(savedProduct1?.id.toString())
+            .test()
+            .assertNext { product ->
+                assertEquals(savedProduct1?.amountAvailable!! - 1, product.amountAvailable)
+            }
+
+        productRepository.findById(savedProduct2?.id.toString())
+            .test()
+            .assertNext { product ->
+                assertEquals(savedProduct2?.amountAvailable!! - 3, product.amountAvailable)
+            }
+    }
+
+    @Test
+    fun `findAllByIds should return list of products by ids`() {
+        // GIVEN
+        val product1 = productRepository.save(unsavedProduct).block()
+        val product2 = productRepository.save(unsavedProduct).block()
+        val productIds = listOf(product1?.id.toString(), product2?.id.toString())
+
+        // WHEN
+        val actual = productRepository.findAllByIds(productIds)
+
+        // THEN
+        actual
+            .test()
+            .expectNextMatches { it.id == product1?.id }
+            .expectNextMatches { it.id == product2?.id }
+            .verifyComplete()
     }
 }

@@ -35,6 +35,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("io.mongock:mongock-springboot-v3:5.2.4")
     implementation("io.mongock:mongodb-springdata-v4-driver:5.2.4")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.3")
+    testImplementation("io.projectreactor:reactor-test:3.6.10")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -77,10 +79,6 @@ configure<DeltaCoverageConfiguration> {
         html = true
         markdown = true
     }
-}
-
-tasks.withType<Test> {
-    enabled = false // This will disable the test task
 }
 
 tasks.check {

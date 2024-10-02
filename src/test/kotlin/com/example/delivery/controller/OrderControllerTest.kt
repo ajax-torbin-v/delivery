@@ -9,112 +9,99 @@ import com.example.delivery.domain.DomainOrder
 import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderWithProductMapper.toDTO
 import com.example.delivery.service.OrderService
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.verify
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.junit.jupiter.api.extension.ExtendWith
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
-@WebMvcTest(OrderController::class)
+@ExtendWith(MockKExtension::class)
 internal class OrderControllerTest {
-    @MockBean
+    @MockK
     private lateinit var orderService: OrderService
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val objectMapper = jacksonObjectMapper()
+    @InjectMockKs
+    private lateinit var orderController: OrderController
 
     @Test
     fun `should add order and return status is created`() {
         // GIVEN
-        Mockito.`when`(orderService.add(any())).thenReturn(domainOrder)
+        every { orderService.add(createOrderDTO) } returns domainOrder.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(
-            post("/orders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createOrderDTO))
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(domainOrder.toDTO())))
+        // WHEN
+        val actual = orderController.add(createOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainOrder.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should return order when order exists`() {
         // GIVEN
-        Mockito.`when`(orderService.getById("1")).thenReturn(domainOrderWithProduct)
+        every { orderService.getById("1") } returns domainOrderWithProduct.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(get("/orders/{id}", "1"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(domainOrderWithProduct.toDTO())))
+        // WHEN
+        val actual = orderController.findById("1")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainOrderWithProduct.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should update order with proper dto`() {
         // GIVEN
-        Mockito.`when`(orderService.updateOrder("1", updateOrderDTO)).thenReturn(updatedDomainOrder)
+        every { orderService.updateOrder("1", updateOrderDTO) } returns updatedDomainOrder.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(
-            put("/orders/{id}", "1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateOrderDTO))
-        )
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainOrder.toDTO())))
+        // WHEN
+        val actual = orderController.update("1", updateOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectNext(updatedDomainOrder.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should update order's status`() {
         // GIVEN
-        Mockito.`when`(orderService.updateOrderStatus("1", "CANCELED"))
-            .thenReturn(domainOrder.copy(status = DomainOrder.Status.CANCELED))
+        val order = domainOrder.copy(status = DomainOrder.Status.CANCELED)
+        every { orderService.updateOrderStatus("1", "CANCELED") } returns order.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(
-            patch("/orders/{id}?status={status}", "1", "CANCELED")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateOrderDTO))
-        )
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                content().json(
-                    objectMapper.writeValueAsString(
-                        domainOrder.copy(status = DomainOrder.Status.CANCELED).toDTO()
-                    )
-                )
-            )
+        // WHEN
+        val actual = orderController.updateStatus("1", "CANCELED")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(order.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should delete order when order exists`() {
         // GIVEN
-        doNothing().`when`(orderService).deleteById("1")
+        every { (orderService).deleteById("1") } returns Mono.empty()
 
-        // WHEN // THEN
-        mockMvc.perform(delete("/orders/{id}", "1"))
-            .andExpect(status().isNoContent)
+        // WHEN
+        val actual = orderController.delete("1")
 
-        // AND THEN
-        verify(orderService).deleteById("1")
+        // THEN
+        actual
+            .test()
+            .verifyComplete()
+
+        verify(exactly = 1) { orderService.deleteById("1") }
     }
 }

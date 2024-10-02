@@ -66,13 +66,17 @@ object ProductFixture {
         .set("amountAvailable", 1000)
 
     val updatedProduct = product.copy(
-        price = BigDecimal.TEN,
-        amountAvailable = 1000
+        name = "Coca-cola",
+        price = BigDecimal.valueOf(99.99),
+        amountAvailable = 999,
+        measurement = "99L"
     )
 
     val updatedDomainProduct = domainProduct.copy(
-        price = BigDecimal.TEN,
-        amountAvailable = 1000
+        name = "Coca-cola",
+        price = BigDecimal.valueOf(99.99),
+        amountAvailable = 999,
+        measurement = "99L"
     )
 
     val updateProductDTO = UpdateProductDTO(

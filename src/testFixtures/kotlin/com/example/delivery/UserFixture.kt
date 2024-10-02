@@ -37,16 +37,16 @@ object UserFixture {
     )
 
     val userUpdateObject = Update()
-        .set("fullName", "new full name")
-        .set("phone", "new phone")
+        .set("fullName", "UpdatedName")
+        .set("phone", "+38-new-phone")
 
     val updatedDomainUser = domainUser.copy(fullName = "new full name", phone = "new phone")
 
-    val updatedUser = user.copy(fullName = "new full name", phone = "new phone")
+    val updatedUser = user.copy(fullName = "UpdatedName", phone = "+38-new-phone")
 
     val updateUserDTO = UpdateUserDTO(
-        fullName = "new full name",
-        phone = "new phone"
+        fullName = "UpdatedName",
+        phone = "+38-new-phone"
     )
 
 }

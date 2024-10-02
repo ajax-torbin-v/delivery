@@ -46,15 +46,18 @@ class OrderService(
                 val requestedProductsIds = createOrderDTO.items.map { it.productId }
                 productRepository.findAllByIds(requestedProductsIds)
                     .collectList()
-                    .flatMap { productsList ->
-                        checkProductAvailability(productsList, createOrderDTO, requestedProductsIds)
+                    .flatMapMany { productsList ->
+                        if (productsList.size == createOrderDTO.items.size) {
+                            Flux.fromIterable(productsList.map { it.toDomain() })
+                        } else {
+                            checkProductAvailability(productsList, requestedProductsIds)
+                        }
                     }
-                    .flatMap { domainProducts ->
-                        Flux.fromIterable(domainProducts)
-                            .flatMap { product -> checkProductAmount(createOrderDTO, product) }
-                            .collectList()
+                    .flatMap { product -> checkProductAmount(createOrderDTO, product) }
+                    .collectList()
+                    .flatMap { items ->
+                        saveOrder(items, createOrderDTO, user)
                     }
-                    .flatMap { items -> saveOrder(items, createOrderDTO, user) }
             }
     }
 
@@ -78,23 +81,10 @@ class OrderService(
         return orderRepository.findAllByUserId(id).map { it.toDomain() }
     }
 
-    private fun checkProductAvailability(
-        productList: List<MongoProduct>,
-        createOrderDTO: CreateOrderDTO,
-        requestedProductsIds: List<String>,
-    ): Mono<List<DomainProduct>> {
-        return if (productList.size != createOrderDTO.items.size) {
-            val productIds = productList.map { it.id.toString() }
-            val notExistingProductId = requestedProductsIds.firstOrNull { !productIds.contains(it) }
-
-            if (notExistingProductId != null) {
-                Mono.error(NotFoundException("Product with id $notExistingProductId doesn't exist"))
-            } else {
-                Mono.just(productList.map { it.toDomain() })
-            }
-        } else {
-            Mono.just(productList.map { it.toDomain() })
-        }
+    private fun checkProductAvailability(products: List<MongoProduct>, itemsIds: List<String>): Flux<DomainProduct> {
+        val productIds = products.map { it.id.toString() }
+        val missingProductId = itemsIds.first { it !in productIds }
+        return Flux.error(NotFoundException("Product with id $missingProductId doesn't exist"))
     }
 
     private fun checkProductAmount(
@@ -102,9 +92,8 @@ class OrderService(
         product: DomainProduct,
     ): Mono<MongoOrder.MongoOrderItem> {
         val orderItem = createOrderDTO.items.first { it.productId == product.id }
-
         if (orderItem.amount > product.amountAvailable) {
-            Mono.error<ProductAmountException>(
+            return Mono.error(
                 ProductAmountException(
                     "Insufficient stock for product ${product.name}. " +
                         "Available: ${product.amountAvailable}. " +
@@ -126,14 +115,13 @@ class OrderService(
         createOrderDTO: CreateOrderDTO,
         user: MongoUser,
     ): Mono<DomainOrder> {
-        return productRepository.updateProductsAmount(items).flatMap {
-            val order = MongoOrder(
-                items = items,
-                shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
-                status = MongoOrder.Status.NEW,
-                userId = user.id
-            )
-            orderRepository.save(order).map { it.toDomain() }
-        }
+        productRepository.updateProductsAmount(items)
+        val order = MongoOrder(
+            items = items,
+            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
+            status = MongoOrder.Status.NEW,
+            userId = user.id
+        )
+        return orderRepository.save(order).map { it.toDomain() }
     }
 }

@@ -68,7 +68,7 @@ internal class OrderRepositoryImpl(var mongoTemplate: ReactiveMongoTemplate) : O
     }
 
     override fun save(order: MongoOrder): Mono<MongoOrder> {
-        return mongoTemplate.save(order)
+        return mongoTemplate.save(order, MongoOrder.COLLECTION_NAME)
     }
 
     override fun updateOrderStatus(id: String, status: MongoOrder.Status): Mono<MongoOrder> {
