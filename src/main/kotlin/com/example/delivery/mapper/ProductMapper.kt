@@ -38,6 +38,7 @@ object ProductMapper {
         name?.let { update.set(MongoProduct::name.name, it) }
         price?.let { update.set(MongoProduct::price.name, it) }
         amountAvailable?.let { update.set(MongoProduct::amountAvailable.name, it) }
+        measurement?.let { update.set(MongoProduct::measurement.name, it) }
         return update
     }
 }

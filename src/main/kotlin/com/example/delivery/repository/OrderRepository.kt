@@ -11,7 +11,7 @@ interface OrderRepository {
     fun findById(id: String): Mono<MongoOrderWithProduct>
     fun save(order: MongoOrder): Mono<MongoOrder>
     fun updateOrderStatus(id: String, status: MongoOrder.Status): Mono<MongoOrder>
-    fun deleteById(id: String): Mono<Void>
+    fun deleteById(id: String): Mono<Unit>
     fun updateOrder(id: String, update: Update): Mono<MongoOrder>
     fun findAllByUserId(userId: String): Flux<MongoOrder>
 }

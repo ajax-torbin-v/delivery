@@ -32,9 +32,9 @@ internal class UserRepositoryImpl(
         return mongoTemplate.findById<MongoUser>(id)
     }
 
-    override fun deleteById(id: String): Mono<Void> {
+    override fun deleteById(id: String): Mono<Unit> {
         val query = Query().addCriteria(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.findAndRemove(query, MongoUser::class.java).then()
+        return mongoTemplate.findAndRemove(query, MongoUser::class.java).thenReturn(Unit)
     }
 
     override fun update(id: String, update: Update): Mono<MongoUser> {

@@ -39,14 +39,14 @@ internal class ProductRepositoryImpl(val mongoTemplate: ReactiveMongoTemplate) :
         return mongoTemplate.find<MongoProduct>(query)
     }
 
-    override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>): Mono<Void> {
+    override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>): Mono<Unit> {
         val bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, MongoProduct::class.java)
         products.forEach { (productId, _, requestedAmount) ->
             val query = Query(Criteria.where("_id").isEqualTo(productId))
             val update = Update().inc("amountAvailable", -requestedAmount!!)
             bulkOperations.updateOne(query, update)
         }
-        return bulkOperations.execute().then()
+        return bulkOperations.execute().thenReturn(Unit)
     }
 
     override fun findById(id: String): Mono<MongoProduct> {
@@ -57,8 +57,8 @@ internal class ProductRepositoryImpl(val mongoTemplate: ReactiveMongoTemplate) :
         return mongoTemplate.save(product)
     }
 
-    override fun deleteById(id: String): Mono<Void> {
+    override fun deleteById(id: String): Mono<Unit> {
         val query = Query(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.findAndRemove<MongoProduct>(query).then()
+        return mongoTemplate.findAndRemove<MongoProduct>(query).thenReturn(Unit)
     }
 }

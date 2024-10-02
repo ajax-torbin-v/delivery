@@ -1,14 +1,13 @@
 package com.example.delivery.repository
 
 import com.example.delivery.ProductFixture.unsavedProduct
+import com.example.delivery.ProductFixture.updateProductObject
 import com.example.delivery.ProductFixture.updatedProduct
 import com.example.delivery.mongo.MongoOrder
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.mongodb.core.query.Update
 import reactor.kotlin.test.test
 import reactor.test.StepVerifier
-import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -69,6 +68,7 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
         // WHEN //THEN
         productRepository.deleteById(savedProduct?.id.toString())
             .test()
+            .expectNext(Unit)
             .verifyComplete()
 
         // AND THEN
@@ -82,14 +82,9 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
     fun `update should update product`() {
         // GIVEN
         val savedProduct = productRepository.save(unsavedProduct).block()
-        val update = Update()
-            .set("name", "Coca-cola")
-            .set("price", BigDecimal.valueOf(99.99))
-            .set("amountAvailable", 999)
-            .set("measurement", "99L")
 
         // WHEN
-        val actual = productRepository.update(savedProduct?.id.toString(), update)
+        val actual = productRepository.update(savedProduct?.id.toString(), updateProductObject)
 
         // THEN
         actual
@@ -116,6 +111,7 @@ class ProductRepositoryTest : AbstractMongoTestContainer {
 
         // THEN
         StepVerifier.create(actual)
+            .expectNext(Unit)
             .verifyComplete()
 
         // AND THEN

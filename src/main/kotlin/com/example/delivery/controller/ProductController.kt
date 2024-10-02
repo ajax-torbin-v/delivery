@@ -40,7 +40,7 @@ class ProductController(private val productService: ProductService) {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: String): Mono<Void> {
+    fun delete(@PathVariable id: String): Mono<Unit> {
         return productService.deleteById(id)
     }
 }

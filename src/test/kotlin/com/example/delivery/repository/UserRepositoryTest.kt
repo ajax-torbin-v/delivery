@@ -1,5 +1,7 @@
 package com.example.delivery.repository
 
+import com.example.delivery.UserFixture.randomUpdatedFullName
+import com.example.delivery.UserFixture.randomUpdatedPhone
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedUser
 import org.junit.jupiter.api.Test
@@ -69,6 +71,7 @@ class UserRepositoryTest : AbstractMongoTestContainer {
         // WHEN //THEN
         userRepository.deleteById(savedUser?.id.toString())
             .test()
+            .expectNext(Unit)
             .verifyComplete()
         // AND THEN
         userRepository.existsById(savedUser?.id.toString())
@@ -82,8 +85,8 @@ class UserRepositoryTest : AbstractMongoTestContainer {
         // GIVEN
         val savedUser = userRepository.save(unsavedUser).block()
         val update = Update()
-            .set("fullName", "UpdatedName")
-            .set("phone", "+38-new-phone")
+            .set("fullName", randomUpdatedFullName)
+            .set("phone", randomUpdatedPhone)
 
         // WHEN
         val actual = userRepository.update(

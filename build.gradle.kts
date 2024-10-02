@@ -36,6 +36,7 @@ dependencies {
     implementation("io.mongock:mongock-springboot-v3:5.2.4")
     implementation("io.mongock:mongodb-springdata-v4-driver:5.2.4")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.3")
+    implementation("io.github.serpro69:kotlin-faker:1.16.0")
     testImplementation("io.projectreactor:reactor-test:3.6.10")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -23,7 +23,7 @@ class ProductService(private val productRepository: ProductRepository) {
         return productRepository.save(createProductDTO.toMongo()).map { it.toDomain() }
     }
 
-    fun deleteById(id: String): Mono<Void> {
+    fun deleteById(id: String): Mono<Unit> {
         return productRepository.deleteById(id)
     }
 

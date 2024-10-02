@@ -8,37 +8,53 @@ import com.example.delivery.dto.request.CreateOrderDTO
 import com.example.delivery.dto.request.CreateOrderItemDTO
 import com.example.delivery.dto.request.UpdateOrderDTO
 import com.example.delivery.dto.response.OrderDTO
-import com.example.delivery.dto.response.ShipmentDetailsDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
+import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderFixture {
+    val randomMongoShipmentDetails = MongoOrder.MongoShipmentDetails(
+        city = Faker().address.city(),
+        street = Faker().address.streetName(),
+        building = Faker().address.buildingNumber(),
+        index = Faker().address.countryCodeLong()
+    )
+
+    val randomUpdateMongoShipmentDetails = MongoOrder.MongoShipmentDetails(
+        city = Faker().address.city(),
+        street = Faker().address.streetName(),
+        building = Faker().address.buildingNumber(),
+        index = Faker().address.countryCodeLong()
+    )
+
+    val randomDomainShipmentDetails = randomMongoShipmentDetails.toDomain()
+    val randomUpdateDomainShipmentDetails = randomUpdateMongoShipmentDetails.toDomain()
+    val randomDTOShipmentDetails = randomDomainShipmentDetails.toDTO()
+    val randomUpdateDTOShipmentDetails = randomUpdateDomainShipmentDetails.toDTO()
+    val randomPrice = BigDecimal.valueOf(Faker().random.nextDouble() * 100)
+    val randomAmount = Faker().random.nextInt(1, 10)
+
     val mongoOrderItem = MongoOrder.MongoOrderItem(
         ObjectId("123456789011121314151617"),
-        BigDecimal.TEN,
-        2
+        randomPrice,
+        randomAmount
     )
 
     val mongoOrderItemWithProduct = MongoOrderWithProduct.MongoOrderItemWithProduct(
         product,
-        BigDecimal.ZERO,
-        amount = 0
+        randomPrice,
+        randomAmount
     )
 
     val mongoOrderWithProduct = MongoOrderWithProduct(
         id = ObjectId("123456789011121314151617"),
         items = listOf(mongoOrderItemWithProduct),
-        shipmentDetails = MongoOrder.MongoShipmentDetails(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomMongoShipmentDetails,
         status = MongoOrder.Status.NEW,
         userId = ObjectId("123456789011121314151617")
     )
@@ -46,12 +62,7 @@ object OrderFixture {
     val order = MongoOrder(
         id = ObjectId("123456789011121314151617"),
         items = listOf(mongoOrderItem),
-        shipmentDetails = MongoOrder.MongoShipmentDetails(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomMongoShipmentDetails,
         status = MongoOrder.Status.NEW,
         userId = ObjectId("123456789011121314151617")
     )
@@ -61,12 +72,7 @@ object OrderFixture {
     val orderDTO = OrderDTO(
         id = "123456789011121314151617",
         items = listOf(mongoOrderItem.toDomain().toDTO()),
-        shipmentDetails = ShipmentDetailsDTO(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomDTOShipmentDetails,
         status = "NEW",
         userId = "123456789011121314151617"
 
@@ -74,24 +80,14 @@ object OrderFixture {
 
     val createOrderDTO = CreateOrderDTO(
         items = listOf(CreateOrderItemDTO("123456789011121314151617", 0)),
-        shipmentDetails = ShipmentDetailsDTO(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomDTOShipmentDetails,
         userId = "123456789011121314151617"
     )
 
     val domainOrder = DomainOrder(
         id = "123456789011121314151617",
         items = listOf(mongoOrderItem.toDomain()),
-        shipmentDetails = DomainOrder.DomainShipmentDetails(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomDomainShipmentDetails,
         status = DomainOrder.Status.NEW,
         userId = "123456789011121314151617"
     )
@@ -101,39 +97,26 @@ object OrderFixture {
         id = "123456789011121314151617",
         items = listOf(
             DomainOrderWithProduct.DomainOrderItemWithProduct(
-                price = BigDecimal.ZERO,
-                amount = 0,
+                price = randomPrice,
+                amount = randomAmount,
                 product = domainProduct,
             ),
         ),
-        shipmentDetails = DomainOrder.DomainShipmentDetails(
-            city = "city",
-            street = "street",
-            building = "3a",
-            index = "54890",
-        ),
+        shipmentDetails = randomDomainShipmentDetails,
         status = "NEW",
         userId = "123456789011121314151617"
     )
 
-
-    val updatedShipmentDetails = MongoOrder.MongoShipmentDetails(
-        city = "Dnipro",
-        street = "street",
-        building = "1b",
-        index = "01222"
-    )
-
     val updateOrderDTO = UpdateOrderDTO(
-        shipmentDetails = updatedShipmentDetails.toDomain().toDTO()
+        shipmentDetails = randomUpdateDTOShipmentDetails
     )
 
     val orderUpdateObject = Update()
-        .set("shipmentDetails", updatedShipmentDetails.toDomain().toDTO())
+        .set("shipmentDetails", randomUpdateDTOShipmentDetails)
 
     val updatedOrder = order.copy(
-        shipmentDetails = updatedShipmentDetails
+        shipmentDetails = randomUpdateMongoShipmentDetails
     )
 
-    val updatedDomainOrder = domainOrder.copy(shipmentDetails = updatedShipmentDetails.toDomain())
+    val updatedDomainOrder = domainOrder.copy(shipmentDetails = randomUpdateDomainShipmentDetails)
 }

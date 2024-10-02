@@ -57,7 +57,7 @@ class OrderController(private val orderService: OrderService) {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: String): Mono<Void> {
+    fun delete(@PathVariable id: String): Mono<Unit> {
         return orderService.deleteById(id)
     }
 

@@ -23,6 +23,7 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
 class OrderService(
@@ -41,27 +42,33 @@ class OrderService(
     @SuppressWarnings("ThrowsCount")
     fun add(createOrderDTO: CreateOrderDTO): Mono<DomainOrder> {
         return userRepository.findById(createOrderDTO.userId)
-            .switchIfEmpty(Mono.error(NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")))
+            .switchIfEmpty { Mono.error(NotFoundException("User with id ${createOrderDTO.userId} doesn't exist")) }
             .flatMap { user ->
-                val requestedProductsIds = createOrderDTO.items.map { it.productId }
-                productRepository.findAllByIds(requestedProductsIds)
-                    .collectList()
-                    .flatMapMany { productsList ->
-                        if (productsList.size == createOrderDTO.items.size) {
-                            Flux.fromIterable(productsList.map { it.toDomain() })
-                        } else {
-                            checkProductAvailability(productsList, requestedProductsIds)
-                        }
-                    }
-                    .flatMap { product -> checkProductAmount(createOrderDTO, product) }
-                    .collectList()
+                verifyProducts(createOrderDTO)
                     .flatMap { items ->
                         saveOrder(items, createOrderDTO, user)
                     }
             }
     }
 
-    fun deleteById(id: String): Mono<Void> {
+    private fun verifyProducts(
+        createOrderDTO: CreateOrderDTO,
+    ): Mono<MutableList<MongoOrder.MongoOrderItem>> {
+        val requestedProductsIds = createOrderDTO.items.map { it.productId }
+        return productRepository.findAllByIds(requestedProductsIds)
+            .collectList()
+            .flatMapMany { productsList ->
+                if (productsList.size == createOrderDTO.items.size) {
+                    Flux.fromIterable(productsList.map { it.toDomain() })
+                } else {
+                    checkProductAvailability(productsList, requestedProductsIds)
+                }
+            }
+            .flatMap { product -> checkProductAmount(createOrderDTO, product) }
+            .collectList()
+    }
+
+    fun deleteById(id: String): Mono<Unit> {
         return orderRepository.deleteById(id)
     }
 

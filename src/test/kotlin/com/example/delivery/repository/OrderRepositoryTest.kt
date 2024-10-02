@@ -103,6 +103,7 @@ class OrderRepositoryTest : AbstractMongoTestContainer {
         // WHEN // THEN
         orderRepository.deleteById(savedOrder?.id.toString())
             .test()
+            .expectNext(Unit)
             .verifyComplete()
 
         // AND THEN
