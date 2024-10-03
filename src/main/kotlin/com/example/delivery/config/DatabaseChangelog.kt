@@ -27,9 +27,7 @@ class DatabaseChangelog {
             .log()
 
         val orderCollection = mongoTemplate.getCollection(MongoOrder.COLLECTION_NAME)
-
-        val indexExists = orderCollection.listIndexes()
-            .any { it.getString("name") == "userId_1" }
+        val indexExists = orderCollection.listIndexes().any { it.getString("name") == "userId_1" }
 
         log.atInfo()
             .setMessage(

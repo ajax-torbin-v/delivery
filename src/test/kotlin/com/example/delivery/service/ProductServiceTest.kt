@@ -9,86 +9,113 @@ import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.ProductFixture.updatedProduct
 import com.example.delivery.exception.NotFoundException
 import com.example.delivery.repository.ProductRepository
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import kotlin.test.assertEquals
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class ProductServiceTest {
-    @Mock
+    @MockK
     lateinit var productRepository: ProductRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var productService: ProductService
 
     @Test
     fun `should add product with proper dto`() {
         // GIVEN
-        Mockito.`when`(productRepository.save(product.copy(id = null))).thenReturn(product)
+        every { productRepository.save(product.copy(id = null)) } returns product.toMono()
 
         // WHEN
-        productService.add(createProductDTO)
+        val actual = productService.add(createProductDTO)
 
         // THEN
-        verify(productRepository, times(1)).save(product.copy(id = null))
+        actual
+            .test()
+            .expectNext(domainProduct)
+            .verifyComplete()
+
+        verify(exactly = 1) { productRepository.save(product.copy(id = null)) }
     }
 
     @Test
     fun `should return product when product exists`() {
         // GIVEN
-        Mockito.`when`(productRepository.findById("1")).thenReturn(product)
+        every { productRepository.findById("1") } returns product.toMono()
 
         // WHEN
         val actual = productService.getById("1")
 
         // THEN
-        assertEquals(domainProduct, actual)
+        actual
+            .test()
+            .expectNext(domainProduct)
+            .verifyComplete()
     }
 
     @Test
     fun `should throw an exception when product don't exist`() {
         // GIVEN
-        Mockito.`when`(productRepository.findById("13")).thenReturn(null)
+        every { productRepository.findById("13") } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { productService.getById("13") }
+        // WHEN
+        val actual = productService.getById("13")
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
     }
 
     @Test
     fun `should update product with proper dto when product exists`() {
         // GIVEN
-        Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(updatedProduct)
+        every { productRepository.update("1", updateProductObject) } returns updatedProduct.toMono()
 
         // WHEN
         val actual = productService.update("1", updateProductDTO)
 
         // THEN
-        verify(productRepository, times(1)).update("1", updateProductObject)
-        assertEquals(updatedDomainProduct, actual)
+        actual
+            .test()
+            .expectNext(updatedDomainProduct)
+            .verifyComplete()
+        verify(exactly = 1) { productRepository.update("1", updateProductObject) }
     }
 
     @Test
     fun `should throw exception if product doesn't exists on update`() {
         // GIVEN
-        Mockito.`when`(productRepository.update("1", updateProductObject)).thenReturn(null)
+        every { productRepository.update("1", updateProductObject) } returns Mono.empty()
 
-        // WHEN // THEN
-        assertThrows<NotFoundException> { productService.update("1", updateProductDTO) }
+        // WHEN
+        val actual = productService.update("1", updateProductDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
     }
 
     @Test
     fun `should be okay when deleting existing product`() {
-        // GIVEN // WHEN
-        productService.deleteById("1")
+        // GIVEN
+        every { productRepository.deleteById("1") } returns Mono.empty()
+
+        // WHEN
+        val actual = productService.deleteById("1")
 
         // THEN
-        verify(productRepository, times(1)).deleteById("1")
+        actual
+            .test()
+            .verifyComplete()
+        verify(exactly = 1) { productRepository.deleteById("1") }
     }
 }

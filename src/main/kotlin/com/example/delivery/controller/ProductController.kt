@@ -16,30 +16,31 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/products")
 class ProductController(private val productService: ProductService) {
     @LogInvoke
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): ProductDTO {
-        return productService.getById(id).toDTO()
+    fun findById(@PathVariable id: String): Mono<ProductDTO> {
+        return productService.getById(id).map { it.toDTO() }
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    fun add(@RequestBody createProductDTO: CreateProductDTO): ProductDTO {
-        return productService.add(createProductDTO).toDTO()
+    fun add(@RequestBody createProductDTO: CreateProductDTO): Mono<ProductDTO> {
+        return productService.add(createProductDTO).map { it.toDTO() }
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: String, @RequestBody updateProductDTO: UpdateProductDTO): ProductDTO {
-        return productService.update(id, updateProductDTO).toDTO()
+    fun update(@PathVariable id: String, @RequestBody updateProductDTO: UpdateProductDTO): Mono<ProductDTO> {
+        return productService.update(id, updateProductDTO).map { it.toDTO() }
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: String) {
-        productService.deleteById(id)
+    fun delete(@PathVariable id: String): Mono<Unit> {
+        return productService.deleteById(id)
     }
 }

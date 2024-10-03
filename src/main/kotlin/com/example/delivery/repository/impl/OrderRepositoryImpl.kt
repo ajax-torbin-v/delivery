@@ -7,10 +7,9 @@ import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.MongoExpression
 import org.springframework.data.mongodb.core.FindAndModifyOptions
-import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationExpression
-import org.springframework.data.mongodb.core.aggregation.AggregationResults
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators.Eq
 import org.springframework.data.mongodb.core.aggregation.LookupOperation
@@ -23,16 +22,18 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Repository
-internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepository {
+internal class OrderRepositoryImpl(var mongoTemplate: ReactiveMongoTemplate) : OrderRepository {
 
-    override fun existsById(id: String): Boolean {
+    override fun existsById(id: String): Mono<Boolean> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.exists<MongoOrder>(query)
     }
 
-    override fun findById(id: String): MongoOrderWithProduct? {
+    override fun findById(id: String): Mono<MongoOrderWithProduct> {
         val matchStage = MatchOperation(Criteria.where("_id").isEqualTo(id))
 
         val lookupStage = LookupOperation.newLookup()
@@ -58,19 +59,19 @@ internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepo
             Aggregation.project().andExclude("fetchedProducts")
         )
 
-        val results: AggregationResults<MongoOrderWithProduct> = mongoTemplate.aggregate(
+        val results = mongoTemplate.aggregate(
             pipeline,
             MongoOrder::class.java,
             MongoOrderWithProduct::class.java
         )
-        return results.uniqueMappedResult
+        return results.singleOrEmpty()
     }
 
-    override fun save(order: MongoOrder): MongoOrder {
-        return mongoTemplate.save(order)
+    override fun save(order: MongoOrder): Mono<MongoOrder> {
+        return mongoTemplate.save(order, MongoOrder.COLLECTION_NAME)
     }
 
-    override fun updateOrderStatus(id: String, status: MongoOrder.Status): MongoOrder? {
+    override fun updateOrderStatus(id: String, status: MongoOrder.Status): Mono<MongoOrder> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         val update = Update.update(MongoOrder::status.name, status)
         return mongoTemplate.findAndModify(
@@ -81,12 +82,12 @@ internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepo
         )
     }
 
-    override fun deleteById(id: String) {
+    override fun deleteById(id: String): Mono<Unit> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        mongoTemplate.findAndRemove(query, MongoOrder::class.java)
+        return mongoTemplate.findAndRemove(query, MongoOrder::class.java).thenReturn(Unit)
     }
 
-    override fun updateOrder(id: String, update: Update): MongoOrder? {
+    override fun updateOrder(id: String, update: Update): Mono<MongoOrder> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.findAndModify(
             query,
@@ -96,7 +97,7 @@ internal class OrderRepositoryImpl(var mongoTemplate: MongoTemplate) : OrderRepo
         )
     }
 
-    override fun findAllByUserId(userId: String): List<MongoOrder> {
+    override fun findAllByUserId(userId: String): Flux<MongoOrder> {
         val query = Query(Criteria.where("userId").isEqualTo(ObjectId(userId)))
         return mongoTemplate.find<MongoOrder>(query)
     }

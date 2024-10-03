@@ -6,87 +6,83 @@ import com.example.delivery.UserFixture.updateUserDTO
 import com.example.delivery.UserFixture.updatedDomainUser
 import com.example.delivery.mapper.UserMapper.toDTO
 import com.example.delivery.service.UserService
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.verify
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.junit.jupiter.api.extension.ExtendWith
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
-@WebMvcTest(UserController::class)
+@ExtendWith(MockKExtension::class)
 internal class UserControllerTest {
-    @MockBean
+    @MockK
     private lateinit var userService: UserService
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    private val objectMapper = jacksonObjectMapper()
+    @InjectMockKs
+    private lateinit var useController: UserController
 
     @Test
     fun `should add user and return created`() {
         // GIVEN
-        Mockito.`when`(userService.add(createUserDTO)).thenReturn(domainUser)
+        every { userService.add(createUserDTO) } returns domainUser.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(
-            post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createUserDTO))
-        )
-            .andExpect(status().isCreated)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(domainUser.toDTO())))
+        // WHEN
+        val actual = useController.add(createUserDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainUser.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should return user when user exists`() {
         // GIVEN
-        Mockito.`when`(userService.getById("1")).thenReturn(domainUser)
+        every { userService.getById("1") } returns domainUser.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(get("/users/{id}", "1"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(domainUser.toDTO())))
+        // WHEN
+        val actual = useController.findById("1")
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainUser.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should update user`() {
         // GIVEN
-        Mockito.`when`(userService.update("1", updateUserDTO)).thenReturn(updatedDomainUser)
+        every { userService.update("1", updateUserDTO) } returns updatedDomainUser.toMono()
 
-        // WHEN // THEN
-        mockMvc.perform(
-            put("/users/{id}", "1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateUserDTO))
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(updatedDomainUser.toDTO())))
+        // WHEN
+        val actual = useController.update("1", updateUserDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectNext(updatedDomainUser.toDTO())
+            .verifyComplete()
     }
 
     @Test
     fun `should delete existing user and return no content`() {
         // GIVEN
-        doNothing().`when`(userService).deleteById("1")
+        every { userService.deleteById("1") } returns Mono.empty()
 
-        // WHEN // THEN
-        mockMvc.perform(delete("/users/{id}", "1"))
-            .andExpect(status().isNoContent)
+        // WHEN
+        val actual = useController.deleteById("1")
 
-        // AND THEN
-        verify(userService).deleteById("1")
+        // THEN
+        actual
+            .test()
+            .verifyComplete()
+
+        verify(exactly = 1) { userService.deleteById("1") }
     }
 }
