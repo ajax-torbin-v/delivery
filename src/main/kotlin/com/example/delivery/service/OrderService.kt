@@ -64,7 +64,7 @@ class OrderService(
                     checkProductAvailability(productsList, requestedProductsIds)
                 }
             }
-            .flatMap { product -> checkProductAmount(createOrderDTO, product) }
+            .map { product -> checkProductAmount(createOrderDTO, product) }
             .collectList()
     }
 
@@ -97,24 +97,16 @@ class OrderService(
     private fun checkProductAmount(
         createOrderDTO: CreateOrderDTO,
         product: DomainProduct,
-    ): Mono<MongoOrder.MongoOrderItem> {
+    ): MongoOrder.MongoOrderItem {
         val orderItem = createOrderDTO.items.first { it.productId == product.id }
         if (orderItem.amount > product.amountAvailable) {
-            return Mono.error(
-                ProductAmountException(
-                    "Insufficient stock for product ${product.name}. " +
-                        "Available: ${product.amountAvailable}. " +
-                        "Requested: ${orderItem.amount}"
-                )
+            throw ProductAmountException(
+                "Insufficient stock for product ${product.name}. " +
+                    "Available: ${product.amountAvailable}. " +
+                    "Requested: ${orderItem.amount}"
             )
         }
-        return Mono.just(
-            MongoOrder.MongoOrderItem(
-                ObjectId(orderItem.productId),
-                product.price,
-                orderItem.amount
-            )
-        )
+        return MongoOrder.MongoOrderItem(ObjectId(orderItem.productId), product.price, orderItem.amount)
     }
 
     private fun saveOrder(

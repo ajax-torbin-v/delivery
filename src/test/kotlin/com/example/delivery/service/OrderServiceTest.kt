@@ -146,6 +146,21 @@ internal class OrderServiceTest {
     }
 
     @Test
+    fun `should throw exception when user doesn't exist`() {
+        // GIVEN
+        every { userRepository.findById("123456789011121314151617") } returns Mono.empty()
+
+        // WHEN
+        val actual = orderService.add(createOrderDTO)
+
+        // THEN
+        actual
+            .test()
+            .expectError(NotFoundException::class.java)
+            .verify()
+    }
+
+    @Test
     fun `should update order with proper dto when product exists`() {
         // GIVEN
         every { orderRepository.updateOrder("1", orderUpdateObject) } returns updatedOrder.toMono()

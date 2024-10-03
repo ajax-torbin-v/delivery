@@ -9,6 +9,7 @@ import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderWithProductMapper.toDTO
 import com.example.delivery.service.OrderService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -61,7 +62,7 @@ class OrderController(private val orderService: OrderService) {
         return orderService.deleteById(id)
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{id}", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
     fun findAllByUserId(@PathVariable id: String): Flux<OrderDTO> {
         return orderService.getAllByUserId(id).map { it.toDTO() }
     }
