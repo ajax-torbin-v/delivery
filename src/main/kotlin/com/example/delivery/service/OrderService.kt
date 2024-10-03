@@ -36,7 +36,7 @@ class OrderService(
     fun getById(id: String): Mono<DomainOrderWithProduct> {
         return orderRepository.findById(id)
             .map { it.toDomain() }
-            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id doesn't exists")) }
     }
 
     @SuppressWarnings("ThrowsCount")
@@ -75,13 +75,13 @@ class OrderService(
     fun updateOrder(id: String, updateOrderDTO: UpdateOrderDTO): Mono<DomainOrder> {
         return orderRepository.updateOrder(id, updateOrderDTO.toUpdate())
             .map { it.toDomain() }
-            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id doesn't exists")) }
     }
 
     fun updateOrderStatus(id: String, status: String): Mono<DomainOrder> {
         return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))
             .map { it.toDomain() }
-            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id doesn't exists")))
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id doesn't exists")) }
     }
 
     fun getAllByUserId(id: String): Flux<DomainOrder> {
