@@ -27,36 +27,34 @@ import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatus
 
 object OrderProtoMapper {
     fun DomainOrder.toCreateOrderResponse(): CreateOrderResponse {
-        return CreateOrderResponse.newBuilder().also { builder ->
-            builder.successBuilder.orderBuilder.also { buildOrder(it) }
+        return CreateOrderResponse.newBuilder().apply {
+            successBuilder.orderBuilder.also { buildOrder(it) }
         }.build()
     }
 
     fun DomainOrder.toUpdateOrderResponse(): UpdateOrderResponse {
-        return UpdateOrderResponse.newBuilder().also { builder ->
-            builder.successBuilder.orderBuilder.also { buildOrder(it) }
+        return UpdateOrderResponse.newBuilder().apply {
+            successBuilder.orderBuilder.also { buildOrder(it) }
         }.build()
     }
 
     fun DomainOrder.toUpdateOrderStatusResponse(): UpdateOrderStatusResponse {
-        return UpdateOrderStatusResponse.newBuilder().also { builder ->
-            builder.successBuilder.orderBuilder.also { buildOrder(it) }
+        return UpdateOrderStatusResponse.newBuilder().apply {
+            successBuilder.orderBuilder.also { buildOrder(it) }
         }.build()
     }
 
     fun DomainOrderWithProduct.toFindOrderByIdResponse(): FindOrderByIdResponse {
-        return FindOrderByIdResponse.newBuilder()
-            .also { builder ->
-                builder.successBuilder.orderBuilder.also { protoBuilder ->
-                    protoBuilder
-                        .setId(id)
-                        .setStatus(status)
-                        .setUserId(userId)
-                        .setShipmentDetails(shipmentDetails.toShipmentDetails())
-                        .addAllItems(items.map { it.toOrderItemFull() })
-                }
+        return FindOrderByIdResponse.newBuilder().apply {
+            successBuilder.orderBuilder.also { protoBuilder ->
+                protoBuilder
+                    .setId(id)
+                    .setStatus(status)
+                    .setUserId(userId)
+                    .setShipmentDetails(shipmentDetails.toShipmentDetails())
+                    .addAllItems(items.map { it.toOrderItemFull() })
             }
-            .build()
+        }.build()
     }
 
     fun CreateOrderRequest.toCreateOrderDTO(): CreateOrderDTO {
@@ -65,7 +63,7 @@ object OrderProtoMapper {
 
     fun Throwable.toFailureFindOrderByIdResponse(): FindOrderByIdResponse {
         return FindOrderByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
             }
@@ -74,7 +72,7 @@ object OrderProtoMapper {
 
     fun Throwable.toFailureUpdateOrderResponse(): UpdateOrderResponse {
         return UpdateOrderResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.toString())
+            it.failureBuilder.setMessage(message.toString())
             when (this) {
                 is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
             }
@@ -83,7 +81,7 @@ object OrderProtoMapper {
 
     fun Throwable.toFailureUpdateStatusOrderResponse(): UpdateOrderStatusResponse {
         return UpdateOrderStatusResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.toString())
+            it.failureBuilder.setMessage(message.toString())
             when (this) {
                 is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
             }
@@ -92,13 +90,13 @@ object OrderProtoMapper {
 
     fun Throwable.toFailureDeleteOrderResponse(): DeleteOrderResponse {
         return DeleteOrderResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
         }.build()
     }
 
     fun Throwable.toFailureFindOrdersByUserIdResponse(): FindOrdersByUserIdResponse {
         return FindOrdersByUserIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
             }
@@ -111,7 +109,7 @@ object OrderProtoMapper {
 
     fun Throwable.toFailureCreateOrderResponse(): CreateOrderResponse {
         return CreateOrderResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
                 is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
@@ -157,26 +155,26 @@ object OrderProtoMapper {
 
     fun DomainProduct.toProtoProduct(): Product {
         return Product.newBuilder().also {
-            it.setId(this.id)
-                .setName(this.name)
-                .setPrice(this.price.toString())
-                .setAmount(this.amountAvailable)
-                .setMeasurement(this.measurement)
+            it.setId(id)
+                .setName(name)
+                .setPrice(price.toString())
+                .setAmount(amountAvailable)
+                .setMeasurement(measurement)
         }.build()
     }
 
     fun toFindOrdersByUserIdResponse(orders: List<DomainOrder>): FindOrdersByUserIdResponse {
-        return FindOrdersByUserIdResponse.newBuilder().also { responseBuilder ->
+        return FindOrdersByUserIdResponse.newBuilder().apply {
             val successBuilder = FindOrdersByUserIdResponse.Success.newBuilder()
             successBuilder.addAllOrder(orders.map { it.toProto() })
-            responseBuilder.success = successBuilder.build()
+            success = successBuilder.build()
         }.build()
     }
 
     fun DomainOrder.toProto(): Order {
         return Order.newBuilder().also { builder ->
             builder
-                .addAllItems(this.items.map { it.toOrderItem() })
+                .addAllItems(items.map { it.toOrderItem() })
                 .setId(id)
                 .setStatus(status.toString())
                 .setShipmentDetails(shipmentDetails.toShipmentDetails())

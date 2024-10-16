@@ -26,6 +26,7 @@ import io.nats.client.Connection
 import io.nats.client.Dispatcher
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 @Component
 @NatsController(subjectPrefix = UserNatsSubject.USER_PREFIX, queueGroup = UserNatsSubject.QUEUE_GROUP)
@@ -39,27 +40,27 @@ class UserNatsController(
     fun save(response: CreateUserRequest): Mono<CreateUserResponse> {
         return userService.add(response.toCreateUserDTO())
             .map { user -> user.toCreateUserResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureCreateUserResponse()) }
+            .onErrorResume { error -> error.toFailureCreateUserResponse().toMono() }
     }
 
     @NatsHandler(subject = UserNatsSubject.FIND_BY_ID)
     fun findById(request: FindUserByIdRequest): Mono<FindUserByIdResponse> {
         return userService.getById(request.id)
             .map { user -> user.toFindUserByIdResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureFindUserByIdResponse()) }
+            .onErrorResume { error -> error.toFailureFindUserByIdResponse().toMono() }
     }
 
     @NatsHandler(subject = UserNatsSubject.UPDATE)
     fun update(request: UpdateUserRequest): Mono<UpdateUserResponse> {
         return userService.update(request.id, request.toUpdateUserDTO())
             .map { user -> user.toUpdateUserResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureUpdateUserResponse()) }
+            .onErrorResume { error -> error.toFailureUpdateUserResponse().toMono() }
     }
 
     @NatsHandler(subject = UserNatsSubject.DELETE)
     fun delete(request: DeleteUserRequest): Mono<DeleteUserResponse> {
         return userService.deleteById(request.id)
             .map { toDeleteUserResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureDeleteUserResponse()) }
+            .onErrorResume { error -> error.toFailureDeleteUserResponse().toMono() }
     }
 }

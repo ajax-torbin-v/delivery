@@ -24,10 +24,8 @@ import com.example.internal.input.reqreply.product.update.UpdateProductResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import reactor.kotlin.test.test
 
-@SpringBootTest
 class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
     @Autowired

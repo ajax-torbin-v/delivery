@@ -4,13 +4,6 @@ plugins {
     `java-test-fixtures`
 }
 
-group = "com.example"
-version = "0.0.1-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":internal-api"))
     implementation(project(":domainservice"))
@@ -22,8 +15,4 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.12")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

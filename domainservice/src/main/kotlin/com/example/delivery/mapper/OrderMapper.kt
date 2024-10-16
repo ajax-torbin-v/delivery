@@ -60,7 +60,7 @@ object OrderMapper {
 
     fun UpdateOrderDTO.toUpdate(): Update {
         val update = Update()
-        shipmentDetails?.let { update.set(com.example.delivery.mongo.MongoOrder::shipmentDetails.name, it) }
+        shipmentDetails?.let { update.set(MongoOrder::shipmentDetails.name, it) }
         return update
     }
 }

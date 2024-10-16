@@ -45,7 +45,7 @@ object OrderProtoMapper {
                     )
 
                 CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalStateException(failure.message)
+                    error(failure.message)
             }
         }
         return success.order.toDTO()
@@ -59,7 +59,7 @@ object OrderProtoMapper {
                     throw OrderNotFoundException(failure.message)
 
                 FindOrderByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalStateException(failure.message)
+                    error(failure.message)
             }
         }
         return success.order.toDtoWithProduct()
@@ -84,7 +84,7 @@ object OrderProtoMapper {
                     throw OrderNotFoundException(failure.message)
 
                 UpdateOrderStatusResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalStateException(failure.message)
+                    error(failure.message)
             }
         }
         return success.order.toDTO()
@@ -98,7 +98,7 @@ object OrderProtoMapper {
                     throw UserNotFoundException(failure.message)
 
                 FindOrdersByUserIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalArgumentException(failure.message)
+                    error(failure.message)
             }
         }
         return success.orderList.map { it.toDTO() }
@@ -121,8 +121,8 @@ object OrderProtoMapper {
 
     fun DeleteOrderResponse.toDTO() {
         require(this != DeleteOrderResponse.getDefaultInstance()) { "Acquired message is empty!" }
-        if (this.hasFailure()) {
-            throw IllegalStateException(failure.message)
+        if (hasFailure()) {
+            error(failure.message)
         }
     }
 

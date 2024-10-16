@@ -35,10 +35,10 @@ object ProductMapper {
 
     fun UpdateProductDTO.toUpdate(): Update {
         val update = Update()
-        name?.let { update.set(com.example.delivery.mongo.MongoProduct::name.name, it) }
-        price?.let { update.set(com.example.delivery.mongo.MongoProduct::price.name, it) }
-        amountAvailable?.let { update.set(com.example.delivery.mongo.MongoProduct::amountAvailable.name, it) }
-        measurement?.let { update.set(com.example.delivery.mongo.MongoProduct::measurement.name, it) }
+        name?.let { update.set(MongoProduct::name.name, it) }
+        price?.let { update.set(MongoProduct::price.name, it) }
+        amountAvailable?.let { update.set(MongoProduct::amountAvailable.name, it) }
+        measurement?.let { update.set(MongoProduct::measurement.name, it) }
         return update
     }
 }

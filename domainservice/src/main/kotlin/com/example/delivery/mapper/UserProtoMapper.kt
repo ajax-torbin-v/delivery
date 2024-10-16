@@ -46,7 +46,7 @@ object UserProtoMapper {
 
     fun Throwable.toFailureFindUserByIdResponse(): FindUserByIdResponse {
         return FindUserByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
             }
@@ -55,13 +55,13 @@ object UserProtoMapper {
 
     fun Throwable.toFailureCreateUserResponse(): CreateUserResponse {
         return CreateUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
         }.build()
     }
 
     fun Throwable.toFailureUpdateUserResponse(): UpdateUserResponse {
         return UpdateUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
             }
@@ -70,7 +70,7 @@ object UserProtoMapper {
 
     fun Throwable.toFailureDeleteUserResponse(): DeleteUserResponse {
         return DeleteUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
         }.build()
     }
 

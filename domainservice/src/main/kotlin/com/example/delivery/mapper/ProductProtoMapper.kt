@@ -57,7 +57,7 @@ object ProductProtoMapper {
 
     fun Throwable.toFailureFindProductByIdResponse(): FindProductByIdResponse {
         return FindProductByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
             }
@@ -66,13 +66,13 @@ object ProductProtoMapper {
 
     fun Throwable.toFailureCreateProductResponse(): CreateProductResponse {
         return CreateProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
         }.build()
     }
 
     fun Throwable.toFailureUpdateProductResponse(): UpdateProductResponse {
         return UpdateProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
             when (this) {
                 is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
             }
@@ -81,7 +81,7 @@ object ProductProtoMapper {
 
     fun Throwable.toFailureDeleteProductResponse(): DeleteProductResponse {
         return DeleteProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(this.message.orEmpty())
+            it.failureBuilder.setMessage(message.orEmpty())
         }.build()
     }
 

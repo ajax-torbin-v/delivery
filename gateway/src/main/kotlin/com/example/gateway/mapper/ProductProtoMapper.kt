@@ -27,7 +27,7 @@ object ProductProtoMapper {
     fun CreateProductResponse.toDTO(): ProductDTO {
         require(this != CreateProductResponse.getDefaultInstance()) { "Acquired message is empty!" }
         if (hasFailure()) {
-            throw IllegalStateException(failure.message)
+            error(failure.message)
         }
         return success.product.toDTO()
     }
@@ -37,7 +37,7 @@ object ProductProtoMapper {
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalStateException(failure.message)
+                    error(failure.message)
 
                 FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
                     throw ProductNotFoundException(failure.message)
@@ -51,7 +51,7 @@ object ProductProtoMapper {
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    throw IllegalStateException(failure.message)
+                    error(failure.message)
 
                 UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
                     throw ProductNotFoundException(failure.message)
@@ -63,7 +63,7 @@ object ProductProtoMapper {
     fun DeleteProductResponse.toDTO() {
         require(this != DeleteProductResponse.getDefaultInstance()) { "Acquired message is empty!" }
         if (this.hasFailure()) {
-            throw IllegalStateException(failure.message)
+            error(failure.message)
         }
     }
 

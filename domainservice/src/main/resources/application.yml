@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/delivery
+      uri: mongodb://${HOST}:${PORT}/${DB_NAME}
 
 server:
   servlet:

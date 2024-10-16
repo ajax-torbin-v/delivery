@@ -26,6 +26,7 @@ import io.nats.client.Connection
 import io.nats.client.Dispatcher
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 @Component
 @NatsController(subjectPrefix = ProductsNatsSubject.PRODUCT_PREFIX, queueGroup = ProductsNatsSubject.QUEUE_GROUP)
@@ -38,27 +39,27 @@ class ProductNatsController(
     fun add(request: CreateProductRequest): Mono<CreateProductResponse> {
         return productService.add(request.toCreateProductDTO())
             .map { it.toCreateProductResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureCreateProductResponse()) }
+            .onErrorResume { error -> error.toFailureCreateProductResponse().toMono() }
     }
 
     @NatsHandler(subject = ProductsNatsSubject.FIND_BY_ID)
     fun findById(request: FindProductByIdRequest): Mono<FindProductByIdResponse> {
         return productService.getById(request.id)
             .map { product -> product.toFindProductByIdResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureFindProductByIdResponse()) }
+            .onErrorResume { error -> error.toFailureFindProductByIdResponse().toMono() }
     }
 
     @NatsHandler(subject = ProductsNatsSubject.UPDATE)
     fun update(request: UpdateProductRequest): Mono<UpdateProductResponse> {
         return productService.update(request.id, request.toUpdateProductDTO())
             .map { product -> product.toUpdateProductResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureUpdateProductResponse()) }
+            .onErrorResume { error -> error.toFailureUpdateProductResponse().toMono() }
     }
 
     @NatsHandler(subject = ProductsNatsSubject.DELETE)
     fun delete(request: DeleteProductRequest): Mono<DeleteProductResponse> {
         return productService.deleteById(request.id)
             .map { toDeleteProductResponse() }
-            .onErrorResume { error -> Mono.just(error.toFailureDeleteProductResponse()) }
+            .onErrorResume { error -> error.toFailureDeleteProductResponse().toMono() }
     }
 }

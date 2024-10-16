@@ -18,7 +18,7 @@ object UserProtoMapper {
     fun CreateUserResponse.toDTO(): UserDTO {
         require(this != CreateUserResponse.getDefaultInstance()) { "Acquired message is empty!" }
         if (hasFailure()) {
-            throw IllegalStateException(failure.message)
+            error(failure.message)
         }
         return success.user.toDTO()
     }
@@ -28,7 +28,7 @@ object UserProtoMapper {
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                ErrorCase.ERROR_NOT_SET -> throw IllegalStateException(failure.message)
+                ErrorCase.ERROR_NOT_SET -> error(failure.message)
             }
         }
         return success.user.toDTO()
@@ -39,7 +39,7 @@ object UserProtoMapper {
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw IllegalStateException(failure.message)
+                UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
             }
         }
         return success.user.toDTO()
@@ -48,7 +48,7 @@ object UserProtoMapper {
     fun DeleteUserResponse.toDTO() {
         require(this != DeleteUserResponse.getDefaultInstance()) { "Acquired message is empty!" }
         if (this.hasFailure()) {
-            throw IllegalStateException(failure.message)
+            error(failure.message)
         }
     }
 

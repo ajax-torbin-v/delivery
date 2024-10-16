@@ -2,6 +2,8 @@ package com.example.delivery.service
 
 import com.example.delivery.OrderFixture.createOrderDTO
 import com.example.delivery.OrderFixture.domainOrder
+import com.example.delivery.OrderFixture.domainOrderWithProduct
+import com.example.delivery.OrderFixture.mongoOrderWithProduct
 import com.example.delivery.OrderFixture.order
 import com.example.delivery.OrderFixture.orderUpdateObject
 import com.example.delivery.OrderFixture.randomOrderId
@@ -49,20 +51,20 @@ internal class OrderServiceTest {
     @InjectMockKs
     private lateinit var orderService: OrderService
 
-//    @Test
-//    fun `should return order when order exists`() {
-//        // GIVEN
-//        every { orderRepository.findById(randomOrderId) } returns mongoOrderWithProduct.toMono()
-//
-//        // WHEN
-//        val actual = orderService.getById(randomOrderId)
-//
-//        // THEN
-//        actual
-//            .test()
-//            .expectNext(domainOrderWithProduct)
-//            .verifyComplete()
-//    }
+    @Test
+    fun `should return order when order exists`() {
+        // GIVEN
+        every { orderRepository.findById(randomOrderId) } returns mongoOrderWithProduct.toMono()
+
+        // WHEN
+        val actual = orderService.getById(randomOrderId)
+
+        // THEN
+        actual
+            .test()
+            .expectNext(domainOrderWithProduct)
+            .verifyComplete()
+    }
 
     @Test
     fun `should throw exception when order doesn't exists while find`() {
