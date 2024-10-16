@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package com.example.internal.input.reqreply.product.create;
+
+import "com/example/internal/commonmodels/error.proto";
+import "com/example/internal/commonmodels/product/product.proto";
+
+option java_multiple_files = true;
+
+message CreateProductRequest {
+    commonmodels.product.product.Product product = 1;
+}
+
+message CreateProductResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {
+        commonmodels.product.product.Product product = 1;
+    }
+
+    message Failure {
+        string message = 100;
+        optional commonmodels.Error error = 1;
+    }
+}

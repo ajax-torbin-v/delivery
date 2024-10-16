@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.example.internal.commonmodels.order.order_item;
+
+import "com/example/internal/commonmodels/product/product.proto";
+
+option java_multiple_files = true;
+
+message OrderItem {
+    optional string price = 1;
+    int32 amount = 2;
+    oneof product {
+        string product_id = 3;
+        product.product.Product product_full = 4;
+    }
+}

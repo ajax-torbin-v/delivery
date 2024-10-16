@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.example.internal.commonmodels.input.reqreply.product.delete;
+
+import "com/example/internal/commonmodels/error.proto";
+
+option java_multiple_files = true;
+
+message DeleteProductRequest {
+    string id = 1;
+}
+
+message DeleteProductResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {}
+
+    message Failure {
+        string message = 100;
+        optional Error error = 1;
+    }
+}
+
