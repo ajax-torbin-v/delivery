@@ -1,49 +1,46 @@
 package com.example.gateway
 
-import com.example.delivery.OrderFixture.buildDeleteOrderRequest
-import com.example.delivery.OrderFixture.buildFindOrderRequest
-import com.example.delivery.OrderFixture.createOrderDTO
-import com.example.delivery.OrderFixture.domainOrder
-import com.example.delivery.OrderFixture.domainOrderWithProduct
-import com.example.delivery.OrderFixture.orderDTO
-import com.example.delivery.OrderFixture.orderNotFoundException
-import com.example.delivery.OrderFixture.randomOrderId
-import com.example.delivery.OrderFixture.unexpectedError
-import com.example.delivery.OrderFixture.updateOrderDTO
-import com.example.delivery.OrderFixture.updatedDomainOrder
-import com.example.delivery.ProductFixture
-import com.example.delivery.UserFixture.randomUserId
-import com.example.delivery.UserFixture.userNotFoundException
-import com.example.delivery.domain.DomainOrder
-import com.example.delivery.exception.OrderNotFoundException
-import com.example.delivery.exception.ProductNotFoundException
-import com.example.delivery.exception.UserNotFoundException
-import com.example.delivery.mapper.OrderMapper.toDTO
-import com.example.delivery.mapper.OrderProtoMapper.toCreateOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toDeleteOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureDeleteOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrdersByUserIdResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateStatusOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFindOrderByIdResponse
-import com.example.delivery.mapper.OrderProtoMapper.toFindOrdersByUserIdResponse
-import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderResponse
-import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
-import com.example.delivery.mapper.OrderWithProductMapper.toDTO
+import com.example.core.OrderFixture.createOrderDTO
+import com.example.core.OrderFixture.orderDTO
+import com.example.core.OrderFixture.randomOrderId
+import com.example.core.OrderFixture.updateOrderDTO
+import com.example.core.UserFixture.randomUserId
+import com.example.core.exception.OrderNotFoundException
+import com.example.core.exception.ProductNotFoundException
+import com.example.core.exception.UserNotFoundException
+import com.example.gateway.OrderProtoFixture.createOrderResponse
+import com.example.gateway.OrderProtoFixture.createOrderResponseWithProductNotFoundException
+import com.example.gateway.OrderProtoFixture.createOrderResponseWithUnexpectedException
+import com.example.gateway.OrderProtoFixture.createOrderResponseWithUserNotFoundException
+import com.example.gateway.OrderProtoFixture.deleteOrderRequest
+import com.example.gateway.OrderProtoFixture.deleteOrderResponse
+import com.example.gateway.OrderProtoFixture.deleteOrderResponseWithUnexpectedException
+import com.example.gateway.OrderProtoFixture.findOrderByIdRequest
+import com.example.gateway.OrderProtoFixture.findOrderByIdResponse
+import com.example.gateway.OrderProtoFixture.findOrderByIdResponseWithOrderNotFoundException
+import com.example.gateway.OrderProtoFixture.findOrderByIdResponseWithUnexpectedException
+import com.example.gateway.OrderProtoFixture.findOrdersByUserIdRequest
+import com.example.gateway.OrderProtoFixture.findOrdersByUserIdResponse
+import com.example.gateway.OrderProtoFixture.findOrdersByUserIdResponseWithUserNotFoundException
+import com.example.gateway.OrderProtoFixture.updateOrderResponse
+import com.example.gateway.OrderProtoFixture.updateOrderResponseWithOrderNotFoundException
+import com.example.gateway.OrderProtoFixture.updateOrderResponseWithUnexpectedException
+import com.example.gateway.OrderProtoFixture.updateOrderStatusRequest
+import com.example.gateway.OrderProtoFixture.updateOrderStatusResponse
+import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithOrNotFoundException
+import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithUnexpectedException
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
+import com.example.gateway.mapper.OrderProtoMapper.toDTO
+import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
 import com.example.gateway.mapper.OrderProtoMapper.updateOrderRequest
 import com.example.gateway.rest.OrderController
 import com.example.internal.api.subject.OrdersNatsSubject
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
 import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdRequest
 import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdResponse
 import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
-import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusRequest
 import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -78,13 +75,13 @@ class OrderControllerTest {
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
-        } returns domainOrder.toCreateOrderResponse().toMono()
+        } returns createOrderResponse.toMono()
 
         // WHEN
         val actual = orderController.add(createOrderDTO).block()
 
         // THEN
-        assertEquals(orderDTO, actual)
+        assertEquals(createOrderResponse.toDTO(), actual)
     }
 
     @Test
@@ -96,7 +93,7 @@ class OrderControllerTest {
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
-        } returns userNotFoundException.toFailureCreateOrderResponse().toMono()
+        } returns createOrderResponseWithUserNotFoundException.toMono()
 
         // WHEN //THEN
         assertThrows<UserNotFoundException> { orderController.add(createOrderDTO).block() }
@@ -111,7 +108,7 @@ class OrderControllerTest {
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
-        } returns ProductFixture.productNotFoundException.toFailureCreateOrderResponse().toMono()
+        } returns createOrderResponseWithProductNotFoundException.toMono()
 
         // WHEN //THEN
         assertThrows<ProductNotFoundException> { orderController.add(createOrderDTO).block() }
@@ -126,7 +123,7 @@ class OrderControllerTest {
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
-        } returns unexpectedError.toFailureCreateOrderResponse().toMono()
+        } returns createOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
         assertThrows<IllegalStateException> { orderController.add(createOrderDTO).block() }
@@ -153,16 +150,17 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
-                payload = buildFindOrderRequest(randomOrderId),
+                payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
-        } returns domainOrderWithProduct.toFindOrderByIdResponse().toMono()
+        } returns findOrderByIdResponse.toMono()
 
         // WHEN
         val actual = orderController.findById(randomOrderId).block()!!
+        println(actual)
 
         // THEN
-        assertEquals(domainOrderWithProduct.toDTO(), actual)
+        assertEquals(findOrderByIdResponse.toDtoWithProduct(), actual)
     }
 
     @Test
@@ -171,10 +169,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
-                payload = buildFindOrderRequest(randomOrderId),
+                payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
-        } returns orderNotFoundException.toFailureFindOrderByIdResponse().toMono()
+        } returns findOrderByIdResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
         assertThrows<OrderNotFoundException> { orderController.findById(randomOrderId).block()!! }
@@ -186,10 +184,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
-                payload = buildFindOrderRequest(randomOrderId),
+                payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
-        } returns unexpectedError.toFailureFindOrderByIdResponse().toMono()
+        } returns findOrderByIdResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
         assertThrows<IllegalStateException> { orderController.findById(randomOrderId).block()!! }
@@ -201,7 +199,7 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
-                payload = buildFindOrderRequest(randomOrderId),
+                payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
         } returns FindOrderByIdResponse.getDefaultInstance().toMono()
@@ -219,13 +217,13 @@ class OrderControllerTest {
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
-        } returns updatedDomainOrder.toUpdateOrderResponse().toMono()
+        } returns updateOrderResponse.toMono()
 
         // WHEN
         val actual = orderController.update(randomOrderId, updateOrderDTO).block()!!
 
         // THEN
-        assertEquals(updatedDomainOrder.toDTO(), actual)
+        assertEquals(updateOrderResponse.toDTO(), actual)
     }
 
     @Test
@@ -237,7 +235,7 @@ class OrderControllerTest {
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
-        } returns orderNotFoundException.toFailureUpdateOrderResponse().toMono()
+        } returns updateOrderResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
         assertThrows<OrderNotFoundException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
@@ -252,7 +250,7 @@ class OrderControllerTest {
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
-        } returns unexpectedError.toFailureUpdateOrderResponse().toMono()
+        } returns updateOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
         assertThrows<IllegalStateException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
@@ -279,16 +277,16 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
-                payload = FindOrdersByUserIdRequest.newBuilder().setId(randomUserId).build(),
+                payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
-        } returns toFindOrdersByUserIdResponse(listOf(domainOrder)).toMono()
+        } returns findOrdersByUserIdResponse.toMono()
 
         // WHEN
         val actual = orderController.findAllByUserId(randomUserId).block()
 
         // THEN
-        assertEquals(listOf(domainOrder).map { it.toDTO() }, actual)
+        assertEquals(findOrdersByUserIdResponse.toDTO(), actual)
     }
 
     @Test
@@ -297,10 +295,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
-                payload = FindOrdersByUserIdRequest.newBuilder().setId(randomUserId).build(),
+                payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
-        } returns userNotFoundException.toFailureFindOrdersByUserIdResponse().toMono()
+        } returns findOrdersByUserIdResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
         assertThrows<UserNotFoundException> { orderController.findAllByUserId(randomUserId).block() }
@@ -312,7 +310,7 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
-                payload = FindOrdersByUserIdRequest.newBuilder().setId(randomUserId).build(),
+                payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
         } returns FindOrdersByUserIdResponse.getDefaultInstance().toMono()
@@ -327,10 +325,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
-                payload = UpdateOrderStatusRequest.newBuilder().setId(randomOrderId).setStatus("COMPLETED").build(),
+                payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
-        } returns domainOrder.copy(status = DomainOrder.Status.COMPLETED).toUpdateOrderStatusResponse().toMono()
+        } returns updateOrderStatusResponse.toMono()
 
         // WHEN
         val actual = orderController.updateStatus(randomOrderId, "COMPLETED").block()
@@ -345,10 +343,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
-                payload = UpdateOrderStatusRequest.newBuilder().setId(randomOrderId).setStatus("COMPLETED").build(),
+                payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
-        } returns orderNotFoundException.toFailureUpdateStatusOrderResponse().toMono()
+        } returns updateOrderStatusResponseWithOrNotFoundException.toMono()
 
         // WHEN // THEN
         assertThrows<OrderNotFoundException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
@@ -360,10 +358,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
-                payload = UpdateOrderStatusRequest.newBuilder().setId(randomOrderId).setStatus("COMPLETED").build(),
+                payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
-        } returns unexpectedError.toFailureUpdateStatusOrderResponse().toMono()
+        } returns updateOrderStatusResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
@@ -375,7 +373,7 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
-                payload = UpdateOrderStatusRequest.newBuilder().setId(randomOrderId).setStatus("COMPLETED").build(),
+                payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
         } returns UpdateOrderStatusResponse.getDefaultInstance().toMono()
@@ -390,10 +388,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
-                buildDeleteOrderRequest(randomOrderId),
+                deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
-        } returns toDeleteOrderResponse().toMono()
+        } returns deleteOrderResponse.toMono()
 
         // WHEN
         orderController.delete(randomOrderId).block()
@@ -402,7 +400,7 @@ class OrderControllerTest {
         verify(exactly = 1) {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
-                buildDeleteOrderRequest(randomOrderId),
+                deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
         }
@@ -414,10 +412,10 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
-                buildDeleteOrderRequest(randomOrderId),
+                deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
-        } returns unexpectedError.toFailureDeleteOrderResponse().toMono()
+        } returns deleteOrderResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { orderController.delete(randomOrderId).block() }
@@ -429,7 +427,7 @@ class OrderControllerTest {
         every {
             natsClient.doRequest(
                 "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
-                buildDeleteOrderRequest(randomOrderId),
+                deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
         } returns DeleteOrderResponse.getDefaultInstance().toMono()

@@ -1,23 +1,18 @@
 package com.example.delivery
 
+import com.example.core.OrderFixture.randomAmount
+import com.example.core.OrderFixture.randomOrderId
+import com.example.core.OrderFixture.randomUpdateShipmentDetailsDTO
+import com.example.core.ProductFixture.randomPrice
+import com.example.core.ProductFixture.randomProductId
+import com.example.core.UserFixture.randomUserId
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
-import com.example.delivery.ProductFixture.randomPrice
-import com.example.delivery.ProductFixture.randomProductId
-import com.example.delivery.UserFixture.randomUserId
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.projection.DomainOrderWithProduct
-import com.example.delivery.dto.request.CreateOrderDTO
-import com.example.delivery.dto.request.CreateOrderItemDTO
-import com.example.delivery.dto.request.UpdateOrderDTO
-import com.example.delivery.dto.response.OrderDTO
-import com.example.delivery.exception.OrderNotFoundException
-import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
-import com.example.internal.input.reqreply.order.delete.DeleteOrderRequest
-import com.example.internal.input.reqreply.order.find.FindOrderByIdRequest
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
@@ -37,14 +32,8 @@ object OrderFixture {
         index = Faker().address.countryCodeLong()
     )
 
-    val randomOrderId = ObjectId().toString()
     val randomDomainShipmentDetails = randomMongoShipmentDetails.toDomain()
     val randomUpdateDomainShipmentDetails = randomUpdateMongoShipmentDetails.toDomain()
-    val randomDTOShipmentDetails = randomDomainShipmentDetails.toDTO()
-    val randomUpdateDTOShipmentDetails = randomUpdateDomainShipmentDetails.toDTO()
-    val randomAmount = Faker().random.nextInt(1, 10)
-    val orderNotFoundException = OrderNotFoundException("Order with id $randomOrderId not found!")
-    val unexpectedError = NullPointerException()
 
     val mongoOrderItem = MongoOrder.MongoOrderItem(
         ObjectId(randomProductId),
@@ -76,21 +65,6 @@ object OrderFixture {
 
     val unsavedOrder = order.copy(id = null)
 
-    val orderDTO = OrderDTO(
-        id = randomOrderId,
-        items = listOf(mongoOrderItem.toDomain().toDTO()),
-        shipmentDetails = randomDTOShipmentDetails,
-        status = "NEW",
-        userId = randomUserId
-
-    )
-
-    val createOrderDTO = CreateOrderDTO(
-        items = listOf(CreateOrderItemDTO(randomProductId, randomAmount)),
-        shipmentDetails = randomDTOShipmentDetails,
-        userId = randomUserId
-    )
-
     val domainOrder = DomainOrder(
         id = randomOrderId,
         items = listOf(mongoOrderItem.toDomain()),
@@ -114,22 +88,12 @@ object OrderFixture {
         userId = randomUserId
     )
 
-    val updateOrderDTO = UpdateOrderDTO(
-        shipmentDetails = randomUpdateDTOShipmentDetails
-    )
-
     val orderUpdateObject = Update()
-        .set("shipmentDetails", randomUpdateDTOShipmentDetails)
+        .set("shipmentDetails", randomUpdateShipmentDetailsDTO)
 
     val updatedOrder = order.copy(
         shipmentDetails = randomUpdateMongoShipmentDetails
     )
 
     val updatedDomainOrder = domainOrder.copy(shipmentDetails = randomUpdateDomainShipmentDetails)
-
-    fun buildFindOrderRequest(orderId: String): FindOrderByIdRequest {
-        return FindOrderByIdRequest.newBuilder().setId(orderId).build()
-    }
-
-    fun buildDeleteOrderRequest(orderId: String) = DeleteOrderRequest.newBuilder().setId(orderId).build()
 }

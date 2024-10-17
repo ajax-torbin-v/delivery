@@ -1,9 +1,9 @@
 package com.example.gateway.mapper
 
-import com.example.delivery.dto.request.CreateUserDTO
-import com.example.delivery.dto.request.UpdateUserDTO
-import com.example.delivery.dto.response.UserDTO
-import com.example.delivery.exception.UserNotFoundException
+import com.example.core.dto.request.CreateUserDTO
+import com.example.core.dto.request.UpdateUserDTO
+import com.example.core.dto.response.UserDTO
+import com.example.core.exception.UserNotFoundException
 import com.example.internal.commonmodels.user.user.User
 import com.example.internal.input.reqreply.user.create.CreateUserRequest
 import com.example.internal.input.reqreply.user.create.CreateUserResponse

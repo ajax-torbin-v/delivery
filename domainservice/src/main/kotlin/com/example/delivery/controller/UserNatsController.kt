@@ -24,6 +24,7 @@ import com.example.internal.input.reqreply.user.update.UpdateUserRequest
 import com.example.internal.input.reqreply.user.update.UpdateUserResponse
 import io.nats.client.Connection
 import io.nats.client.Dispatcher
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -40,27 +41,43 @@ class UserNatsController(
     fun save(response: CreateUserRequest): Mono<CreateUserResponse> {
         return userService.add(response.toCreateUserDTO())
             .map { user -> user.toCreateUserResponse() }
-            .onErrorResume { error -> error.toFailureCreateUserResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureCreateUserResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = UserNatsSubject.FIND_BY_ID)
     fun findById(request: FindUserByIdRequest): Mono<FindUserByIdResponse> {
         return userService.getById(request.id)
             .map { user -> user.toFindUserByIdResponse() }
-            .onErrorResume { error -> error.toFailureFindUserByIdResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureFindUserByIdResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = UserNatsSubject.UPDATE)
     fun update(request: UpdateUserRequest): Mono<UpdateUserResponse> {
         return userService.update(request.id, request.toUpdateUserDTO())
             .map { user -> user.toUpdateUserResponse() }
-            .onErrorResume { error -> error.toFailureUpdateUserResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureUpdateUserResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = UserNatsSubject.DELETE)
     fun delete(request: DeleteUserRequest): Mono<DeleteUserResponse> {
         return userService.deleteById(request.id)
             .map { toDeleteUserResponse() }
-            .onErrorResume { error -> error.toFailureDeleteUserResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureDeleteUserResponse().toMono()
+            }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(UserNatsController::class.java)
     }
 }

@@ -3,10 +3,6 @@ plugins {
     id("com.google.protobuf") version "0.9.4"
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api("com.google.protobuf:protobuf-kotlin:4.28.2")
 }

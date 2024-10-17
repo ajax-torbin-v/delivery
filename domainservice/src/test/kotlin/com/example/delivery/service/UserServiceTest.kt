@@ -1,13 +1,13 @@
 package com.example.delivery.service
 
-import com.example.delivery.UserFixture.createUserDTO
+import com.example.core.UserFixture.createUserDTO
+import com.example.core.UserFixture.updateUserDTO
+import com.example.core.exception.NotFoundException
 import com.example.delivery.UserFixture.domainUser
-import com.example.delivery.UserFixture.updateUserDTO
 import com.example.delivery.UserFixture.updatedDomainUser
 import com.example.delivery.UserFixture.updatedUser
 import com.example.delivery.UserFixture.user
 import com.example.delivery.UserFixture.userUpdateObject
-import com.example.delivery.exception.NotFoundException
 import com.example.delivery.repository.UserRepository
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs

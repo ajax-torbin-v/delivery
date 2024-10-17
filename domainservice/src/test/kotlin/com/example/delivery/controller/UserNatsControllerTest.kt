@@ -1,11 +1,11 @@
 package com.example.delivery.controller
 
+import com.example.core.UserFixture.randomUserId
 import com.example.delivery.UserFixture.buildDeleteUserRequest
 import com.example.delivery.UserFixture.buildFindUserByIdRequest
 import com.example.delivery.UserFixture.buildUpdateUserRequest
 import com.example.delivery.UserFixture.createUserRequest
 import com.example.delivery.UserFixture.domainUser
-import com.example.delivery.UserFixture.randomUserId
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedDomainUser
 import com.example.delivery.UserFixture.userNotFoundException

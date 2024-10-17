@@ -1,9 +1,9 @@
 package com.example.delivery.mapper
 
+import com.example.core.dto.request.CreateProductDTO
+import com.example.core.dto.request.UpdateProductDTO
+import com.example.core.dto.response.ProductDTO
 import com.example.delivery.domain.DomainProduct
-import com.example.delivery.dto.request.CreateProductDTO
-import com.example.delivery.dto.request.UpdateProductDTO
-import com.example.delivery.dto.response.ProductDTO
 import com.example.delivery.mongo.MongoProduct
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal

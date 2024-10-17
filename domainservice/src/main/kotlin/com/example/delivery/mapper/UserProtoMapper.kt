@@ -1,10 +1,9 @@
 package com.example.delivery.mapper
 
+import com.example.core.dto.request.CreateUserDTO
+import com.example.core.dto.request.UpdateUserDTO
+import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainUser
-import com.example.delivery.dto.request.CreateUserDTO
-import com.example.delivery.dto.request.UpdateUserDTO
-import com.example.delivery.exception.UserNotFoundException
-import com.example.internal.commonmodels.Error
 import com.example.internal.commonmodels.user.user.User
 import com.example.internal.input.reqreply.user.create.CreateUserRequest
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
@@ -45,32 +44,32 @@ object UserProtoMapper {
     }
 
     fun Throwable.toFailureFindUserByIdResponse(): FindUserByIdResponse {
-        return FindUserByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
+        return FindUserByIdResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureFindUserByIdResponse) {
+                is UserNotFoundException -> failureBuilder.userNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureCreateUserResponse(): CreateUserResponse {
-        return CreateUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
+        return CreateUserResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
         }.build()
     }
 
     fun Throwable.toFailureUpdateUserResponse(): UpdateUserResponse {
-        return UpdateUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
+        return UpdateUserResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureUpdateUserResponse) {
+                is UserNotFoundException -> failureBuilder.userNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureDeleteUserResponse(): DeleteUserResponse {
-        return DeleteUserResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
+        return DeleteUserResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
         }.build()
     }
 

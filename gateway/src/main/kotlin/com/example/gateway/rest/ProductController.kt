@@ -1,20 +1,19 @@
 package com.example.gateway.rest
 
-import com.example.delivery.dto.request.CreateProductDTO
-import com.example.delivery.dto.request.UpdateProductDTO
-import com.example.delivery.dto.response.ProductDTO
+import com.example.core.dto.request.CreateProductDTO
+import com.example.core.dto.request.UpdateProductDTO
+import com.example.core.dto.response.ProductDTO
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
 import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
-import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.internal.api.subject.ProductsNatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductRequest
+import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.input.reqreply.product.create.CreateProductResponse
 import com.example.internal.input.reqreply.product.find.FindProductByIdRequest
 import com.example.internal.input.reqreply.product.find.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.update.UpdateProductResponse
-import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -64,7 +63,7 @@ class ProductController(private val natsClient: NatsClient) {
         return natsClient.doRequest(
             "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.DELETE}",
             DeleteProductRequest.newBuilder().setId(id).build(),
-            DeleteUserResponse.parser()
+            DeleteProductResponse.parser()
         ).map { it.toDTO() }
     }
 }

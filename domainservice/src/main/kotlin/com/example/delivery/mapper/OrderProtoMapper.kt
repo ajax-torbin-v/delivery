@@ -1,17 +1,16 @@
 package com.example.delivery.mapper
 
+import com.example.core.dto.request.CreateOrderDTO
+import com.example.core.dto.request.CreateOrderItemDTO
+import com.example.core.dto.request.UpdateOrderDTO
+import com.example.core.dto.response.ShipmentDetailsDTO
+import com.example.core.exception.OrderNotFoundException
+import com.example.core.exception.ProductAmountException
+import com.example.core.exception.ProductNotFoundException
+import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.DomainProduct
 import com.example.delivery.domain.projection.DomainOrderWithProduct
-import com.example.delivery.dto.request.CreateOrderDTO
-import com.example.delivery.dto.request.CreateOrderItemDTO
-import com.example.delivery.dto.request.UpdateOrderDTO
-import com.example.delivery.dto.response.ShipmentDetailsDTO
-import com.example.delivery.exception.OrderNotFoundException
-import com.example.delivery.exception.ProductAmountException
-import com.example.delivery.exception.ProductNotFoundException
-import com.example.delivery.exception.UserNotFoundException
-import com.example.internal.commonmodels.Error
 import com.example.internal.commonmodels.order.order.Order
 import com.example.internal.commonmodels.order.order_item.OrderItem
 import com.example.internal.commonmodels.order.shipment_details.ShipmentDetails
@@ -62,28 +61,28 @@ object OrderProtoMapper {
     }
 
     fun Throwable.toFailureFindOrderByIdResponse(): FindOrderByIdResponse {
-        return FindOrderByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
+        return FindOrderByIdResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureFindOrderByIdResponse) {
+                is OrderNotFoundException -> failureBuilder.orderNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureUpdateOrderResponse(): UpdateOrderResponse {
-        return UpdateOrderResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.toString())
-            when (this) {
-                is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
+        return UpdateOrderResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureUpdateOrderResponse) {
+                is OrderNotFoundException -> failureBuilder.orderNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureUpdateStatusOrderResponse(): UpdateOrderStatusResponse {
-        return UpdateOrderStatusResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.toString())
-            when (this) {
-                is OrderNotFoundException -> it.failureBuilder.setOrderNotFound(Error.getDefaultInstance())
+        return UpdateOrderStatusResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureUpdateStatusOrderResponse) {
+                is OrderNotFoundException -> failureBuilder.orderNotFound
             }
         }.build()
     }
@@ -95,10 +94,10 @@ object OrderProtoMapper {
     }
 
     fun Throwable.toFailureFindOrdersByUserIdResponse(): FindOrdersByUserIdResponse {
-        return FindOrdersByUserIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
+        return FindOrdersByUserIdResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureFindOrdersByUserIdResponse) {
+                is UserNotFoundException -> failureBuilder.userNotFound
             }
         }.build()
     }
@@ -108,12 +107,12 @@ object OrderProtoMapper {
     }
 
     fun Throwable.toFailureCreateOrderResponse(): CreateOrderResponse {
-        return CreateOrderResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
-                is UserNotFoundException -> it.failureBuilder.setUserNotFound(Error.getDefaultInstance())
-                is ProductAmountException -> it.failureBuilder.setProductNotSufficientAmount(Error.getDefaultInstance())
+        return CreateOrderResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureCreateOrderResponse) {
+                is ProductNotFoundException -> failureBuilder.productNotFound
+                is UserNotFoundException -> failureBuilder.userNotFound
+                is ProductAmountException -> failureBuilder.productNotSufficientAmount
             }
         }.build()
     }

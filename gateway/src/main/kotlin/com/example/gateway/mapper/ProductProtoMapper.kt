@@ -1,9 +1,9 @@
 package com.example.gateway.mapper
 
-import com.example.delivery.dto.request.CreateProductDTO
-import com.example.delivery.dto.request.UpdateProductDTO
-import com.example.delivery.dto.response.ProductDTO
-import com.example.delivery.exception.ProductNotFoundException
+import com.example.core.dto.request.CreateProductDTO
+import com.example.core.dto.request.UpdateProductDTO
+import com.example.core.dto.response.ProductDTO
+import com.example.core.exception.ProductNotFoundException
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.commonmodels.product.product.Product
 import com.example.internal.input.reqreply.product.create.CreateProductRequest

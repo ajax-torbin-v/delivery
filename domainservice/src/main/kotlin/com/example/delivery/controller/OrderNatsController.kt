@@ -32,6 +32,7 @@ import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatus
 import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusResponse
 import io.nats.client.Connection
 import io.nats.client.Dispatcher
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -48,35 +49,50 @@ class OrderNatsController(
     fun add(request: CreateOrderRequest): Mono<CreateOrderResponse> {
         return orderService.add(request.toCreateOrderDTO())
             .map { it.toCreateOrderResponse() }
-            .onErrorResume { error -> error.toFailureCreateOrderResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureCreateOrderResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = OrdersNatsSubject.FIND_BY_ID)
     fun findById(request: FindOrderByIdRequest): Mono<FindOrderByIdResponse> {
         return orderService.getById(request.id)
             .map { it.toFindOrderByIdResponse() }
-            .onErrorResume { error -> error.toFailureFindOrderByIdResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureFindOrderByIdResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = OrdersNatsSubject.UPDATE)
     fun update(request: UpdateOrderRequest): Mono<UpdateOrderResponse> {
         return orderService.updateOrder(request.id, request.toUpdateOrderDTO())
             .map { it.toUpdateOrderResponse() }
-            .onErrorResume { error -> error.toFailureUpdateOrderResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureUpdateOrderResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = OrdersNatsSubject.UPDATE_STATUS)
     fun updateStatus(request: UpdateOrderStatusRequest): Mono<UpdateOrderStatusResponse> {
         return orderService.updateOrderStatus(request.id, request.status)
             .map { it.toUpdateOrderStatusResponse() }
-            .onErrorResume { error -> error.toFailureUpdateStatusOrderResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureUpdateStatusOrderResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = OrdersNatsSubject.DELETE)
     fun delete(request: DeleteOrderRequest): Mono<DeleteOrderResponse> {
         return orderService.deleteById(request.id)
             .map { toDeleteOrderResponse() }
-            .onErrorResume { error -> error.toFailureDeleteOrderResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureDeleteOrderResponse().toMono()
+            }
     }
 
     @NatsHandler(subject = OrdersNatsSubject.FIND_ALL_BY_USER_ID)
@@ -84,6 +100,13 @@ class OrderNatsController(
         return orderService.getAllByUserId(request.id)
             .collectList()
             .map { orders -> toFindOrdersByUserIdResponse(orders) }
-            .onErrorResume { error -> error.toFailureFindOrdersByUserIdResponse().toMono() }
+            .onErrorResume { error ->
+                log.error("Error while executing", error)
+                error.toFailureFindOrdersByUserIdResponse().toMono()
+            }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(OrderNatsController::class.java)
     }
 }

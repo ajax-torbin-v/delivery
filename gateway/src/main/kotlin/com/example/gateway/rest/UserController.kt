@@ -1,8 +1,8 @@
 package com.example.gateway.rest
 
-import com.example.delivery.dto.request.CreateUserDTO
-import com.example.delivery.dto.request.UpdateUserDTO
-import com.example.delivery.dto.response.UserDTO
+import com.example.core.dto.request.CreateUserDTO
+import com.example.core.dto.request.UpdateUserDTO
+import com.example.core.dto.response.UserDTO
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO

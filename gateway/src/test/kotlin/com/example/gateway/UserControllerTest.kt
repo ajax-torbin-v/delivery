@@ -1,27 +1,24 @@
 package com.example.gateway
 
-import com.example.delivery.UserFixture.buildDeleteUserRequest
-import com.example.delivery.UserFixture.buildUpdateUserRequest
-import com.example.delivery.UserFixture.createUserDTO
-import com.example.delivery.UserFixture.domainUser
-import com.example.delivery.UserFixture.randomUserId
-import com.example.delivery.UserFixture.unexpectedError
-import com.example.delivery.UserFixture.updateUserDTO
-import com.example.delivery.UserFixture.updatedDomainUser
-import com.example.delivery.UserFixture.userDTO
-import com.example.delivery.UserFixture.userNotFoundException
-import com.example.delivery.exception.UserNotFoundException
-import com.example.delivery.mapper.UserProtoMapper.toCreateUserResponse
-import com.example.delivery.mapper.UserProtoMapper.toDeleteUserResponse
-import com.example.delivery.mapper.UserProtoMapper.toFailureCreateUserResponse
-import com.example.delivery.mapper.UserProtoMapper.toFailureDeleteUserResponse
-import com.example.delivery.mapper.UserProtoMapper.toFailureFindUserByIdResponse
-import com.example.delivery.mapper.UserProtoMapper.toFailureUpdateUserResponse
-import com.example.delivery.mapper.UserProtoMapper.toFindUserByIdResponse
-import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
+import com.example.core.UserFixture.createUserDTO
+import com.example.core.UserFixture.randomUserId
+import com.example.core.UserFixture.updateUserDTO
+import com.example.core.exception.UserNotFoundException
+import com.example.gateway.UserProtoFixture.createUserResponse
+import com.example.gateway.UserProtoFixture.createUserResponseWithUnexpectedException
+import com.example.gateway.UserProtoFixture.deleteUserRequest
+import com.example.gateway.UserProtoFixture.deleteUserResponse
+import com.example.gateway.UserProtoFixture.deleteUserResponseWithUnexpectedException
+import com.example.gateway.UserProtoFixture.findUserByIdResponse
+import com.example.gateway.UserProtoFixture.findUserByIdResponseWithNotFoundException
+import com.example.gateway.UserProtoFixture.findUserByIdResponseWithUnexpectedException
+import com.example.gateway.UserProtoFixture.updateUserResponse
+import com.example.gateway.UserProtoFixture.updateUserResponseWithUnexpectedException
+import com.example.gateway.UserProtoFixture.updateUserResponseWithUserNotFoundException
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
+import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
 import com.example.gateway.rest.UserController
 import com.example.internal.api.subject.UserNatsSubject
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
@@ -62,13 +59,13 @@ class UserControllerTest {
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
-        } returns domainUser.toCreateUserResponse().toMono()
+        } returns createUserResponse.toMono()
 
         // WHEN
         val actual = userController.add(createUserDTO).block()
 
         // THEN
-        assertEquals(userDTO, actual)
+        assertEquals(createUserResponse.toDTO(), actual)
     }
 
     @Test
@@ -80,7 +77,7 @@ class UserControllerTest {
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
-        } returns unexpectedError.toFailureCreateUserResponse().toMono()
+        } returns createUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { userController.add(createUserDTO).block() }
@@ -110,13 +107,13 @@ class UserControllerTest {
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
-        } returns domainUser.toFindUserByIdResponse().toMono()
+        } returns findUserByIdResponse.toMono()
 
         // WHEN
         val actual = userController.findById(randomUserId).block()
 
         // THEN
-        assertEquals(userDTO, actual)
+        assertEquals(findUserByIdResponse.toDTO(), actual)
     }
 
     @Test
@@ -128,7 +125,7 @@ class UserControllerTest {
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
-        } returns userNotFoundException.toFailureFindUserByIdResponse().toMono()
+        } returns findUserByIdResponseWithNotFoundException.toMono()
 
         // WHEN // THEN
         assertThrows<UserNotFoundException> { userController.findById(randomUserId).block() }
@@ -143,7 +140,7 @@ class UserControllerTest {
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
-        } returns unexpectedError.toFailureFindUserByIdResponse().toMono()
+        } returns findUserByIdResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { userController.findById(randomUserId).block() }
@@ -170,16 +167,16 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
-                buildUpdateUserRequest(randomUserId),
+                updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
-        } returns updatedDomainUser.toUpdateUserResponse().toMono()
+        } returns updateUserResponse.toMono()
 
         // WHEN
         val actual = userController.update(randomUserId, updateUserDTO).block()
 
         // THEN
-        assertEquals(updatedDomainUser.toUpdateUserResponse().toDTO(), actual)
+        assertEquals(updateUserResponse.toDTO(), actual)
     }
 
     @Test
@@ -188,10 +185,10 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
-                buildUpdateUserRequest(randomUserId),
+                updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
-        } returns userNotFoundException.toFailureUpdateUserResponse().toMono()
+        } returns updateUserResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
         assertThrows<UserNotFoundException> { userController.update(randomUserId, updateUserDTO).block() }
@@ -203,10 +200,10 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
-                buildUpdateUserRequest(randomUserId),
+                updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
-        } returns unexpectedError.toFailureUpdateUserResponse().toMono()
+        } returns updateUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { userController.update(randomUserId, updateUserDTO).block() }
@@ -218,7 +215,7 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
-                buildUpdateUserRequest(randomUserId),
+                updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
         } returns UpdateUserResponse.getDefaultInstance().toMono()
@@ -233,10 +230,10 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
-                buildDeleteUserRequest(randomUserId),
+                deleteUserRequest,
                 DeleteUserResponse.parser()
             )
-        } returns toDeleteUserResponse().toMono()
+        } returns deleteUserResponse.toMono()
 
         // WHEN
         userController.delete(randomUserId).block()
@@ -245,7 +242,7 @@ class UserControllerTest {
         verify(exactly = 1) {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
-                buildDeleteUserRequest(randomUserId),
+                deleteUserRequest,
                 DeleteUserResponse.parser()
             )
         }
@@ -257,10 +254,10 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
-                buildDeleteUserRequest(randomUserId),
+                deleteUserRequest,
                 DeleteUserResponse.parser()
             )
-        } returns unexpectedError.toFailureDeleteUserResponse().toMono()
+        } returns deleteUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
         assertThrows<IllegalStateException> { userController.delete(randomUserId).block() }
@@ -272,7 +269,7 @@ class UserControllerTest {
         every {
             natsClient.doRequest(
                 "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
-                buildDeleteUserRequest(randomUserId),
+                deleteUserRequest,
                 DeleteUserResponse.parser()
             )
         } returns DeleteUserResponse.getDefaultInstance().toMono()

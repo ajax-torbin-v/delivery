@@ -1,9 +1,9 @@
 package com.example.gateway.rest
 
-import com.example.delivery.dto.request.CreateOrderDTO
-import com.example.delivery.dto.request.UpdateOrderDTO
-import com.example.delivery.dto.response.OrderDTO
-import com.example.delivery.dto.response.OrderWithProductDTO
+import com.example.core.dto.request.CreateOrderDTO
+import com.example.core.dto.request.UpdateOrderDTO
+import com.example.core.dto.response.OrderDTO
+import com.example.core.dto.response.OrderWithProductDTO
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
 import com.example.gateway.mapper.OrderProtoMapper.toDTO

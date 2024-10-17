@@ -1,12 +1,12 @@
 package com.example.delivery.controller
 
+import com.example.core.ProductFixture.randomProductId
 import com.example.delivery.ProductFixture.buildDeleteProductRequest
 import com.example.delivery.ProductFixture.buildFindProductByIdRequest
 import com.example.delivery.ProductFixture.buildUpdateProductRequest
 import com.example.delivery.ProductFixture.createProductRequest
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.productNotFoundException
-import com.example.delivery.ProductFixture.randomProductId
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.mapper.ProductProtoMapper.toCreateProductResponse

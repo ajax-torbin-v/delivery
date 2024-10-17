@@ -20,7 +20,6 @@ message DeleteProductResponse {
 
     message Failure {
         string message = 100;
-        optional Error error = 1;
     }
 }
 

@@ -1,9 +1,9 @@
 package com.example.delivery.mapper
 
+import com.example.core.dto.response.OrderItemWithProductDTO
+import com.example.core.dto.response.OrderWithProductDTO
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.projection.DomainOrderWithProduct
-import com.example.delivery.dto.response.OrderItemWithProductDTO
-import com.example.delivery.dto.response.OrderWithProductDTO
 import com.example.delivery.mapper.OrderMapper.toDTO
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.ProductMapper.toDTO

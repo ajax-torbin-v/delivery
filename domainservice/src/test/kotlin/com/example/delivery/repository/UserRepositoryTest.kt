@@ -1,7 +1,7 @@
 package com.example.delivery.repository
 
-import com.example.delivery.UserFixture.randomUpdatedFullName
-import com.example.delivery.UserFixture.randomUpdatedPhone
+import com.example.core.UserFixture.randomUpdatedFullName
+import com.example.core.UserFixture.randomUpdatedPhone
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedUser
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,10 +1,9 @@
 package com.example.delivery.mapper
 
+import com.example.core.dto.request.CreateProductDTO
+import com.example.core.dto.request.UpdateProductDTO
+import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.domain.DomainProduct
-import com.example.delivery.dto.request.CreateProductDTO
-import com.example.delivery.dto.request.UpdateProductDTO
-import com.example.delivery.exception.ProductNotFoundException
-import com.example.internal.commonmodels.Error
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.commonmodels.product.product.Product
 import com.example.internal.input.reqreply.product.create.CreateProductRequest
@@ -56,32 +55,32 @@ object ProductProtoMapper {
     }
 
     fun Throwable.toFailureFindProductByIdResponse(): FindProductByIdResponse {
-        return FindProductByIdResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
+        return FindProductByIdResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureFindProductByIdResponse) {
+                is ProductNotFoundException -> failureBuilder.productNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureCreateProductResponse(): CreateProductResponse {
-        return CreateProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
+        return CreateProductResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
         }.build()
     }
 
     fun Throwable.toFailureUpdateProductResponse(): UpdateProductResponse {
-        return UpdateProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
-            when (this) {
-                is ProductNotFoundException -> it.failureBuilder.setProductNotFound(Error.getDefaultInstance())
+        return UpdateProductResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
+            when (this@toFailureUpdateProductResponse) {
+                is ProductNotFoundException -> failureBuilder.productNotFound
             }
         }.build()
     }
 
     fun Throwable.toFailureDeleteProductResponse(): DeleteProductResponse {
-        return DeleteProductResponse.newBuilder().also {
-            it.failureBuilder.setMessage(message.orEmpty())
+        return DeleteProductResponse.newBuilder().apply {
+            failureBuilder.message = message.orEmpty()
         }.build()
     }
 

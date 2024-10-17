@@ -23,6 +23,5 @@ message CreateUserResponse {
 
     message Failure {
         string message = 100;
-        optional commonmodels.Error error = 1;
     }
 }

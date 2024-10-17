@@ -11,7 +11,6 @@ dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
 }
 
-
 val targetJvmVersion = JavaLanguageVersion.of(17)
 kotlin {
     jvmToolchain {
