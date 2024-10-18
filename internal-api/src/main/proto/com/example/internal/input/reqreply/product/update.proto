@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package com.example.internal.input.reqreply.product.update;
+
+import "com/example/internal/commonmodels/error.proto";
+import "com/example/internal/commonmodels/product/product.proto";
+
+option java_multiple_files = true;
+
+message UpdateProductRequest {
+    string id = 1;
+    optional string name = 2;
+    optional string price = 3;
+    optional int32 amount = 4;
+    optional string measurement = 5;
+}
+
+message UpdateProductResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {
+        commonmodels.product.product.Product product = 1;
+    }
+
+    message Failure {
+        string message = 100;
+        oneof error {
+            commonmodels.Error product_not_found = 1;
+        }
+    }
+}
+

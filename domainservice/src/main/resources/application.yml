@@ -1,0 +1,11 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://${HOST}:${PORT}/${DB_NAME}
+
+server:
+  servlet:
+    contextPath: /api/v1
+
+mongock:
+  migration-scan-package: com.example.delivery.config

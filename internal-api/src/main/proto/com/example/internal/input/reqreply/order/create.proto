@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package com.example.internal.input.reqreply.order.create;
+
+import "com/example/internal/commonmodels/error.proto";
+import "com/example/internal/commonmodels/order/order.proto";
+import "com/example/internal/commonmodels/order/order_item.proto";
+import "com/example/internal/commonmodels/order/shipment_details.proto";
+
+option java_multiple_files = true;
+
+message CreateOrderRequest {
+    repeated commonmodels.order.order_item.OrderItem items = 1;
+    commonmodels.order.shipment_details.ShipmentDetails shipment_details = 2;
+    string user_id = 3;
+}
+
+message CreateOrderResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {
+        commonmodels.order.order.Order order = 1;
+    }
+
+    message Failure {
+        string message = 100;
+        oneof error {
+            commonmodels.Error user_not_found = 1;
+            commonmodels.Error product_not_found = 2;
+            commonmodels.Error product_not_sufficient_amount = 3;
+        }
+    }
+}

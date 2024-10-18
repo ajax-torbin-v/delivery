@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package com.example.internal.input.reqreply.product.find;
+
+import "com/example/internal/commonmodels/error.proto";
+import "com/example/internal/commonmodels/product/product.proto";
+
+option java_multiple_files = true;
+
+message FindProductByIdRequest {
+    string id = 1;
+}
+
+message FindProductByIdResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {
+        commonmodels.product.product.Product product = 1;
+    }
+
+    message Failure {
+        string message = 100;
+        oneof error {
+            commonmodels.Error product_not_found = 1;
+        }
+    }
+}
+
