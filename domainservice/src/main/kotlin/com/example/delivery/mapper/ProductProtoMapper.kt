@@ -16,28 +16,20 @@ import java.math.BigDecimal
 object ProductProtoMapper {
 
     fun DomainProduct.toFindProductByIdResponse(): FindProductByIdResponse {
-        return FindProductByIdResponse.newBuilder()
-            .also { builder ->
-                builder.successBuilder.also {
-                    buildProduct(this, it.productBuilder)
-                }.build()
-            }.build()
+        return FindProductByIdResponse.newBuilder().also {
+            it.successBuilder.product = this.toProto()
+        }.build()
     }
 
     fun DomainProduct.toCreateProductResponse(): CreateProductResponse {
-        return CreateProductResponse.newBuilder()
-            .also { builder ->
-                builder.successBuilder.also {
-                    buildProduct(this, it.productBuilder)
-                }.build()
-            }.build()
+        return CreateProductResponse.newBuilder().also {
+            it.successBuilder.product = this.toProto()
+        }.build()
     }
 
     fun DomainProduct.toUpdateProductResponse(): UpdateProductResponse {
-        return UpdateProductResponse.newBuilder().also { builder ->
-            builder.successBuilder.also {
-                buildProduct(this, it.productBuilder)
-            }.build()
+        return UpdateProductResponse.newBuilder().also {
+            it.successBuilder.product = this.toProto()
         }.build()
     }
 
@@ -90,13 +82,13 @@ object ProductProtoMapper {
         }.build()
     }
 
-    private fun buildProduct(domainProduct: DomainProduct, productBuilder: Product.Builder) {
-        productBuilder.apply {
-            setId(domainProduct.id)
-            setName(domainProduct.name)
-            setPrice(domainProduct.price.toPlainString())
-            setAmount(domainProduct.amountAvailable)
-            setMeasurement(domainProduct.measurement)
+    fun DomainProduct.toProto(): Product {
+        return Product.newBuilder().also {
+            it.id = this.id
+            it.name = this.name
+            it.price = this.price.toPlainString()
+            it.amount = this.amountAvailable
+            it.measurement = this.measurement
         }.build()
     }
 }

@@ -27,19 +27,19 @@ object UserProtoMapper {
 
     fun DomainUser.toUpdateUserResponse(): UpdateUserResponse {
         return UpdateUserResponse.newBuilder().also {
-            buildUser(this, it.successBuilder.userBuilder)
+            it.successBuilder.user = this.toProto()
         }.build()
     }
 
     fun DomainUser.toFindUserByIdResponse(): FindUserByIdResponse {
         return FindUserByIdResponse.newBuilder().also {
-            buildUser(this, it.successBuilder.userBuilder)
+            it.successBuilder.user = this.toProto()
         }.build()
     }
 
     fun DomainUser.toCreateUserResponse(): CreateUserResponse {
         return CreateUserResponse.newBuilder().also {
-            buildUser(this, it.successBuilder.userBuilder)
+            it.successBuilder.user = this.toProto()
         }.build()
     }
 
@@ -73,12 +73,12 @@ object UserProtoMapper {
         }.build()
     }
 
-    private fun buildUser(domainUser: DomainUser, userBuilder: User.Builder) {
-        userBuilder.apply {
-            setId(domainUser.id)
-            setPassword(domainUser.password)
-            setPhone(domainUser.phone)
-            setFullName(domainUser.fullName)
-        }
+    fun DomainUser.toProto(): User {
+        return User.newBuilder().also {
+            it.id = id
+            it.password = password
+            it.phone = phone
+            it.fullName = fullName
+        }.build()
     }
 }

@@ -2,6 +2,7 @@ package com.example.delivery.controller
 
 import com.example.delivery.annotaion.NatsController
 import com.example.delivery.annotaion.NatsHandler
+import com.example.delivery.controller.OrderNatsController.Companion.QUEUE_GROUP
 import com.example.delivery.mapper.OrderProtoMapper.toCreateOrderDTO
 import com.example.delivery.mapper.OrderProtoMapper.toCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toDeleteOrderResponse
@@ -38,7 +39,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-@NatsController(subjectPrefix = OrdersNatsSubject.ORDER_PREFIX, queueGroup = OrdersNatsSubject.QUEUE_GROUP)
+@NatsController(subjectPrefix = OrdersNatsSubject.ORDER_PREFIX, queueGroup = QUEUE_GROUP)
 class OrderNatsController(
     private val orderService: OrderService,
     connection: Connection,
@@ -107,6 +108,7 @@ class OrderNatsController(
     }
 
     companion object {
+        const val QUEUE_GROUP = "order_group"
         private val log = LoggerFactory.getLogger(OrderNatsController::class.java)
     }
 }

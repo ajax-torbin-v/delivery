@@ -7,7 +7,7 @@ import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdResponse
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class OrderProtoMapperTest {

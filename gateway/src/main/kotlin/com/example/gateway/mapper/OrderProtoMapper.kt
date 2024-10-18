@@ -116,10 +116,10 @@ object OrderProtoMapper {
     }
 
     fun CreateOrderDTO.toCreateOrderRequest(): CreateOrderRequest {
-        return CreateOrderRequest.newBuilder().also { builder ->
-            builder.addAllItems(this.items.map { it.toOrderItem() })
-                .setUserId(userId)
-                .setShipmentDetails(shipmentDetails.toProto())
+        return CreateOrderRequest.newBuilder().also {
+            it.addAllItems(items.map { item -> item.toOrderItem() })
+            it.userId = userId
+            it.shipmentDetails = shipmentDetails.toProto()
         }.build()
     }
 
@@ -141,14 +141,14 @@ object OrderProtoMapper {
 
     fun updateOrderRequest(id: String, updateOrderDTO: UpdateOrderDTO): UpdateOrderRequest {
         return UpdateOrderRequest.newBuilder().also { builder ->
-            builder.setId(id)
+            builder.id = id
             updateOrderDTO.shipmentDetails?.let { shipment ->
                 builder.setShipmentDetails(
                     ShipmentDetails.newBuilder().also { shipmentBuilder ->
-                        shipment.city.let { shipmentBuilder.setCity(it) }
-                        shipment.street.let { shipmentBuilder.setStreet(it) }
-                        shipment.building.let { shipmentBuilder.setBuilding(it) }
-                        shipment.index.let { shipmentBuilder.setIndex(it) }
+                        shipment.city.let { shipmentBuilder.city = it }
+                        shipment.street.let { shipmentBuilder.street = it }
+                        shipment.building.let { shipmentBuilder.building = it }
+                        shipment.index.let { shipmentBuilder.index = it }
                     }.build()
                 )
             }
@@ -183,10 +183,10 @@ object OrderProtoMapper {
 
     private fun ShipmentDetailsDTO.toProto(): ShipmentDetails {
         return ShipmentDetails.newBuilder().also {
-            it.setCity(city)
-                .setStreet(street)
-                .setBuilding(building)
-                .setIndex(index)
+            it.city = city
+            it.street = street
+            it.building = building
+            it.index = index
         }.build()
     }
 }

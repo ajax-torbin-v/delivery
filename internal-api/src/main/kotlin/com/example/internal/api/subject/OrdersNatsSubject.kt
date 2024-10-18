@@ -1,7 +1,6 @@
 package com.example.internal.api.subject
 
 object OrdersNatsSubject {
-    const val QUEUE_GROUP = "order_group"
     const val ORDER_PREFIX = "order"
     const val SAVE = "save"
     const val FIND_BY_ID = "find_by_id"

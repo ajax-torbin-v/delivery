@@ -2,6 +2,7 @@ package com.example.delivery.controller
 
 import com.example.delivery.annotaion.NatsController
 import com.example.delivery.annotaion.NatsHandler
+import com.example.delivery.controller.ProductNatsController.Companion.QUEUE_GROUP
 import com.example.delivery.mapper.ProductProtoMapper.toCreateProductDTO
 import com.example.delivery.mapper.ProductProtoMapper.toCreateProductResponse
 import com.example.delivery.mapper.ProductProtoMapper.toDeleteProductResponse
@@ -30,7 +31,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-@NatsController(subjectPrefix = ProductsNatsSubject.PRODUCT_PREFIX, queueGroup = ProductsNatsSubject.QUEUE_GROUP)
+@NatsController(subjectPrefix = ProductsNatsSubject.PRODUCT_PREFIX, queueGroup = QUEUE_GROUP)
 class ProductNatsController(
     private val productService: ProductService,
     connection: Connection,
@@ -77,6 +78,7 @@ class ProductNatsController(
     }
 
     companion object {
+        const val QUEUE_GROUP = "product_group"
         private val log = LoggerFactory.getLogger(ProductNatsController::class.java)
     }
 }

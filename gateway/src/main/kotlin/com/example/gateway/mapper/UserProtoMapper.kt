@@ -62,20 +62,18 @@ object UserProtoMapper {
 
     fun updateUserRequest(id: String, updateUserDTO: UpdateUserDTO): UpdateUserRequest {
         return UpdateUserRequest.newBuilder().also { builder ->
-            builder.setId(id)
-            updateUserDTO.phone?.let { builder.setPhone(it) }
-            updateUserDTO.fullName?.let { builder.setFullname(it) }
+            builder.id = id
+            updateUserDTO.phone?.let { builder.phone = it }
+            updateUserDTO.fullName?.let { builder.fullname = it }
         }.build()
     }
 
     fun CreateUserDTO.toCreateUserRequest(): CreateUserRequest {
-        return CreateUserRequest.newBuilder()
-            .also {
-                it.userBuilder
-                    .setFullName(this.fullName)
-                    .setPhone(this.phone)
-                    .setPassword(this.password)
-            }.build()
+        return CreateUserRequest.newBuilder().apply {
+            userBuilder.fullName = fullName
+            userBuilder.phone = phone
+            userBuilder.password = password
+        }.build()
     }
 
     private fun User.toDTO(): UserDTO {

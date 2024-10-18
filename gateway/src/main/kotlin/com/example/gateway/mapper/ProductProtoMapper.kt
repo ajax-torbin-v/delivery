@@ -15,12 +15,11 @@ import java.math.BigDecimal
 
 object ProductProtoMapper {
     fun CreateProductDTO.toCreateProductRequest(): CreateProductRequest {
-        return CreateProductRequest.newBuilder().also {
-            it.productBuilder
-                .setPrice(this.price.toPlainString())
-                .setAmount(this.amount)
-                .setMeasurement(this.measurement)
-                .setName(this.name)
+        return CreateProductRequest.newBuilder().apply {
+            productBuilder.price = price.toString()
+            productBuilder.amount = amount
+            productBuilder.measurement = measurement
+            productBuilder.name = name
         }.build()
     }
 
@@ -77,11 +76,11 @@ object ProductProtoMapper {
 
     fun updateProductRequest(id: String, updateProductDTO: UpdateProductDTO): UpdateProductRequest {
         return UpdateProductRequest.newBuilder().also { builder ->
-            builder.setId(id)
-            updateProductDTO.name?.let { builder.setName(it) }
-            updateProductDTO.amountAvailable?.let { builder.setAmount(it) }
-            updateProductDTO.price?.let { builder.setPrice(it.toPlainString()) }
-            updateProductDTO.measurement?.let { builder.setMeasurement(it) }
+            builder.id = id
+            updateProductDTO.name?.let { builder.name = it }
+            updateProductDTO.amountAvailable?.let { builder.amount = it }
+            updateProductDTO.price?.let { builder.price = it.toPlainString() }
+            updateProductDTO.measurement?.let { builder.measurement = it }
         }.build()
     }
 

@@ -9,12 +9,11 @@ import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
 import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainOrder
-import com.example.delivery.domain.DomainProduct
 import com.example.delivery.domain.projection.DomainOrderWithProduct
+import com.example.delivery.mapper.ProductProtoMapper.toProto
 import com.example.internal.commonmodels.order.order.Order
 import com.example.internal.commonmodels.order.order_item.OrderItem
 import com.example.internal.commonmodels.order.shipment_details.ShipmentDetails
-import com.example.internal.commonmodels.product.product.Product
 import com.example.internal.input.reqreply.order.create.CreateOrderRequest
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
@@ -26,32 +25,31 @@ import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatus
 
 object OrderProtoMapper {
     fun DomainOrder.toCreateOrderResponse(): CreateOrderResponse {
-        return CreateOrderResponse.newBuilder().apply {
-            successBuilder.orderBuilder.also { buildOrder(it) }
+        return CreateOrderResponse.newBuilder().also {
+            it.successBuilder.order = this.toProto()
         }.build()
     }
 
     fun DomainOrder.toUpdateOrderResponse(): UpdateOrderResponse {
-        return UpdateOrderResponse.newBuilder().apply {
-            successBuilder.orderBuilder.also { buildOrder(it) }
+        return UpdateOrderResponse.newBuilder().also {
+            it.successBuilder.order = this.toProto()
         }.build()
     }
 
     fun DomainOrder.toUpdateOrderStatusResponse(): UpdateOrderStatusResponse {
-        return UpdateOrderStatusResponse.newBuilder().apply {
-            successBuilder.orderBuilder.also { buildOrder(it) }
+        return UpdateOrderStatusResponse.newBuilder().also {
+            it.successBuilder.order = this.toProto()
         }.build()
     }
 
     fun DomainOrderWithProduct.toFindOrderByIdResponse(): FindOrderByIdResponse {
         return FindOrderByIdResponse.newBuilder().apply {
-            successBuilder.orderBuilder.also { protoBuilder ->
-                protoBuilder
-                    .setId(id)
-                    .setStatus(status)
-                    .setUserId(userId)
-                    .setShipmentDetails(shipmentDetails.toShipmentDetails())
-                    .addAllItems(items.map { it.toOrderItemFull() })
+            successBuilder.orderBuilder.also {
+                it.id = id
+                it.status = status
+                it.userId = userId
+                it.shipmentDetails = shipmentDetails.toShipmentDetails()
+                it.addAllItems(items.map { item -> item.toOrderItemFull() })
             }
         }.build()
     }
@@ -128,56 +126,33 @@ object OrderProtoMapper {
     }
 
     fun DomainOrder.DomainShipmentDetails.toShipmentDetails(): ShipmentDetails {
-        return ShipmentDetails.newBuilder()
-            .setCity(city)
-            .setStreet(street)
-            .setBuilding(building)
-            .setIndex(index)
-            .build()
+        return ShipmentDetails.newBuilder().also {
+            it.city = city
+            it.street = street
+            it.building = building
+            it.index = index
+        }.build()
     }
 
     fun DomainOrderWithProduct.DomainOrderItemWithProduct.toOrderItemFull(): OrderItem {
         return OrderItem.newBuilder().also {
-            it.setPrice(price.toString())
-                .setAmount(amount)
-                .setProductFull(product.toProtoProduct())
+            it.price = price.toString()
+            it.amount = amount
+            it.productFull = product.toProto()
         }.build()
     }
 
     fun DomainOrder.DomainOrderItem.toOrderItem(): OrderItem {
         return OrderItem.newBuilder().also {
-            it.setProductId(productId)
-                .setAmount(amount)
-                .setPrice(price.toString())
-        }.build()
-    }
-
-    fun DomainProduct.toProtoProduct(): Product {
-        return Product.newBuilder().also {
-            it.setId(id)
-                .setName(name)
-                .setPrice(price.toString())
-                .setAmount(amountAvailable)
-                .setMeasurement(measurement)
+            it.productId = productId
+            it.amount = amount
+            it.price = price.toString()
         }.build()
     }
 
     fun toFindOrdersByUserIdResponse(orders: List<DomainOrder>): FindOrdersByUserIdResponse {
         return FindOrdersByUserIdResponse.newBuilder().apply {
-            val successBuilder = FindOrdersByUserIdResponse.Success.newBuilder()
             successBuilder.addAllOrder(orders.map { it.toProto() })
-            success = successBuilder.build()
-        }.build()
-    }
-
-    fun DomainOrder.toProto(): Order {
-        return Order.newBuilder().also { builder ->
-            builder
-                .addAllItems(items.map { it.toOrderItem() })
-                .setId(id)
-                .setStatus(status.toString())
-                .setShipmentDetails(shipmentDetails.toShipmentDetails())
-                .setUserId(userId)
         }.build()
     }
 
@@ -185,12 +160,13 @@ object OrderProtoMapper {
         return ShipmentDetailsDTO(city, street, building, index)
     }
 
-    fun DomainOrder.buildOrder(protoBuilder: Order.Builder) {
-        protoBuilder
-            .setId(id)
-            .setStatus(status.toString())
-            .setUserId(userId)
-            .setShipmentDetails(shipmentDetails.toShipmentDetails())
-            .addAllItems(items.map { it.toOrderItem() })
+    fun DomainOrder.toProto(): Order {
+        return Order.newBuilder().also {
+            it.id = id
+            it.status = status.toString()
+            it.userId = userId
+            it.shipmentDetails = shipmentDetails.toShipmentDetails()
+            it.addAllItems(items.map { item -> item.toOrderItem() })
+        }.build()
     }
 }
