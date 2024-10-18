@@ -47,7 +47,7 @@ object UserProtoMapper {
         return FindUserByIdResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureFindUserByIdResponse) {
-                is UserNotFoundException -> failureBuilder.userNotFound
+                is UserNotFoundException -> failureBuilder.userNotFoundBuilder
             }
         }.build()
     }
@@ -62,7 +62,7 @@ object UserProtoMapper {
         return UpdateUserResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureUpdateUserResponse) {
-                is UserNotFoundException -> failureBuilder.userNotFound
+                is UserNotFoundException -> failureBuilder.userNotFoundBuilder
             }
         }.build()
     }

@@ -1,5 +1,4 @@
 plugins {
-    id("com.google.protobuf") version "0.9.4"
     id("delta-coverage-conventions")
     id("kotlin-conventions")
 }

@@ -126,7 +126,7 @@ class OrderControllerTest {
         } returns createOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalStateException> { orderController.add(createOrderDTO).block() }
+        assertThrows<RuntimeException> { orderController.add(createOrderDTO).block() }
     }
 
     @Test
@@ -141,7 +141,7 @@ class OrderControllerTest {
         } returns CreateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalArgumentException> { orderController.add(createOrderDTO).block() }
+        assertThrows<RuntimeException> { orderController.add(createOrderDTO).block() }
     }
 
     @Test
@@ -205,7 +205,7 @@ class OrderControllerTest {
         } returns FindOrderByIdResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalArgumentException> { orderController.findById(randomOrderId).block()!! }
+        assertThrows<RuntimeException> { orderController.findById(randomOrderId).block()!! }
     }
 
     @Test
@@ -268,7 +268,7 @@ class OrderControllerTest {
         } returns UpdateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalArgumentException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
+        assertThrows<RuntimeException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
     }
 
     @Test
@@ -316,7 +316,7 @@ class OrderControllerTest {
         } returns FindOrdersByUserIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { orderController.findAllByUserId(randomUserId).block() }
+        assertThrows<RuntimeException> { orderController.findAllByUserId(randomUserId).block() }
     }
 
     @Test
@@ -379,7 +379,7 @@ class OrderControllerTest {
         } returns UpdateOrderStatusResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
+        assertThrows<RuntimeException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
     }
 
     @Test
@@ -433,6 +433,6 @@ class OrderControllerTest {
         } returns DeleteOrderResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { orderController.delete(randomOrderId).block() }
+        assertThrows<RuntimeException> { orderController.delete(randomOrderId).block() }
     }
 }

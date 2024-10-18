@@ -87,7 +87,7 @@ class ProductControllerTest {
         } returns CreateProductResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalArgumentException> { productController.add(createProductDTO).block() }
+        assertThrows<RuntimeException> { productController.add(createProductDTO).block() }
     }
 
     @Test
@@ -150,7 +150,7 @@ class ProductControllerTest {
         } returns FindProductByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { productController.findById(randomProductId).block() }
+        assertThrows<RuntimeException> { productController.findById(randomProductId).block() }
     }
 
     @Test

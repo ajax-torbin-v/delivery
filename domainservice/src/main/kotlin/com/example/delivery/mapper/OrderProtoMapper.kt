@@ -64,7 +64,7 @@ object OrderProtoMapper {
         return FindOrderByIdResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureFindOrderByIdResponse) {
-                is OrderNotFoundException -> failureBuilder.orderNotFound
+                is OrderNotFoundException -> failureBuilder.orderNotFoundBuilder
             }
         }.build()
     }
@@ -73,7 +73,7 @@ object OrderProtoMapper {
         return UpdateOrderResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureUpdateOrderResponse) {
-                is OrderNotFoundException -> failureBuilder.orderNotFound
+                is OrderNotFoundException -> failureBuilder.orderNotFoundBuilder
             }
         }.build()
     }
@@ -82,7 +82,7 @@ object OrderProtoMapper {
         return UpdateOrderStatusResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureUpdateStatusOrderResponse) {
-                is OrderNotFoundException -> failureBuilder.orderNotFound
+                is OrderNotFoundException -> failureBuilder.orderNotFoundBuilder
             }
         }.build()
     }
@@ -97,7 +97,7 @@ object OrderProtoMapper {
         return FindOrdersByUserIdResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureFindOrdersByUserIdResponse) {
-                is UserNotFoundException -> failureBuilder.userNotFound
+                is UserNotFoundException -> failureBuilder.userNotFoundBuilder
             }
         }.build()
     }
@@ -110,9 +110,9 @@ object OrderProtoMapper {
         return CreateOrderResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureCreateOrderResponse) {
-                is ProductNotFoundException -> failureBuilder.productNotFound
-                is UserNotFoundException -> failureBuilder.userNotFound
-                is ProductAmountException -> failureBuilder.productNotSufficientAmount
+                is ProductNotFoundException -> failureBuilder.productNotFoundBuilder
+                is UserNotFoundException -> failureBuilder.userNotFoundBuilder
+                is ProductAmountException -> failureBuilder.productNotSufficientAmountBuilder
             }
         }.build()
     }

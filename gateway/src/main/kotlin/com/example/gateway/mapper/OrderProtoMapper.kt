@@ -30,7 +30,9 @@ object OrderProtoMapper {
 
     @SuppressWarnings("ThrowsCount")
     fun CreateOrderResponse.toDTO(): OrderDTO {
-        require(this != CreateOrderResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == CreateOrderResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND ->
@@ -52,7 +54,9 @@ object OrderProtoMapper {
     }
 
     fun FindOrderByIdResponse.toDtoWithProduct(): OrderWithProductDTO {
-        require(this != FindOrderByIdResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == FindOrderByIdResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 FindOrderByIdResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
@@ -65,8 +69,11 @@ object OrderProtoMapper {
         return success.order.toDtoWithProduct()
     }
 
+    @SuppressWarnings("ThrowsCount")
     fun UpdateOrderResponse.toDTO(): OrderDTO {
-        require(this != UpdateOrderResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == UpdateOrderResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateOrderResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> throw OrderNotFoundException(failure.message)
@@ -77,7 +84,9 @@ object OrderProtoMapper {
     }
 
     fun UpdateOrderStatusResponse.toDTO(): OrderDTO {
-        require(this != UpdateOrderStatusResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == UpdateOrderStatusResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateOrderStatusResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
@@ -91,7 +100,9 @@ object OrderProtoMapper {
     }
 
     fun FindOrdersByUserIdResponse.toDTO(): List<OrderDTO> {
-        require(this != FindOrdersByUserIdResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == FindOrdersByUserIdResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 FindOrdersByUserIdResponse.Failure.ErrorCase.USER_NOT_FOUND ->
@@ -120,7 +131,9 @@ object OrderProtoMapper {
     }
 
     fun DeleteOrderResponse.toDTO() {
-        require(this != DeleteOrderResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == DeleteOrderResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             error(failure.message)
         }

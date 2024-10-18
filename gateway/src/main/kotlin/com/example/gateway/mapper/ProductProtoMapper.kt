@@ -25,7 +25,9 @@ object ProductProtoMapper {
     }
 
     fun CreateProductResponse.toDTO(): ProductDTO {
-        require(this != CreateProductResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == CreateProductResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             error(failure.message)
         }
@@ -33,7 +35,9 @@ object ProductProtoMapper {
     }
 
     fun FindProductByIdResponse.toDTO(): ProductDTO {
-        require(this != FindProductByIdResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == FindProductByIdResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
@@ -47,7 +51,9 @@ object ProductProtoMapper {
     }
 
     fun UpdateProductResponse.toDTO(): ProductDTO {
-        require(this == UpdateProductResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == UpdateProductResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
@@ -61,7 +67,9 @@ object ProductProtoMapper {
     }
 
     fun DeleteProductResponse.toDTO() {
-        require(this != DeleteProductResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == DeleteProductResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (this.hasFailure()) {
             error(failure.message)
         }

@@ -2,7 +2,6 @@ package com.example.core
 
 import com.example.core.dto.request.CreateUserDTO
 import com.example.core.dto.request.UpdateUserDTO
-import com.example.core.dto.response.UserDTO
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 
@@ -17,12 +16,6 @@ object UserFixture {
         fullName = randomFullName,
         phone = randomPhone,
         password = "password",
-    )
-
-    val userDTO = UserDTO(
-        id = randomUserId,
-        fullName = randomFullName,
-        phone = randomPhone,
     )
 
     val updateUserDTO = UpdateUserDTO(

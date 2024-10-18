@@ -41,23 +41,6 @@ object ProductFixture {
         measurement = randomMeasurement
     )
 
-    val products = listOf(
-        DomainProduct(
-            randomProductId,
-            randomProductName,
-            randomPrice,
-            randomAmountAvailable,
-            randomMeasurement
-        ),
-        DomainProduct(
-            randomProductId.reversed(),
-            randomProductName,
-            randomPrice,
-            randomAmountAvailable,
-            randomMeasurement
-        )
-    )
-
     val updateProductObject = Update()
         .set("name", randomUpdateProductName)
         .set("price", randomUpdatePrice)

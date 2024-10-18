@@ -37,7 +37,7 @@ jobs:
           build-scan-terms-of-use-agree: "yes"
 
       - name: Start containers
-        run: docker compose -f "docker-compose-github-actions.yaml" up -d
+        run: docker compose -f docker-compose-github-actions.yaml up -d
 
       - name: Run build
         run: ./gradlew build --scan -x deltaCoverage

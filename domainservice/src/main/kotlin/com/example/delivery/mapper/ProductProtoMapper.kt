@@ -58,7 +58,7 @@ object ProductProtoMapper {
         return FindProductByIdResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureFindProductByIdResponse) {
-                is ProductNotFoundException -> failureBuilder.productNotFound
+                is ProductNotFoundException -> failureBuilder.productNotFoundBuilder
             }
         }.build()
     }
@@ -73,7 +73,7 @@ object ProductProtoMapper {
         return UpdateProductResponse.newBuilder().apply {
             failureBuilder.message = message.orEmpty()
             when (this@toFailureUpdateProductResponse) {
-                is ProductNotFoundException -> failureBuilder.productNotFound
+                is ProductNotFoundException -> failureBuilder.productNotFoundBuilder
             }
         }.build()
     }

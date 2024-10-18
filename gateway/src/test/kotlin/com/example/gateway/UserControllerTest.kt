@@ -95,7 +95,7 @@ class UserControllerTest {
         } returns CreateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { userController.add(createUserDTO).block() }
+        assertThrows<RuntimeException> { userController.add(createUserDTO).block() }
     }
 
     @Test
@@ -158,7 +158,7 @@ class UserControllerTest {
         } returns FindUserByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { userController.findById(randomUserId).block() }
+        assertThrows<RuntimeException> { userController.findById(randomUserId).block() }
     }
 
     @Test
@@ -221,7 +221,7 @@ class UserControllerTest {
         } returns UpdateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { userController.update(randomUserId, updateUserDTO).block() }
+        assertThrows<RuntimeException> { userController.update(randomUserId, updateUserDTO).block() }
     }
 
     @Test
@@ -275,6 +275,6 @@ class UserControllerTest {
         } returns DeleteUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { userController.delete(randomUserId).block() }
+        assertThrows<RuntimeException> { userController.delete(randomUserId).block() }
     }
 }

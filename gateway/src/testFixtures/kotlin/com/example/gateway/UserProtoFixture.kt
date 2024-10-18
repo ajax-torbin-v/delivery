@@ -5,7 +5,6 @@ import com.example.core.UserFixture.randomPhone
 import com.example.core.UserFixture.randomUpdatedFullName
 import com.example.core.UserFixture.randomUpdatedPhone
 import com.example.core.UserFixture.randomUserId
-import com.example.core.exception.UserNotFoundException
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
 import com.example.internal.input.reqreply.user.delete.DeleteUserRequest
 import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
@@ -13,8 +12,6 @@ import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
 import com.example.internal.input.reqreply.user.update.UpdateUserResponse
 
 object UserProtoFixture {
-    val userNotFoundException = UserNotFoundException("User with id $randomUserId don't exist")
-
     val createUserResponse = CreateUserResponse.newBuilder().apply {
         successBuilder.userBuilder.apply {
             id = randomUserId

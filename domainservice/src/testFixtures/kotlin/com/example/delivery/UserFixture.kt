@@ -18,7 +18,6 @@ import org.springframework.data.mongodb.core.query.Update
 object UserFixture {
 
     val userNotFoundException = UserNotFoundException("User with id $randomUserId doesn't exists")
-    val unexpectedError = NullPointerException()
 
     val user = MongoUser(
         ObjectId(randomUserId),

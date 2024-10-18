@@ -16,7 +16,9 @@ import com.example.internal.input.reqreply.user.update.UpdateUserResponse
 object UserProtoMapper {
 
     fun CreateUserResponse.toDTO(): UserDTO {
-        require(this != CreateUserResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == CreateUserResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             error(failure.message)
         }
@@ -24,7 +26,9 @@ object UserProtoMapper {
     }
 
     fun FindUserByIdResponse.toDTO(): UserDTO {
-        require(this != FindUserByIdResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == FindUserByIdResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
@@ -35,7 +39,9 @@ object UserProtoMapper {
     }
 
     fun UpdateUserResponse.toDTO(): UserDTO {
-        require(this != UpdateUserResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == UpdateUserResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (hasFailure()) {
             when (failure.errorCase!!) {
                 UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
@@ -46,7 +52,9 @@ object UserProtoMapper {
     }
 
     fun DeleteUserResponse.toDTO() {
-        require(this != DeleteUserResponse.getDefaultInstance()) { "Acquired message is empty!" }
+        if (this == DeleteUserResponse.getDefaultInstance()) {
+            throw RuntimeException("Acquired message is empty!")
+        }
         if (this.hasFailure()) {
             error(failure.message)
         }
