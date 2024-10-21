@@ -62,12 +62,11 @@ object ProductFixture {
     )
 
 
-    val createProductRequest = CreateProductRequest.newBuilder().also {
-        it.productBuilder
-            .setAmount(randomAmountAvailable)
-            .setPrice(randomPrice.toPlainString())
-            .setName(randomProductName)
-            .setMeasurement(randomMeasurement)
+    val createProductRequest = CreateProductRequest.newBuilder().apply {
+        amount = randomAmountAvailable
+        price = randomPrice.toPlainString()
+        name = randomProductName
+        measurement = randomMeasurement
     }.build()
 
     fun buildFindProductByIdRequest(productId: String): FindProductByIdRequest {
@@ -75,12 +74,12 @@ object ProductFixture {
     }
 
     fun buildUpdateProductRequest(productId: String): UpdateProductRequest {
-        return UpdateProductRequest.newBuilder().also {
-            it.setId(productId)
-                .setName(randomUpdateProductName)
-                .setPrice(randomUpdatePrice.toPlainString())
-                .setMeasurement(randomUpdateMeasurement)
-                .setAmount(randomUpdateAmountAvailable)
+        return UpdateProductRequest.newBuilder().apply {
+            id = productId
+            name = randomUpdateProductName
+            price = randomUpdatePrice.toPlainString()
+            measurement = randomUpdateMeasurement
+            amount = randomUpdateAmountAvailable
         }.build()
     }
 

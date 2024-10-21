@@ -35,10 +35,10 @@ object ProductProtoMapper {
 
     fun CreateProductRequest.toCreateProductDTO(): CreateProductDTO {
         return CreateProductDTO(
-            product.name,
-            BigDecimal(product.price),
-            product.amount,
-            product.measurement
+            name,
+            BigDecimal(price),
+            amount,
+            measurement
         )
     }
 

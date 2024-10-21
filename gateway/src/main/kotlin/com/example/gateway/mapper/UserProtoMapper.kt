@@ -70,9 +70,9 @@ object UserProtoMapper {
 
     fun CreateUserDTO.toCreateUserRequest(): CreateUserRequest {
         return CreateUserRequest.newBuilder().apply {
-            userBuilder.fullName = fullName
-            userBuilder.phone = phone
-            userBuilder.password = password
+            fullName = fullName
+            phone = phone
+            password = password
         }.build()
     }
 

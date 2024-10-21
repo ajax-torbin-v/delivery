@@ -16,10 +16,10 @@ import java.math.BigDecimal
 object ProductProtoMapper {
     fun CreateProductDTO.toCreateProductRequest(): CreateProductRequest {
         return CreateProductRequest.newBuilder().apply {
-            productBuilder.price = price.toString()
-            productBuilder.amount = amount
-            productBuilder.measurement = measurement
-            productBuilder.name = name
+            price = price.toString()
+            amount = amount
+            measurement = measurement
+            name = name
         }.build()
     }
 

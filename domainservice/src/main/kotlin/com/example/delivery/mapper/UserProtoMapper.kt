@@ -14,7 +14,7 @@ import com.example.internal.input.reqreply.user.update.UpdateUserResponse
 
 object UserProtoMapper {
     fun CreateUserRequest.toCreateUserDTO(): CreateUserDTO {
-        return CreateUserDTO(user.fullName, user.phone, user.password)
+        return CreateUserDTO(fullName, phone, password)
     }
 
     fun UpdateUserRequest.toUpdateUserDTO(): UpdateUserDTO {

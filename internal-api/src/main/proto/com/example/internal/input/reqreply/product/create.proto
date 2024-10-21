@@ -7,7 +7,10 @@ import "com/example/internal/commonmodels/product/product.proto";
 option java_multiple_files = true;
 
 message CreateProductRequest {
-    commonmodels.product.product.Product product = 1;
+    string name = 1;
+    string price = 2;
+    int32 amount = 3;
+    string measurement = 4;
 }
 
 message CreateProductResponse {

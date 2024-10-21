@@ -43,19 +43,18 @@ object UserFixture {
 
     val updatedUser = user.copy(fullName = randomUpdatedFullName, phone = randomUpdatedPhone)
 
-    val createUserRequest = CreateUserRequest.newBuilder().also {
-        it.userBuilder
-            .setFullName(randomFullName)
-            .setPhone(randomPhone)
-            .setPassword("password")
+    val createUserRequest = CreateUserRequest.newBuilder().apply {
+        fullName = randomFullName
+        phone = randomPhone
+        password = "password"
     }.build()
 
     fun buildFindUserByIdRequest(userId: String) = FindUserByIdRequest.newBuilder().setId(userId).build()
 
-    fun buildUpdateUserRequest(userId: String) = UpdateUserRequest.newBuilder().also {
-        it.setId(userId)
-        it.setFullname(randomUpdatedFullName)
-        it.setPhone(randomUpdatedPhone)
+    fun buildUpdateUserRequest(userId: String) = UpdateUserRequest.newBuilder().apply {
+        id = userId
+        fullname = randomUpdatedFullName
+        phone = randomUpdatedPhone
     }.build()
 
     fun buildDeleteUserRequest(userId: String) = DeleteUserRequest.newBuilder().setId(userId).build()
