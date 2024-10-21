@@ -9,7 +9,7 @@ import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
 import com.example.gateway.mapper.OrderProtoMapper.toDTO
 import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
 import com.example.gateway.mapper.OrderProtoMapper.updateOrderRequest
-import com.example.internal.api.subject.OrdersNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.delete.DeleteOrderRequest
 import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
@@ -42,7 +42,7 @@ class OrderController(private val natsClient: NatsClient) {
     @PostMapping
     fun add(@RequestBody createOrderDTO: CreateOrderDTO): Mono<OrderDTO> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+            NatsSubject.Order.ORDER_SAVE,
             createOrderDTO.toCreateOrderRequest(),
             CreateOrderResponse.parser()
         ).map { it.toDTO() }
@@ -51,7 +51,7 @@ class OrderController(private val natsClient: NatsClient) {
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<OrderWithProductDTO> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
+            NatsSubject.Order.ORDER_FIND_BY_ID,
             FindOrderByIdRequest.newBuilder().setId(id).build(),
             FindOrderByIdResponse.parser()
         ).map { it.toDtoWithProduct() }
@@ -63,7 +63,7 @@ class OrderController(private val natsClient: NatsClient) {
         @RequestBody updateOrderDTO: UpdateOrderDTO,
     ): Mono<OrderDTO> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE}",
+            NatsSubject.Order.ORDER_UPDATE,
             updateOrderRequest(id, updateOrderDTO),
             UpdateOrderResponse.parser()
         ).map { it.toDTO() }
@@ -75,7 +75,7 @@ class OrderController(private val natsClient: NatsClient) {
         @RequestParam status: String,
     ): Mono<OrderDTO> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
+            NatsSubject.Order.ORDER_UPDATE_STATUS,
             UpdateOrderStatusRequest.newBuilder().setStatus(status).setId(id).build(),
             UpdateOrderStatusResponse.parser()
         ).map { it.toDTO() }
@@ -85,7 +85,7 @@ class OrderController(private val natsClient: NatsClient) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String): Mono<Unit> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
+            NatsSubject.Order.ORDER_DELETE,
             DeleteOrderRequest.newBuilder().setId(id).build(),
             DeleteOrderResponse.parser()
         ).map { it.toDTO() }
@@ -94,7 +94,7 @@ class OrderController(private val natsClient: NatsClient) {
     @GetMapping("/user/{id}")
     fun findAllByUserId(@PathVariable id: String): Mono<List<OrderDTO>> {
         return natsClient.doRequest(
-            "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
+            NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
             FindOrdersByUserIdRequest.newBuilder().setId(id).build(),
             FindOrdersByUserIdResponse.parser()
         ).map { it.toDTO() }

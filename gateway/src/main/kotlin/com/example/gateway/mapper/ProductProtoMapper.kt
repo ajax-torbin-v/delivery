@@ -24,53 +24,54 @@ object ProductProtoMapper {
     }
 
     fun CreateProductResponse.toDTO(): ProductDTO {
-        if (this == CreateProductResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
+        return when (this.responseCase!!) {
+            CreateProductResponse.ResponseCase.SUCCESS -> success.product.toDTO()
+            CreateProductResponse.ResponseCase.FAILURE -> error(failure.message)
+            CreateProductResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        if (hasFailure()) {
-            error(failure.message)
-        }
-        return success.product.toDTO()
     }
 
     fun FindProductByIdResponse.toDTO(): ProductDTO {
-        if (this == FindProductByIdResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+        return when (this.responseCase!!) {
+            FindProductByIdResponse.ResponseCase.SUCCESS -> success.product.toDTO()
+            FindProductByIdResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND -> throw ProductNotFoundException(
+                        failure.message
+                    )
 
-                FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                    throw ProductNotFoundException(failure.message)
+                    FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+                }
             }
+
+            FindProductByIdResponse.ResponseCase.RESPONSE_NOT_SET ->
+                throw RuntimeException("Acquired message is empty!")
         }
-        return success.product.toDTO()
     }
 
     fun UpdateProductResponse.toDTO(): ProductDTO {
-        if (this == UpdateProductResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+        return when (this.responseCase!!) {
+            UpdateProductResponse.ResponseCase.SUCCESS -> success.product.toDTO()
 
-                UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                    throw ProductNotFoundException(failure.message)
+            UpdateProductResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                        error(failure.message)
+
+                    UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
+                        throw ProductNotFoundException(failure.message)
+                }
             }
+
+            UpdateProductResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.product.toDTO()
     }
 
     fun DeleteProductResponse.toDTO() {
-        if (this == DeleteProductResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (this.hasFailure()) {
-            error(failure.message)
+        return when (this.responseCase!!) {
+            DeleteProductResponse.ResponseCase.SUCCESS -> Unit
+            DeleteProductResponse.ResponseCase.FAILURE -> error(failure.message)
+            DeleteProductResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
 

@@ -7,7 +7,7 @@ import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
-import com.example.internal.api.subject.UserNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
 import com.example.internal.input.reqreply.user.delete.DeleteUserRequest
 import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
@@ -33,7 +33,7 @@ class UserController(private val natsClient: NatsClient) {
     @PostMapping
     fun add(@RequestBody createUserDTO: CreateUserDTO): Mono<UserDTO> {
         return natsClient.doRequest(
-            "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.SAVE}",
+            NatsSubject.User.USER_SAVE,
             createUserDTO.toCreateUserRequest(),
             CreateUserResponse.parser(),
         ).map { it.toDTO() }
@@ -42,7 +42,7 @@ class UserController(private val natsClient: NatsClient) {
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<UserDTO> {
         return natsClient.doRequest(
-            "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}",
+            NatsSubject.User.USER_FIND_BY_ID,
             FindUserByIdRequest.newBuilder().apply { setId(id) }.build(),
             FindUserByIdResponse.parser()
         ).map { it.toDTO() }
@@ -51,7 +51,7 @@ class UserController(private val natsClient: NatsClient) {
     @PutMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody updateUserDTO: UpdateUserDTO): Mono<UserDTO> {
         return natsClient.doRequest(
-            "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
+            NatsSubject.User.USER_UPDATE,
             updateUserRequest(id, updateUserDTO),
             UpdateUserResponse.parser()
         ).map { it.toDTO() }
@@ -61,7 +61,7 @@ class UserController(private val natsClient: NatsClient) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String): Mono<Unit> {
         return natsClient.doRequest(
-            "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
+            NatsSubject.User.USER_DELETE,
             DeleteUserRequest.newBuilder().setId(id).build(),
             DeleteUserResponse.parser()
         ).map { it.toDTO() }

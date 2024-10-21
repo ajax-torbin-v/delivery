@@ -16,47 +16,47 @@ import com.example.internal.input.reqreply.user.update.UpdateUserResponse
 object UserProtoMapper {
 
     fun CreateUserResponse.toDTO(): UserDTO {
-        if (this == CreateUserResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
+        when (this.responseCase!!) {
+            CreateUserResponse.ResponseCase.SUCCESS -> return success.user.toDTO()
+            CreateUserResponse.ResponseCase.FAILURE -> error(failure.message)
+            CreateUserResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        if (hasFailure()) {
-            error(failure.message)
-        }
-        return success.user.toDTO()
     }
 
     fun FindUserByIdResponse.toDTO(): UserDTO {
-        if (this == FindUserByIdResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                ErrorCase.ERROR_NOT_SET -> error(failure.message)
+        return when (this.responseCase!!) {
+            FindUserByIdResponse.ResponseCase.SUCCESS -> success.user.toDTO()
+
+            FindUserByIdResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
+                    ErrorCase.ERROR_NOT_SET -> error(failure.message)
+                }
             }
+
+            FindUserByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.user.toDTO()
     }
 
     fun UpdateUserResponse.toDTO(): UserDTO {
-        if (this == UpdateUserResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+        return when (this.responseCase!!) {
+            UpdateUserResponse.ResponseCase.SUCCESS -> success.user.toDTO()
+            UpdateUserResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
+                    UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+                }
             }
+
+            UpdateUserResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.user.toDTO()
     }
 
     fun DeleteUserResponse.toDTO() {
-        if (this == DeleteUserResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (this.hasFailure()) {
-            error(failure.message)
+        return when (this.responseCase!!) {
+            DeleteUserResponse.ResponseCase.SUCCESS -> Unit
+            DeleteUserResponse.ResponseCase.FAILURE -> error(failure.message)
+            DeleteUserResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
 

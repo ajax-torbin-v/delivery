@@ -3,6 +3,8 @@ spring:
     mongodb:
       uri: mongodb://${HOST}:${PORT}/${DB_NAME}
 
+nats.uri: ${NATS_URI}
+
 server:
   servlet:
     contextPath: /api/v1

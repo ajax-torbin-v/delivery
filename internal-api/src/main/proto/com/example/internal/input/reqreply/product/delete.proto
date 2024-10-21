@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package com.example.internal.commonmodels.input.reqreply.product.delete;
 
-import "com/example/internal/commonmodels/error.proto";
-
 option java_multiple_files = true;
 
 message DeleteProductRequest {

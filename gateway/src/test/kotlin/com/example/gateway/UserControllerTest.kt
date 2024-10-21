@@ -20,7 +20,7 @@ import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
 import com.example.gateway.rest.UserController
-import com.example.internal.api.subject.UserNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
 import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
 import com.example.internal.input.reqreply.user.find.FindUserByIdRequest
@@ -31,19 +31,14 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.nats.client.Connection
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 class UserControllerTest {
-    @SuppressWarnings("UnusedPrivateProperty")
-    @MockK
-    private lateinit var connection: Connection
-
     @MockK
     private lateinit var natsClient: NatsClient
 
@@ -55,17 +50,17 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.SAVE}",
+                NatsSubject.User.USER_SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
         } returns createUserResponse.toMono()
 
-        // WHEN
-        val actual = userController.add(createUserDTO).block()
-
-        // THEN
-        assertEquals(createUserResponse.toDTO(), actual)
+        // WHEN // THEN
+        userController.add(createUserDTO)
+            .test()
+            .expectNext(createUserResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -73,14 +68,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.SAVE}",
+                NatsSubject.User.USER_SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
         } returns createUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { userController.add(createUserDTO).block() }
+        userController.add(createUserDTO)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -88,14 +85,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.SAVE}",
+                NatsSubject.User.USER_SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
         } returns CreateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { userController.add(createUserDTO).block() }
+        userController.add(createUserDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -103,17 +102,17 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}",
+                NatsSubject.User.USER_FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
         } returns findUserByIdResponse.toMono()
 
         // WHEN
-        val actual = userController.findById(randomUserId).block()
-
-        // THEN
-        assertEquals(findUserByIdResponse.toDTO(), actual)
+        userController.findById(randomUserId)
+            .test()
+            .expectNext(findUserByIdResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -121,14 +120,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}",
+                NatsSubject.User.USER_FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
         } returns findUserByIdResponseWithNotFoundException.toMono()
 
         // WHEN // THEN
-        assertThrows<UserNotFoundException> { userController.findById(randomUserId).block() }
+        userController.findById(randomUserId)
+            .test()
+            .verifyError(UserNotFoundException::class)
     }
 
     @Test
@@ -136,14 +137,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}",
+                NatsSubject.User.USER_FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
         } returns findUserByIdResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { userController.findById(randomUserId).block() }
+        userController.findById(randomUserId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -151,14 +154,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}",
+                NatsSubject.User.USER_FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
         } returns FindUserByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { userController.findById(randomUserId).block() }
+        userController.findById(randomUserId)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -166,17 +171,17 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
+                NatsSubject.User.USER_UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
         } returns updateUserResponse.toMono()
 
-        // WHEN
-        val actual = userController.update(randomUserId, updateUserDTO).block()
-
-        // THEN
-        assertEquals(updateUserResponse.toDTO(), actual)
+        // WHEN // THEN
+        userController.update(randomUserId, updateUserDTO)
+            .test()
+            .expectNext(updateUserResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -184,14 +189,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
+                NatsSubject.User.USER_UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
         } returns updateUserResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
-        assertThrows<UserNotFoundException> { userController.update(randomUserId, updateUserDTO).block() }
+        userController.update(randomUserId, updateUserDTO)
+            .test()
+            .verifyError(UserNotFoundException::class)
     }
 
     @Test
@@ -199,14 +206,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
+                NatsSubject.User.USER_UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
         } returns updateUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { userController.update(randomUserId, updateUserDTO).block() }
+        userController.update(randomUserId, updateUserDTO)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -214,14 +223,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}",
+                NatsSubject.User.USER_UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
         } returns UpdateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { userController.update(randomUserId, updateUserDTO).block() }
+        userController.update(randomUserId, updateUserDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -229,7 +240,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
+                NatsSubject.User.USER_DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
@@ -241,7 +252,7 @@ class UserControllerTest {
         // THEN
         verify(exactly = 1) {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
+                NatsSubject.User.USER_DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
@@ -253,14 +264,16 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
+                NatsSubject.User.USER_DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
         } returns deleteUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { userController.delete(randomUserId).block() }
+        userController.delete(randomUserId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -268,13 +281,15 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}",
+                NatsSubject.User.USER_DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
         } returns DeleteUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { userController.delete(randomUserId).block() }
+        userController.delete(randomUserId)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 }

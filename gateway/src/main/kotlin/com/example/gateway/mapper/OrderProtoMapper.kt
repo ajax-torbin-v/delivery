@@ -30,89 +30,98 @@ object OrderProtoMapper {
 
     @SuppressWarnings("ThrowsCount")
     fun CreateOrderResponse.toDTO(): OrderDTO {
-        if (this == CreateOrderResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND ->
-                    throw UserNotFoundException(failure.message)
+        return when (this.responseCase!!) {
+            CreateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
+            CreateOrderResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND ->
+                        throw UserNotFoundException(failure.message)
 
-                CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                    throw ProductNotFoundException(failure.message)
+                    CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
+                        throw ProductNotFoundException(failure.message)
 
-                CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_SUFFICIENT_AMOUNT ->
-                    throw ProductAmountException(
-                        failure.message
-                    )
+                    CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_SUFFICIENT_AMOUNT ->
+                        throw ProductAmountException(
+                            failure.message
+                        )
 
-                CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+                    CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                        error(failure.message)
+                }
             }
+
+            CreateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.order.toDTO()
     }
 
     fun FindOrderByIdResponse.toDtoWithProduct(): OrderWithProductDTO {
-        if (this == FindOrderByIdResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                FindOrderByIdResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
-                    throw OrderNotFoundException(failure.message)
+        return when (this.responseCase!!) {
+            FindOrderByIdResponse.ResponseCase.SUCCESS -> success.order.toDtoWithProduct()
+            FindOrderByIdResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    FindOrderByIdResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
+                        throw OrderNotFoundException(failure.message)
 
-                FindOrderByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+                    FindOrderByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                        error(failure.message)
+                }
             }
+
+            FindOrderByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.order.toDtoWithProduct()
     }
 
     @SuppressWarnings("ThrowsCount")
     fun UpdateOrderResponse.toDTO(): OrderDTO {
-        if (this == UpdateOrderResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                UpdateOrderResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> throw OrderNotFoundException(failure.message)
-                UpdateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw IllegalStateException(failure.message)
+        return when (this.responseCase!!) {
+            UpdateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
+            UpdateOrderResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    UpdateOrderResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
+                        throw OrderNotFoundException(failure.message)
+
+                    UpdateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+                }
             }
+
+            UpdateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
-        return success.order.toDTO()
     }
 
     fun UpdateOrderStatusResponse.toDTO(): OrderDTO {
-        if (this == UpdateOrderStatusResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                UpdateOrderStatusResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
-                    throw OrderNotFoundException(failure.message)
+        return when (this.responseCase!!) {
+            UpdateOrderStatusResponse.ResponseCase.SUCCESS -> success.order.toDTO()
+            UpdateOrderStatusResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    UpdateOrderStatusResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
+                        throw OrderNotFoundException(failure.message)
 
-                UpdateOrderStatusResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+                    UpdateOrderStatusResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                        error(failure.message)
+                }
             }
+
+            UpdateOrderStatusResponse.ResponseCase.RESPONSE_NOT_SET ->
+                throw RuntimeException("Acquired message is empty!")
         }
-        return success.order.toDTO()
     }
 
     fun FindOrdersByUserIdResponse.toDTO(): List<OrderDTO> {
-        if (this == FindOrdersByUserIdResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            when (failure.errorCase!!) {
-                FindOrdersByUserIdResponse.Failure.ErrorCase.USER_NOT_FOUND ->
-                    throw UserNotFoundException(failure.message)
+        return when (this.responseCase!!) {
+            FindOrdersByUserIdResponse.ResponseCase.SUCCESS -> success.orderList.map { it.toDTO() }
+            FindOrdersByUserIdResponse.ResponseCase.FAILURE -> {
+                when (failure.errorCase!!) {
+                    FindOrdersByUserIdResponse.Failure.ErrorCase.USER_NOT_FOUND ->
+                        throw UserNotFoundException(failure.message)
 
-                FindOrdersByUserIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                    error(failure.message)
+                    FindOrdersByUserIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                        error(failure.message)
+                }
             }
+
+            FindOrdersByUserIdResponse.ResponseCase.RESPONSE_NOT_SET ->
+                throw RuntimeException("Acquired message is empty!")
         }
-        return success.orderList.map { it.toDTO() }
     }
 
     fun CreateOrderDTO.toCreateOrderRequest(): CreateOrderRequest {
@@ -131,11 +140,10 @@ object OrderProtoMapper {
     }
 
     fun DeleteOrderResponse.toDTO() {
-        if (this == DeleteOrderResponse.getDefaultInstance()) {
-            throw RuntimeException("Acquired message is empty!")
-        }
-        if (hasFailure()) {
-            error(failure.message)
+        return when (this.responseCase!!) {
+            DeleteOrderResponse.ResponseCase.SUCCESS -> Unit
+            DeleteOrderResponse.ResponseCase.FAILURE -> error(failure.message)
+            DeleteOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
 

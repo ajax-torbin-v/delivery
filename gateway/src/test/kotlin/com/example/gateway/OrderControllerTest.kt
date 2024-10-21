@@ -35,7 +35,7 @@ import com.example.gateway.mapper.OrderProtoMapper.toDTO
 import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
 import com.example.gateway.mapper.OrderProtoMapper.updateOrderRequest
 import com.example.gateway.rest.OrderController
-import com.example.internal.api.subject.OrdersNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
 import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
@@ -47,19 +47,14 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.nats.client.Connection
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 class OrderControllerTest {
-    @SuppressWarnings("UnusedPrivateProperty")
-    @MockK
-    private lateinit var connection: Connection
-
     @MockK
     private lateinit var natsClient: NatsClient
 
@@ -71,17 +66,17 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+                NatsSubject.Order.ORDER_SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
         } returns createOrderResponse.toMono()
 
-        // WHEN
-        val actual = orderController.add(createOrderDTO).block()
-
-        // THEN
-        assertEquals(createOrderResponse.toDTO(), actual)
+        // WHEN //THEN
+        orderController.add(createOrderDTO)
+            .test()
+            .expectNext(createOrderResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -89,14 +84,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+                NatsSubject.Order.ORDER_SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
         } returns createOrderResponseWithUserNotFoundException.toMono()
 
         // WHEN //THEN
-        assertThrows<UserNotFoundException> { orderController.add(createOrderDTO).block() }
+        orderController.add(createOrderDTO)
+            .test()
+            .verifyError(UserNotFoundException::class)
     }
 
     @Test
@@ -104,14 +101,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+                NatsSubject.Order.ORDER_SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
         } returns createOrderResponseWithProductNotFoundException.toMono()
 
         // WHEN //THEN
-        assertThrows<ProductNotFoundException> { orderController.add(createOrderDTO).block() }
+        orderController.add(createOrderDTO)
+            .test()
+            .verifyError(ProductNotFoundException::class)
     }
 
     @Test
@@ -119,14 +118,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+                NatsSubject.Order.ORDER_SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
         } returns createOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
-        assertThrows<RuntimeException> { orderController.add(createOrderDTO).block() }
+        orderController.add(createOrderDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -134,14 +135,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.SAVE}",
+                NatsSubject.Order.ORDER_SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
         } returns CreateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<RuntimeException> { orderController.add(createOrderDTO).block() }
+        orderController.add(createOrderDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -149,18 +152,17 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
+                NatsSubject.Order.ORDER_FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
         } returns findOrderByIdResponse.toMono()
 
-        // WHEN
-        val actual = orderController.findById(randomOrderId).block()!!
-        println(actual)
-
-        // THEN
-        assertEquals(findOrderByIdResponse.toDtoWithProduct(), actual)
+        // WHEN // THEN
+        orderController.findById(randomOrderId)
+            .test()
+            .expectNext(findOrderByIdResponse.toDtoWithProduct())
+            .verifyComplete()
     }
 
     @Test
@@ -168,14 +170,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
+                NatsSubject.Order.ORDER_FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
         } returns findOrderByIdResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
-        assertThrows<OrderNotFoundException> { orderController.findById(randomOrderId).block()!! }
+        orderController.findById(randomOrderId)
+            .test()
+            .verifyError(OrderNotFoundException::class)
     }
 
     @Test
@@ -183,14 +187,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
+                NatsSubject.Order.ORDER_FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
         } returns findOrderByIdResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalStateException> { orderController.findById(randomOrderId).block()!! }
+        orderController.findById(randomOrderId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -198,14 +204,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_BY_ID}",
+                NatsSubject.Order.ORDER_FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
         } returns FindOrderByIdResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<RuntimeException> { orderController.findById(randomOrderId).block()!! }
+        orderController.findById(randomOrderId)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -213,17 +221,17 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE}",
+                NatsSubject.Order.ORDER_UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
         } returns updateOrderResponse.toMono()
 
-        // WHEN
-        val actual = orderController.update(randomOrderId, updateOrderDTO).block()!!
-
-        // THEN
-        assertEquals(updateOrderResponse.toDTO(), actual)
+        // WHEN // THEN
+        orderController.update(randomOrderId, updateOrderDTO)
+            .test()
+            .expectNext(updateOrderResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -231,14 +239,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE}",
+                NatsSubject.Order.ORDER_UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
         } returns updateOrderResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
-        assertThrows<OrderNotFoundException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
+        orderController.update(randomOrderId, updateOrderDTO)
+            .test()
+            .verifyError(OrderNotFoundException::class)
     }
 
     @Test
@@ -246,14 +256,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE}",
+                NatsSubject.Order.ORDER_UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
         } returns updateOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalStateException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
+        orderController.update(randomOrderId, updateOrderDTO)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -261,14 +273,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE}",
+                NatsSubject.Order.ORDER_UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
         } returns UpdateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<RuntimeException> { orderController.update(randomOrderId, updateOrderDTO).block()!! }
+        orderController.update(randomOrderId, updateOrderDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -276,17 +290,17 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
+                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
         } returns findOrdersByUserIdResponse.toMono()
 
-        // WHEN
-        val actual = orderController.findAllByUserId(randomUserId).block()
-
-        // THEN
-        assertEquals(findOrdersByUserIdResponse.toDTO(), actual)
+        // WHEN // THEN
+        orderController.findAllByUserId(randomUserId)
+            .test()
+            .expectNext(findOrdersByUserIdResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -294,14 +308,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
+                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
         } returns findOrdersByUserIdResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
-        assertThrows<UserNotFoundException> { orderController.findAllByUserId(randomUserId).block() }
+        orderController.findAllByUserId(randomUserId)
+            .test()
+            .verifyError(UserNotFoundException::class)
     }
 
     @Test
@@ -309,14 +325,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.FIND_ALL_BY_USER_ID}",
+                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
         } returns FindOrdersByUserIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { orderController.findAllByUserId(randomUserId).block() }
+        orderController.findAllByUserId(randomUserId)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -324,17 +342,17 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
+                NatsSubject.Order.ORDER_UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
         } returns updateOrderStatusResponse.toMono()
 
-        // WHEN
-        val actual = orderController.updateStatus(randomOrderId, "COMPLETED").block()
-
-        // THEN
-        assertEquals(orderDTO.copy(status = "COMPLETED"), actual)
+        // WHEN //THEN
+        orderController.updateStatus(randomOrderId, "COMPLETED")
+            .test()
+            .expectNext(orderDTO.copy(status = "COMPLETED"))
+            .verifyComplete()
     }
 
     @Test
@@ -342,14 +360,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
+                NatsSubject.Order.ORDER_UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
         } returns updateOrderStatusResponseWithOrNotFoundException.toMono()
 
         // WHEN // THEN
-        assertThrows<OrderNotFoundException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
+        orderController.updateStatus(randomOrderId, "COMPLETED")
+            .test()
+            .verifyError(OrderNotFoundException::class)
     }
 
     @Test
@@ -357,14 +377,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
+                NatsSubject.Order.ORDER_UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
         } returns updateOrderStatusResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
+        orderController.updateStatus(randomOrderId, "COMPLETED")
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -372,14 +394,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.UPDATE_STATUS}",
+                NatsSubject.Order.ORDER_UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
         } returns UpdateOrderStatusResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { orderController.updateStatus(randomOrderId, "COMPLETED").block() }
+        orderController.updateStatus(randomOrderId, "COMPLETED")
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -387,7 +411,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
+                NatsSubject.Order.ORDER_DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
@@ -399,7 +423,7 @@ class OrderControllerTest {
         // THEN
         verify(exactly = 1) {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
+                NatsSubject.Order.ORDER_DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
@@ -411,14 +435,16 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
+                NatsSubject.Order.ORDER_DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
         } returns deleteOrderResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { orderController.delete(randomOrderId).block() }
+        orderController.delete(randomOrderId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -426,13 +452,15 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${OrdersNatsSubject.ORDER_PREFIX}.${OrdersNatsSubject.DELETE}",
+                NatsSubject.Order.ORDER_DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
         } returns DeleteOrderResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { orderController.delete(randomOrderId).block() }
+        orderController.delete(randomOrderId)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 }

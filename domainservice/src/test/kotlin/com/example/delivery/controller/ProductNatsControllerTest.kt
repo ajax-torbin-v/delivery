@@ -16,7 +16,7 @@ import com.example.delivery.mapper.ProductProtoMapper.toFailureUpdateProductResp
 import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.repository.ProductRepository
-import com.example.internal.api.subject.ProductsNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.input.reqreply.product.create.CreateProductResponse
 import com.example.internal.input.reqreply.product.find.FindProductByIdResponse
@@ -33,12 +33,9 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `save should return saved product`() {
-        // GIVEN
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.SAVE}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_SAVE,
             createProductRequest,
             CreateProductResponse.parser()
         )
@@ -51,11 +48,10 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `findById should return existing product`() {
         // GIVEN
         val product = productRepository.save(unsavedProduct).block()!!
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_FIND_BY_ID,
             buildFindProductByIdRequest(product.id.toString()),
             FindProductByIdResponse.parser()
         )
@@ -66,12 +62,9 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `findById should return message with exception when product not found`() {
-        // GIVEN
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_FIND_BY_ID,
             buildFindProductByIdRequest(randomProductId),
             FindProductByIdResponse.parser()
         )
@@ -84,11 +77,10 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `update should return updated product`() {
         // GIVEN
         val product = productRepository.save(unsavedProduct).block()!!
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.UPDATE}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_UPDATE,
             buildUpdateProductRequest(product.id.toString()),
             UpdateProductResponse.parser()
         )
@@ -99,12 +91,9 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `update should return message with exception when product doesn't exist`() {
-        // GIVEN
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.UPDATE}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_UPDATE,
             buildUpdateProductRequest(randomProductId),
             UpdateProductResponse.parser()
         )
@@ -117,11 +106,10 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `delete should delete product`() {
         // GIVEN
         val product = productRepository.save(unsavedProduct).block()!!
-        val subject = "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.DELETE}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.Product.PRODUCT_DELETE,
             buildDeleteProductRequest(product.id.toString()),
             DeleteProductResponse.parser()
         )

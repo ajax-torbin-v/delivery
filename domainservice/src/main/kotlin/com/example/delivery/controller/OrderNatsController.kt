@@ -18,7 +18,7 @@ import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderDTO
 import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
 import com.example.delivery.service.OrderService
-import com.example.internal.api.subject.OrdersNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.order.create.CreateOrderRequest
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.delete.DeleteOrderRequest
@@ -39,14 +39,14 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-@NatsController(subjectPrefix = OrdersNatsSubject.ORDER_PREFIX, queueGroup = QUEUE_GROUP)
+@NatsController(queueGroup = QUEUE_GROUP)
 class OrderNatsController(
     private val orderService: OrderService,
     connection: Connection,
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
 
-    @NatsHandler(subject = OrdersNatsSubject.SAVE)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_SAVE)
     fun add(request: CreateOrderRequest): Mono<CreateOrderResponse> {
         return orderService.add(request.toCreateOrderDTO())
             .map { it.toCreateOrderResponse() }
@@ -56,7 +56,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = OrdersNatsSubject.FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_FIND_BY_ID)
     fun findById(request: FindOrderByIdRequest): Mono<FindOrderByIdResponse> {
         return orderService.getById(request.id)
             .map { it.toFindOrderByIdResponse() }
@@ -66,7 +66,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = OrdersNatsSubject.UPDATE)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_UPDATE)
     fun update(request: UpdateOrderRequest): Mono<UpdateOrderResponse> {
         return orderService.updateOrder(request.id, request.toUpdateOrderDTO())
             .map { it.toUpdateOrderResponse() }
@@ -76,7 +76,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = OrdersNatsSubject.UPDATE_STATUS)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_UPDATE_STATUS)
     fun updateStatus(request: UpdateOrderStatusRequest): Mono<UpdateOrderStatusResponse> {
         return orderService.updateOrderStatus(request.id, request.status)
             .map { it.toUpdateOrderStatusResponse() }
@@ -86,7 +86,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = OrdersNatsSubject.DELETE)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_DELETE)
     fun delete(request: DeleteOrderRequest): Mono<DeleteOrderResponse> {
         return orderService.deleteById(request.id)
             .map { toDeleteOrderResponse() }
@@ -96,7 +96,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = OrdersNatsSubject.FIND_ALL_BY_USER_ID)
+    @NatsHandler(subject = NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID)
     fun findAllByUserId(request: FindOrdersByUserIdRequest): Mono<FindOrdersByUserIdResponse> {
         return orderService.getAllByUserId(request.id)
             .collectList()

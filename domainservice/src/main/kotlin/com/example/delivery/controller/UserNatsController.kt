@@ -14,7 +14,7 @@ import com.example.delivery.mapper.UserProtoMapper.toFindUserByIdResponse
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserDTO
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
 import com.example.delivery.service.UserService
-import com.example.internal.api.subject.UserNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.user.create.CreateUserRequest
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
 import com.example.internal.input.reqreply.user.delete.DeleteUserRequest
@@ -31,14 +31,14 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-@NatsController(subjectPrefix = UserNatsSubject.USER_PREFIX, queueGroup = QUEUE_GROUP)
+@NatsController(queueGroup = QUEUE_GROUP)
 class UserNatsController(
     private val userService: UserService,
     connection: Connection,
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
 
-    @NatsHandler(subject = UserNatsSubject.SAVE)
+    @NatsHandler(subject = NatsSubject.User.USER_SAVE)
     fun save(response: CreateUserRequest): Mono<CreateUserResponse> {
         return userService.add(response.toCreateUserDTO())
             .map { user -> user.toCreateUserResponse() }
@@ -48,7 +48,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = UserNatsSubject.FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.User.USER_FIND_BY_ID)
     fun findById(request: FindUserByIdRequest): Mono<FindUserByIdResponse> {
         return userService.getById(request.id)
             .map { user -> user.toFindUserByIdResponse() }
@@ -58,7 +58,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = UserNatsSubject.UPDATE)
+    @NatsHandler(subject = NatsSubject.User.USER_UPDATE)
     fun update(request: UpdateUserRequest): Mono<UpdateUserResponse> {
         return userService.update(request.id, request.toUpdateUserDTO())
             .map { user -> user.toUpdateUserResponse() }
@@ -68,7 +68,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = UserNatsSubject.DELETE)
+    @NatsHandler(subject = NatsSubject.User.USER_DELETE)
     fun delete(request: DeleteUserRequest): Mono<DeleteUserResponse> {
         return userService.deleteById(request.id)
             .map { toDeleteUserResponse() }

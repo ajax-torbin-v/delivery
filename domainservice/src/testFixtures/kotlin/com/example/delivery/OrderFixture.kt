@@ -6,6 +6,9 @@ import com.example.core.OrderFixture.randomUpdateShipmentDetailsDTO
 import com.example.core.ProductFixture.randomPrice
 import com.example.core.ProductFixture.randomProductId
 import com.example.core.UserFixture.randomUserId
+import com.example.core.exception.OrderNotFoundException
+import com.example.core.exception.ProductNotFoundException
+import com.example.core.exception.UserNotFoundException
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.domain.DomainOrder
@@ -13,6 +16,8 @@ import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
+import com.example.internal.input.reqreply.order.create.CreateOrderResponse
+import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
@@ -96,4 +101,28 @@ object OrderFixture {
     )
 
     val updatedDomainOrder = domainOrder.copy(shipmentDetails = randomUpdateDomainShipmentDetails)
+
+    val productNotFoundException = ProductNotFoundException("Product not found")
+    val userNotFoundException = UserNotFoundException("User not found")
+    val orderNotFoundException = OrderNotFoundException("Order not found")
+    val unexpectedException = NullPointerException()
+    val failureCreateOrderResponseWithProductNotFoundException = CreateOrderResponse.newBuilder().apply {
+        failureBuilder.message = "Product not found"
+        failureBuilder.productNotFoundBuilder
+    }.build()
+    val failureCreateOrderResponseWithUserNotFoundException = CreateOrderResponse.newBuilder().apply {
+        failureBuilder.message = "User not found"
+        failureBuilder.userNotFoundBuilder
+    }.build()
+    val failureCreateOrderResponseWithUnexpectedException = CreateOrderResponse.newBuilder().apply {
+        failureBuilder
+    }.build()
+
+    val failureFindOrderByIdWithOrderNotFoundException = FindOrderByIdResponse.newBuilder().apply {
+        failureBuilder.message = "Order not found"
+        failureBuilder.orderNotFoundBuilder
+    }.build()
+    val failureFindOrderByIdWithUnexpectedException = FindOrderByIdResponse.newBuilder().apply {
+        failureBuilder
+    }.build()
 }

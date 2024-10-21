@@ -16,7 +16,7 @@ import com.example.delivery.mapper.UserProtoMapper.toFailureUpdateUserResponse
 import com.example.delivery.mapper.UserProtoMapper.toFindUserByIdResponse
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
 import com.example.delivery.repository.UserRepository
-import com.example.internal.api.subject.UserNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.input.reqreply.user.create.CreateUserResponse
 import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
 import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
@@ -33,12 +33,9 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `save should return saved user`() {
-        // GIVEN
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.SAVE}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_SAVE,
             createUserRequest,
             CreateUserResponse.parser()
         )
@@ -51,11 +48,10 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `findById should return existing user`() {
         // GIVEN
         val user = userRepository.save(unsavedUser).block()!!
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_FIND_BY_ID,
             buildFindUserByIdRequest(user.id.toString()),
             FindUserByIdResponse.parser()
         )
@@ -66,12 +62,9 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `findById should return message with exception when user doesn't exist`() {
-        // GIVEN
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.FIND_BY_ID}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_FIND_BY_ID,
             buildFindUserByIdRequest(randomUserId),
             FindUserByIdResponse.parser()
         )
@@ -84,11 +77,10 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `update should return updated product`() {
         // GIVEN
         val user = userRepository.save(unsavedUser).block()!!
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_UPDATE,
             buildUpdateUserRequest(user.id.toString()),
             UpdateUserResponse.parser()
         )
@@ -99,12 +91,9 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
     @Test
     fun `update should throw exception when user doesn't exist`() {
-        // GIVEN
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.UPDATE}"
-
-        // WHEN
+        // GIVEN // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_UPDATE,
             buildUpdateUserRequest(randomUserId),
             UpdateUserResponse.parser()
         )
@@ -117,11 +106,10 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `delete should delete product`() {
         // GIVEN
         val user = userRepository.save(unsavedUser).block()!!
-        val subject = "${UserNatsSubject.USER_PREFIX}.${UserNatsSubject.DELETE}"
 
         // WHEN
         val actual = doRequest(
-            subject,
+            NatsSubject.User.USER_DELETE,
             buildDeleteUserRequest(user.id.toString()),
             DeleteUserResponse.parser()
         )

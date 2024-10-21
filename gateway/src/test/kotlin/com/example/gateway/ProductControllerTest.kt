@@ -2,6 +2,8 @@ package com.example.gateway
 
 import com.example.core.ProductFixture.createProductDTO
 import com.example.core.ProductFixture.randomProductId
+import com.example.core.ProductFixture.updateProductDTO
+import com.example.core.UserFixture.randomUserId
 import com.example.core.exception.ProductNotFoundException
 import com.example.gateway.ProductProtoFixture.createProductResponse
 import com.example.gateway.ProductProtoFixture.createProductResponseWithUnexpectedException
@@ -11,31 +13,29 @@ import com.example.gateway.ProductProtoFixture.findProductByIdRequest
 import com.example.gateway.ProductProtoFixture.findProductByIdResponse
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithProductNotFoundException
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithUnexpectedException
+import com.example.gateway.ProductProtoFixture.updateProductResponse
 import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
+import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
 import com.example.gateway.rest.ProductController
-import com.example.internal.api.subject.ProductsNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.input.reqreply.product.create.CreateProductResponse
 import com.example.internal.input.reqreply.product.find.FindProductByIdResponse
+import com.example.internal.input.reqreply.product.update.UpdateProductResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.nats.client.Connection
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 class ProductControllerTest {
-    @SuppressWarnings("UnusedPrivateProperty")
-    @MockK
-    private lateinit var connection: Connection
-
     @MockK
     private lateinit var natsClient: NatsClient
 
@@ -47,17 +47,17 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.SAVE}",
+                NatsSubject.Product.PRODUCT_SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
         } returns createProductResponse.toMono()
 
-        // WHEN
-        val actual = productController.add(createProductDTO).block()
-
-        // THEN
-        assertEquals(createProductResponse.toDTO(), actual)
+        // WHEN //THEN
+        productController.add(createProductDTO)
+            .test()
+            .expectNext(createProductResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -65,14 +65,16 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.SAVE}",
+                NatsSubject.Product.PRODUCT_SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
         } returns createProductResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
-        assertThrows<IllegalStateException> { productController.add(createProductDTO).block() }
+        productController.add(createProductDTO)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -80,14 +82,16 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.SAVE}",
+                NatsSubject.Product.PRODUCT_SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
         } returns CreateProductResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
-        assertThrows<RuntimeException> { productController.add(createProductDTO).block() }
+        productController.add(createProductDTO)
+            .test()
+            .verifyError(RuntimeException::class)
     }
 
     @Test
@@ -95,32 +99,34 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}",
+                NatsSubject.Product.PRODUCT_FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
         } returns findProductByIdResponse.toMono()
 
-        // WHEN
-        val actual = productController.findById(randomProductId).block()
-
-        // THEN
-        assertEquals(findProductByIdResponse.toDTO(), actual)
+        // WHEN // THEN
+        productController.findById(randomProductId)
+            .test()
+            .expectNext(findProductByIdResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
-    fun `findById should throw exception when user doesn't exist`() {
+    fun `findById should throw exception when product doesn't exist`() {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}",
+                NatsSubject.Product.PRODUCT_FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
         } returns findProductByIdResponseWithProductNotFoundException.toMono()
 
         // WHEN // THEN
-        assertThrows<ProductNotFoundException> { productController.findById(randomProductId).block() }
+        productController.findById(randomProductId)
+            .test()
+            .verifyError(ProductNotFoundException::class)
     }
 
     @Test
@@ -128,14 +134,16 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}",
+                NatsSubject.Product.PRODUCT_FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
         } returns findProductByIdResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { productController.findById(randomProductId).block() }
+        productController.findById(randomProductId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 
     @Test
@@ -143,14 +151,34 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.FIND_BY_ID}",
+                NatsSubject.Product.PRODUCT_FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
         } returns FindProductByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
-        assertThrows<RuntimeException> { productController.findById(randomProductId).block() }
+        productController.findById(randomProductId)
+            .test()
+            .verifyError(RuntimeException::class)
+    }
+
+    @Test
+    fun `update should return updated product`() {
+        // GIVEN
+        every {
+            natsClient.doRequest(
+                NatsSubject.Product.PRODUCT_UPDATE,
+                updateProductRequest(randomUserId, updateProductDTO),
+                UpdateProductResponse.parser()
+            )
+        } returns updateProductResponse.toMono()
+
+        // WHEN // THEN
+        productController.update(randomUserId, updateProductDTO)
+            .test()
+            .expectNext(updateProductResponse.toDTO())
+            .verifyComplete()
     }
 
     @Test
@@ -158,13 +186,15 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                "${ProductsNatsSubject.PRODUCT_PREFIX}.${ProductsNatsSubject.DELETE}",
+                NatsSubject.Product.PRODUCT_DELETE,
                 deleteProductRequest,
                 DeleteProductResponse.parser()
             )
         } returns deleteProductResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
-        assertThrows<IllegalStateException> { productController.delete(randomProductId).block() }
+        productController.delete(randomProductId)
+            .test()
+            .verifyError(IllegalStateException::class)
     }
 }

@@ -14,7 +14,7 @@ import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductDTO
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.service.ProductService
-import com.example.internal.api.subject.ProductsNatsSubject
+import com.example.internal.api.subject.NatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductRequest
 import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
 import com.example.internal.input.reqreply.product.create.CreateProductRequest
@@ -31,13 +31,13 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-@NatsController(subjectPrefix = ProductsNatsSubject.PRODUCT_PREFIX, queueGroup = QUEUE_GROUP)
+@NatsController(queueGroup = QUEUE_GROUP)
 class ProductNatsController(
     private val productService: ProductService,
     connection: Connection,
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
-    @NatsHandler(subject = ProductsNatsSubject.SAVE)
+    @NatsHandler(subject = NatsSubject.Product.PRODUCT_SAVE)
     fun add(request: CreateProductRequest): Mono<CreateProductResponse> {
         return productService.add(request.toCreateProductDTO())
             .map { it.toCreateProductResponse() }
@@ -47,7 +47,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = ProductsNatsSubject.FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.Product.PRODUCT_FIND_BY_ID)
     fun findById(request: FindProductByIdRequest): Mono<FindProductByIdResponse> {
         return productService.getById(request.id)
             .map { product -> product.toFindProductByIdResponse() }
@@ -57,7 +57,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = ProductsNatsSubject.UPDATE)
+    @NatsHandler(subject = NatsSubject.Product.PRODUCT_UPDATE)
     fun update(request: UpdateProductRequest): Mono<UpdateProductResponse> {
         return productService.update(request.id, request.toUpdateProductDTO())
             .map { product -> product.toUpdateProductResponse() }
@@ -67,7 +67,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = ProductsNatsSubject.DELETE)
+    @NatsHandler(subject = NatsSubject.Product.PRODUCT_DELETE)
     fun delete(request: DeleteProductRequest): Mono<DeleteProductResponse> {
         return productService.deleteById(request.id)
             .map { toDeleteProductResponse() }
