@@ -13,17 +13,17 @@ import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
 import com.example.core.exception.UserNotFoundException
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
-import com.example.internal.commonmodels.order.order.Order
-import com.example.internal.commonmodels.order.order_item.OrderItem
-import com.example.internal.commonmodels.order.shipment_details.ShipmentDetails
-import com.example.internal.input.reqreply.order.create.CreateOrderRequest
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderRequest
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
-import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusResponse
+import com.example.internal.commonmodels.order.Order
+import com.example.internal.commonmodels.order.OrderItem
+import com.example.internal.commonmodels.order.ShipmentDetails
+import com.example.internal.input.reqreply.order.CreateOrderRequest
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.DeleteOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderRequest
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
+import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 import java.math.BigDecimal
 
 object OrderProtoMapper {
@@ -115,7 +115,7 @@ object OrderProtoMapper {
             id,
             itemsList.map { it.toDtoWithProduct() },
             shipmentDetails.toDTO(),
-            status,
+            status.toString().substringAfter("_"),
             userId,
         )
     }
@@ -129,7 +129,13 @@ object OrderProtoMapper {
     }
 
     fun Order.toDTO(): OrderDTO {
-        return OrderDTO(id, itemsList.map { it.toDTO() }, shipmentDetails.toDTO(), status, userId)
+        return OrderDTO(
+            id,
+            itemsList.map { it.toDTO() },
+            shipmentDetails.toDTO(),
+            status.toString().substringAfter("_"),
+            userId
+        )
     }
 
     private fun ShipmentDetails.toDTO(): ShipmentDetailsDTO {

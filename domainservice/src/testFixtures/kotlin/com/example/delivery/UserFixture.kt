@@ -8,10 +8,10 @@ import com.example.core.UserFixture.randomUserId
 import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainUser
 import com.example.delivery.mongo.MongoUser
-import com.example.internal.input.reqreply.user.create.CreateUserRequest
-import com.example.internal.input.reqreply.user.delete.DeleteUserRequest
-import com.example.internal.input.reqreply.user.find.FindUserByIdRequest
-import com.example.internal.input.reqreply.user.update.UpdateUserRequest
+import com.example.internal.input.reqreply.user.CreateUserRequest
+import com.example.internal.input.reqreply.user.DeleteUserRequest
+import com.example.internal.input.reqreply.user.FindUserByIdRequest
+import com.example.internal.input.reqreply.user.UpdateUserRequest
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 

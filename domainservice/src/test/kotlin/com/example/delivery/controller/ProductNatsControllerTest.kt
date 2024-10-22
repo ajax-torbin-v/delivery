@@ -17,10 +17,10 @@ import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.repository.ProductRepository
 import com.example.internal.api.subject.NatsSubject
-import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
-import com.example.internal.input.reqreply.product.create.CreateProductResponse
-import com.example.internal.input.reqreply.product.find.FindProductByIdResponse
-import com.example.internal.input.reqreply.product.update.UpdateProductResponse
+import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
+import com.example.internal.input.reqreply.product.CreateProductResponse
+import com.example.internal.input.reqreply.product.FindProductByIdResponse
+import com.example.internal.input.reqreply.product.UpdateProductResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

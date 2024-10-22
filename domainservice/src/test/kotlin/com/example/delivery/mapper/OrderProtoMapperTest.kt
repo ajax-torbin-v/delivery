@@ -8,9 +8,9 @@ import com.example.delivery.OrderFixture
 import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateOrderResponse
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments

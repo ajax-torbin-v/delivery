@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.input.reqreply.order.update;
+package com.example.internal.input.reqreply.order;
 
 import "com/example/internal/commonmodels/error.proto";
 import "com/example/internal/commonmodels/order/order.proto";
@@ -10,7 +10,7 @@ option java_multiple_files = true;
 
 message UpdateOrderRequest {
     string id = 1;
-    commonmodels.order.shipment_details.ShipmentDetails shipment_details = 2;
+    commonmodels.order.ShipmentDetails shipment_details = 2;
 }
 
 message UpdateOrderResponse {
@@ -20,7 +20,7 @@ message UpdateOrderResponse {
     }
 
     message Success {
-        commonmodels.order.order.Order order = 1;
+        commonmodels.order.Order order = 1;
     }
 
     message Failure {

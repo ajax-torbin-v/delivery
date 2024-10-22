@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.input.reqreply.product.update;
+package com.example.internal.input.reqreply.product;
 
 import "com/example/internal/commonmodels/error.proto";
 import "com/example/internal/commonmodels/product/product.proto";
@@ -22,7 +22,7 @@ message UpdateProductResponse {
     }
 
     message Success {
-        commonmodels.product.product.Product product = 1;
+        commonmodels.product.Product product = 1;
     }
 
     message Failure {

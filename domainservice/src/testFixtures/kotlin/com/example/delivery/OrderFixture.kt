@@ -13,9 +13,9 @@ import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update

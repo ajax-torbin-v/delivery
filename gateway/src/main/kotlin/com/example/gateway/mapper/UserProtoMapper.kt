@@ -4,14 +4,14 @@ import com.example.core.dto.request.CreateUserDTO
 import com.example.core.dto.request.UpdateUserDTO
 import com.example.core.dto.response.UserDTO
 import com.example.core.exception.UserNotFoundException
-import com.example.internal.commonmodels.user.user.User
-import com.example.internal.input.reqreply.user.create.CreateUserRequest
-import com.example.internal.input.reqreply.user.create.CreateUserResponse
-import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
-import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
-import com.example.internal.input.reqreply.user.find.FindUserByIdResponse.Failure.ErrorCase
-import com.example.internal.input.reqreply.user.update.UpdateUserRequest
-import com.example.internal.input.reqreply.user.update.UpdateUserResponse
+import com.example.internal.commonmodels.user.User
+import com.example.internal.input.reqreply.user.CreateUserRequest
+import com.example.internal.input.reqreply.user.CreateUserResponse
+import com.example.internal.input.reqreply.user.DeleteUserResponse
+import com.example.internal.input.reqreply.user.FindUserByIdResponse
+import com.example.internal.input.reqreply.user.FindUserByIdResponse.Failure.ErrorCase
+import com.example.internal.input.reqreply.user.UpdateUserRequest
+import com.example.internal.input.reqreply.user.UpdateUserResponse
 
 object UserProtoMapper {
 

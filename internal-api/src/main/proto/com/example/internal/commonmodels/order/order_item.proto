@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.order.order_item;
+package com.example.internal.commonmodels.order;
 
 import "com/example/internal/commonmodels/product/product.proto";
 
@@ -11,6 +11,6 @@ message OrderItem {
     int32 amount = 2;
     oneof product {
         string product_id = 3;
-        product.product.Product product_full = 4;
+        product.Product product_full = 4;
     }
 }
