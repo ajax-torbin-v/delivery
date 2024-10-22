@@ -26,7 +26,7 @@ object UserProtoMapper {
     fun FindUserByIdResponse.toDTO(): UserDTO {
         return when (this.responseCase!!) {
             FindUserByIdResponse.ResponseCase.SUCCESS -> success.user.toDTO()
-            FindUserByIdResponse.ResponseCase.FAILURE -> failureCase()
+            FindUserByIdResponse.ResponseCase.FAILURE -> failure.asException()
             FindUserByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -34,10 +34,7 @@ object UserProtoMapper {
     fun UpdateUserResponse.toDTO(): UserDTO {
         return when (this.responseCase!!) {
             UpdateUserResponse.ResponseCase.SUCCESS -> success.user.toDTO()
-            UpdateUserResponse.ResponseCase.FAILURE -> {
-                failureCase()
-            }
-
+            UpdateUserResponse.ResponseCase.FAILURE -> failure.asException()
             UpdateUserResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -74,17 +71,17 @@ object UserProtoMapper {
         )
     }
 
-    private fun FindUserByIdResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-            ErrorCase.ERROR_NOT_SET -> error(failure.message)
+    private fun FindUserByIdResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            ErrorCase.USER_NOT_FOUND -> UserNotFoundException(message)
+            ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun UpdateUserResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-            UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+    private fun UpdateUserResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> UserNotFoundException(message)
+            UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 }

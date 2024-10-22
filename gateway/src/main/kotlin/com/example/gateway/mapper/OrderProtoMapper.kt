@@ -32,7 +32,7 @@ object OrderProtoMapper {
     fun CreateOrderResponse.toDTO(): OrderDTO {
         return when (this.responseCase!!) {
             CreateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
-            CreateOrderResponse.ResponseCase.FAILURE -> failureCase()
+            CreateOrderResponse.ResponseCase.FAILURE -> failure.asException()
             CreateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -40,7 +40,7 @@ object OrderProtoMapper {
     fun FindOrderByIdResponse.toDtoWithProduct(): OrderWithProductDTO {
         return when (this.responseCase!!) {
             FindOrderByIdResponse.ResponseCase.SUCCESS -> success.order.toDtoWithProduct()
-            FindOrderByIdResponse.ResponseCase.FAILURE -> failureCase()
+            FindOrderByIdResponse.ResponseCase.FAILURE -> failure.asException()
             FindOrderByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -48,7 +48,7 @@ object OrderProtoMapper {
     fun UpdateOrderResponse.toDTO(): OrderDTO {
         return when (this.responseCase!!) {
             UpdateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
-            UpdateOrderResponse.ResponseCase.FAILURE -> failureCase()
+            UpdateOrderResponse.ResponseCase.FAILURE -> failure.asException()
             UpdateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -56,7 +56,7 @@ object OrderProtoMapper {
     fun UpdateOrderStatusResponse.toDTO(): OrderDTO {
         return when (this.responseCase!!) {
             UpdateOrderStatusResponse.ResponseCase.SUCCESS -> success.order.toDTO()
-            UpdateOrderStatusResponse.ResponseCase.FAILURE -> failureCase()
+            UpdateOrderStatusResponse.ResponseCase.FAILURE -> failure.asException()
             UpdateOrderStatusResponse.ResponseCase.RESPONSE_NOT_SET ->
                 throw RuntimeException("Acquired message is empty!")
         }
@@ -65,7 +65,7 @@ object OrderProtoMapper {
     fun FindOrdersByUserIdResponse.toDTO(): List<OrderDTO> {
         return when (this.responseCase!!) {
             FindOrdersByUserIdResponse.ResponseCase.SUCCESS -> success.orderList.map { it.toDTO() }
-            FindOrdersByUserIdResponse.ResponseCase.FAILURE -> failureCase()
+            FindOrdersByUserIdResponse.ResponseCase.FAILURE -> failure.asException()
             FindOrdersByUserIdResponse.ResponseCase.RESPONSE_NOT_SET ->
                 throw RuntimeException("Acquired message is empty!")
         }
@@ -145,57 +145,40 @@ object OrderProtoMapper {
         }.build()
     }
 
-    @SuppressWarnings("ThrowsCount")
-    private fun CreateOrderResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND ->
-                throw UserNotFoundException(failure.message)
-
-            CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                throw ProductNotFoundException(failure.message)
-
-            CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_SUFFICIENT_AMOUNT ->
-                throw ProductAmountException(failure.message)
-
-            CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                error(failure.message)
+    private fun CreateOrderResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND -> UserNotFoundException(message)
+            CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND -> ProductNotFoundException(message)
+            CreateOrderResponse.Failure.ErrorCase.PRODUCT_NOT_SUFFICIENT_AMOUNT -> ProductAmountException(message)
+            CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun FindOrderByIdResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            FindOrderByIdResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
-                throw OrderNotFoundException(failure.message)
-
-            FindOrderByIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                error(failure.message)
+    private fun FindOrderByIdResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            FindOrderByIdResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> OrderNotFoundException(message)
+            FindOrderByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun UpdateOrderResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            UpdateOrderResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> throw OrderNotFoundException(failure.message)
-            UpdateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+    private fun UpdateOrderResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            UpdateOrderResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> OrderNotFoundException(message)
+            UpdateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun UpdateOrderStatusResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            UpdateOrderStatusResponse.Failure.ErrorCase.ORDER_NOT_FOUND ->
-                throw OrderNotFoundException(failure.message)
-
-            UpdateOrderStatusResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                error(failure.message)
+    private fun UpdateOrderStatusResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            UpdateOrderStatusResponse.Failure.ErrorCase.ORDER_NOT_FOUND -> OrderNotFoundException(message)
+            UpdateOrderStatusResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun FindOrdersByUserIdResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            FindOrdersByUserIdResponse.Failure.ErrorCase.USER_NOT_FOUND ->
-                throw UserNotFoundException(failure.message)
-
-            FindOrdersByUserIdResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                error(failure.message)
+    private fun FindOrdersByUserIdResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            FindOrdersByUserIdResponse.Failure.ErrorCase.USER_NOT_FOUND -> UserNotFoundException(message)
+            FindOrdersByUserIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 }

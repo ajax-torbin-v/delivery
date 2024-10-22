@@ -34,7 +34,7 @@ object ProductProtoMapper {
     fun FindProductByIdResponse.toDTO(): ProductDTO {
         return when (this.responseCase!!) {
             FindProductByIdResponse.ResponseCase.SUCCESS -> success.product.toDTO()
-            FindProductByIdResponse.ResponseCase.FAILURE -> failureCase()
+            FindProductByIdResponse.ResponseCase.FAILURE -> failure.asException()
             FindProductByIdResponse.ResponseCase.RESPONSE_NOT_SET ->
                 throw RuntimeException("Acquired message is empty!")
         }
@@ -43,7 +43,7 @@ object ProductProtoMapper {
     fun UpdateProductResponse.toDTO(): ProductDTO {
         return when (this.responseCase!!) {
             UpdateProductResponse.ResponseCase.SUCCESS -> success.product.toDTO()
-            UpdateProductResponse.ResponseCase.FAILURE -> failureCase()
+            UpdateProductResponse.ResponseCase.FAILURE -> failure.asException()
             UpdateProductResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -76,22 +76,17 @@ object ProductProtoMapper {
         )
     }
 
-    private fun FindProductByIdResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                throw ProductNotFoundException(failure.message)
-
-            FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+    private fun FindProductByIdResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND -> ProductNotFoundException(message)
+            FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
         }
     }
 
-    private fun UpdateProductResponse.failureCase(): Nothing {
-        when (failure.errorCase!!) {
-            UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                error(failure.message)
-
-            UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                throw ProductNotFoundException(failure.message)
+    private fun UpdateProductResponse.Failure.asException(): Nothing {
+        throw when (errorCase!!) {
+            UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(message)
+            UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND -> ProductNotFoundException(message)
         }
     }
 }
