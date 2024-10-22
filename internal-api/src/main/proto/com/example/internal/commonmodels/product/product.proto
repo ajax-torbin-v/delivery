@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package com.example.internal.commonmodels.product.product;
+
+option java_multiple_files = true;
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string price = 3;
+    int32 amount = 4;
+    string measurement = 5;
+}
