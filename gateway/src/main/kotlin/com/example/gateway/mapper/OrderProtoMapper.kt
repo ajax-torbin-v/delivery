@@ -45,7 +45,6 @@ object OrderProtoMapper {
         }
     }
 
-    @SuppressWarnings("ThrowsCount")
     fun UpdateOrderResponse.toDTO(): OrderDTO {
         return when (this.responseCase!!) {
             UpdateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
@@ -146,6 +145,7 @@ object OrderProtoMapper {
         }.build()
     }
 
+    @SuppressWarnings("ThrowsCount")
     private fun CreateOrderResponse.failureCase(): Nothing {
         when (failure.errorCase!!) {
             CreateOrderResponse.Failure.ErrorCase.USER_NOT_FOUND ->
@@ -161,7 +161,6 @@ object OrderProtoMapper {
                 error(failure.message)
         }
     }
-
 
     private fun FindOrderByIdResponse.failureCase(): Nothing {
         when (failure.errorCase!!) {

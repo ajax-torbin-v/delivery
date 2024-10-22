@@ -94,5 +94,4 @@ object ProductProtoMapper {
                 throw ProductNotFoundException(failure.message)
         }
     }
-
 }
