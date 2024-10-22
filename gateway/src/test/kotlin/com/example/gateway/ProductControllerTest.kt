@@ -47,7 +47,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_SAVE,
+                NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
@@ -65,7 +65,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_SAVE,
+                NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
@@ -82,7 +82,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_SAVE,
+                NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
             )
@@ -99,7 +99,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_FIND_BY_ID,
+                NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
@@ -117,7 +117,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_FIND_BY_ID,
+                NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
@@ -134,7 +134,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_FIND_BY_ID,
+                NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
@@ -151,7 +151,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_FIND_BY_ID,
+                NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
             )
@@ -168,7 +168,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_UPDATE,
+                NatsSubject.Product.UPDATE,
                 updateProductRequest(randomUserId, updateProductDTO),
                 UpdateProductResponse.parser()
             )
@@ -186,7 +186,7 @@ class ProductControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Product.PRODUCT_DELETE,
+                NatsSubject.Product.DELETE,
                 deleteProductRequest,
                 DeleteProductResponse.parser()
             )

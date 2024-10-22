@@ -66,7 +66,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_SAVE,
+                NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
@@ -84,7 +84,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_SAVE,
+                NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
@@ -101,7 +101,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_SAVE,
+                NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
@@ -118,7 +118,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_SAVE,
+                NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
@@ -135,7 +135,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_SAVE,
+                NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
             )
@@ -152,7 +152,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_BY_ID,
+                NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
@@ -170,7 +170,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_BY_ID,
+                NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
@@ -187,7 +187,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_BY_ID,
+                NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
@@ -204,7 +204,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_BY_ID,
+                NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
             )
@@ -221,7 +221,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE,
+                NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
@@ -239,7 +239,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE,
+                NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
@@ -256,7 +256,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE,
+                NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
@@ -273,7 +273,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE,
+                NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
             )
@@ -290,7 +290,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
+                NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
@@ -308,7 +308,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
+                NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
@@ -325,7 +325,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID,
+                NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
             )
@@ -342,7 +342,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE_STATUS,
+                NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
@@ -360,7 +360,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE_STATUS,
+                NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
@@ -377,7 +377,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE_STATUS,
+                NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
@@ -394,7 +394,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_UPDATE_STATUS,
+                NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
             )
@@ -411,7 +411,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_DELETE,
+                NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
@@ -423,7 +423,7 @@ class OrderControllerTest {
         // THEN
         verify(exactly = 1) {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_DELETE,
+                NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
@@ -435,7 +435,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_DELETE,
+                NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )
@@ -452,7 +452,7 @@ class OrderControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.Order.ORDER_DELETE,
+                NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
             )

@@ -33,7 +33,7 @@ class ProductController(private val natsClient: NatsClient) {
     @PostMapping
     fun add(@RequestBody createProductDTO: CreateProductDTO): Mono<ProductDTO> {
         return natsClient.doRequest(
-            NatsSubject.Product.PRODUCT_SAVE,
+            NatsSubject.Product.SAVE,
             createProductDTO.toCreateProductRequest(),
             CreateProductResponse.parser()
         ).map { it.toDTO() }
@@ -42,7 +42,7 @@ class ProductController(private val natsClient: NatsClient) {
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<ProductDTO> {
         return natsClient.doRequest(
-            NatsSubject.Product.PRODUCT_FIND_BY_ID,
+            NatsSubject.Product.FIND_BY_ID,
             FindProductByIdRequest.newBuilder().setId(id).build(),
             FindProductByIdResponse.parser(),
         ).map { it.toDTO() }
@@ -51,7 +51,7 @@ class ProductController(private val natsClient: NatsClient) {
     @PutMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody updateProductDTO: UpdateProductDTO): Mono<ProductDTO> {
         return natsClient.doRequest(
-            NatsSubject.Product.PRODUCT_UPDATE,
+            NatsSubject.Product.UPDATE,
             updateProductRequest(id, updateProductDTO),
             UpdateProductResponse.parser()
         ).map { it.toDTO() }
@@ -61,7 +61,7 @@ class ProductController(private val natsClient: NatsClient) {
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: String): Mono<Unit> {
         return natsClient.doRequest(
-            NatsSubject.Product.PRODUCT_DELETE,
+            NatsSubject.Product.DELETE,
             DeleteProductRequest.newBuilder().setId(id).build(),
             DeleteProductResponse.parser()
         ).map { it.toDTO() }

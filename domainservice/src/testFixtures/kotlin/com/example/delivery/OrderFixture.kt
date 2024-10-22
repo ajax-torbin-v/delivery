@@ -6,9 +6,6 @@ import com.example.core.OrderFixture.randomUpdateShipmentDetailsDTO
 import com.example.core.ProductFixture.randomPrice
 import com.example.core.ProductFixture.randomProductId
 import com.example.core.UserFixture.randomUserId
-import com.example.core.exception.OrderNotFoundException
-import com.example.core.exception.ProductNotFoundException
-import com.example.core.exception.UserNotFoundException
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.domain.DomainOrder
@@ -18,6 +15,7 @@ import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
@@ -102,10 +100,6 @@ object OrderFixture {
 
     val updatedDomainOrder = domainOrder.copy(shipmentDetails = randomUpdateDomainShipmentDetails)
 
-    val productNotFoundException = ProductNotFoundException("Product not found")
-    val userNotFoundException = UserNotFoundException("User not found")
-    val orderNotFoundException = OrderNotFoundException("Order not found")
-    val unexpectedException = NullPointerException()
     val failureCreateOrderResponseWithProductNotFoundException = CreateOrderResponse.newBuilder().apply {
         failureBuilder.message = "Product not found"
         failureBuilder.productNotFoundBuilder
@@ -113,6 +107,10 @@ object OrderFixture {
     val failureCreateOrderResponseWithUserNotFoundException = CreateOrderResponse.newBuilder().apply {
         failureBuilder.message = "User not found"
         failureBuilder.userNotFoundBuilder
+    }.build()
+    val failureCreateOrderResponseWithProductAmountException = CreateOrderResponse.newBuilder().apply {
+        failureBuilder.message = "Not enough product"
+        failureBuilder.productNotSufficientAmountBuilder
     }.build()
     val failureCreateOrderResponseWithUnexpectedException = CreateOrderResponse.newBuilder().apply {
         failureBuilder
@@ -123,6 +121,14 @@ object OrderFixture {
         failureBuilder.orderNotFoundBuilder
     }.build()
     val failureFindOrderByIdWithUnexpectedException = FindOrderByIdResponse.newBuilder().apply {
+        failureBuilder
+    }.build()
+
+    val failureUpdateOrderResponseWithOrderNotFoundException = UpdateOrderResponse.newBuilder().apply {
+        failureBuilder.message = "Order not found"
+        failureBuilder.orderNotFoundBuilder
+    }.build()
+    val failureUpdateOrderResponseWitUnexpectedException = UpdateOrderResponse.newBuilder().apply {
         failureBuilder
     }.build()
 }

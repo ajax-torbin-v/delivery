@@ -37,7 +37,7 @@ class ProductNatsController(
     connection: Connection,
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
-    @NatsHandler(subject = NatsSubject.Product.PRODUCT_SAVE)
+    @NatsHandler(subject = NatsSubject.Product.SAVE)
     fun add(request: CreateProductRequest): Mono<CreateProductResponse> {
         return productService.add(request.toCreateProductDTO())
             .map { it.toCreateProductResponse() }
@@ -47,7 +47,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Product.PRODUCT_FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.Product.FIND_BY_ID)
     fun findById(request: FindProductByIdRequest): Mono<FindProductByIdResponse> {
         return productService.getById(request.id)
             .map { product -> product.toFindProductByIdResponse() }
@@ -57,7 +57,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Product.PRODUCT_UPDATE)
+    @NatsHandler(subject = NatsSubject.Product.UPDATE)
     fun update(request: UpdateProductRequest): Mono<UpdateProductResponse> {
         return productService.update(request.id, request.toUpdateProductDTO())
             .map { product -> product.toUpdateProductResponse() }
@@ -67,7 +67,7 @@ class ProductNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Product.PRODUCT_DELETE)
+    @NatsHandler(subject = NatsSubject.Product.DELETE)
     fun delete(request: DeleteProductRequest): Mono<DeleteProductResponse> {
         return productService.deleteById(request.id)
             .map { toDeleteProductResponse() }

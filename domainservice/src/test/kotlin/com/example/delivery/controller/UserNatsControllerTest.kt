@@ -35,7 +35,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `save should return saved user`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_SAVE,
+            NatsSubject.User.SAVE,
             createUserRequest,
             CreateUserResponse.parser()
         )
@@ -51,7 +51,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_FIND_BY_ID,
+            NatsSubject.User.FIND_BY_ID,
             buildFindUserByIdRequest(user.id.toString()),
             FindUserByIdResponse.parser()
         )
@@ -64,7 +64,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `findById should return message with exception when user doesn't exist`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_FIND_BY_ID,
+            NatsSubject.User.FIND_BY_ID,
             buildFindUserByIdRequest(randomUserId),
             FindUserByIdResponse.parser()
         )
@@ -80,7 +80,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_UPDATE,
+            NatsSubject.User.UPDATE,
             buildUpdateUserRequest(user.id.toString()),
             UpdateUserResponse.parser()
         )
@@ -93,7 +93,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
     fun `update should throw exception when user doesn't exist`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_UPDATE,
+            NatsSubject.User.UPDATE,
             buildUpdateUserRequest(randomUserId),
             UpdateUserResponse.parser()
         )
@@ -109,7 +109,7 @@ class UserNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.User.USER_DELETE,
+            NatsSubject.User.DELETE,
             buildDeleteUserRequest(user.id.toString()),
             DeleteUserResponse.parser()
         )

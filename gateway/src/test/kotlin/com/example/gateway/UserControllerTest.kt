@@ -50,7 +50,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_SAVE,
+                NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
@@ -68,7 +68,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_SAVE,
+                NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
@@ -85,7 +85,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_SAVE,
+                NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
             )
@@ -102,7 +102,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_FIND_BY_ID,
+                NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
@@ -120,7 +120,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_FIND_BY_ID,
+                NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
@@ -137,7 +137,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_FIND_BY_ID,
+                NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
@@ -154,7 +154,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_FIND_BY_ID,
+                NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
             )
@@ -171,7 +171,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_UPDATE,
+                NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
@@ -189,7 +189,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_UPDATE,
+                NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
@@ -206,7 +206,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_UPDATE,
+                NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
@@ -223,7 +223,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_UPDATE,
+                NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
             )
@@ -240,7 +240,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_DELETE,
+                NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
@@ -252,7 +252,7 @@ class UserControllerTest {
         // THEN
         verify(exactly = 1) {
             natsClient.doRequest(
-                NatsSubject.User.USER_DELETE,
+                NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
@@ -264,7 +264,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_DELETE,
+                NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )
@@ -281,7 +281,7 @@ class UserControllerTest {
         // GIVEN
         every {
             natsClient.doRequest(
-                NatsSubject.User.USER_DELETE,
+                NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
             )

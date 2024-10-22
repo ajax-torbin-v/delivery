@@ -15,11 +15,11 @@ import java.math.BigDecimal
 
 object ProductProtoMapper {
     fun CreateProductDTO.toCreateProductRequest(): CreateProductRequest {
-        return CreateProductRequest.newBuilder().apply {
-            price = price.toString()
-            amount = amount
-            measurement = measurement
-            name = name
+        return CreateProductRequest.newBuilder().also {
+            it.price = price.toString()
+            it.amount = amount
+            it.measurement = measurement
+            it.name = name
         }.build()
     }
 
@@ -34,16 +34,7 @@ object ProductProtoMapper {
     fun FindProductByIdResponse.toDTO(): ProductDTO {
         return when (this.responseCase!!) {
             FindProductByIdResponse.ResponseCase.SUCCESS -> success.product.toDTO()
-            FindProductByIdResponse.ResponseCase.FAILURE -> {
-                when (failure.errorCase!!) {
-                    FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND -> throw ProductNotFoundException(
-                        failure.message
-                    )
-
-                    FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
-                }
-            }
-
+            FindProductByIdResponse.ResponseCase.FAILURE -> failureCase()
             FindProductByIdResponse.ResponseCase.RESPONSE_NOT_SET ->
                 throw RuntimeException("Acquired message is empty!")
         }
@@ -52,17 +43,7 @@ object ProductProtoMapper {
     fun UpdateProductResponse.toDTO(): ProductDTO {
         return when (this.responseCase!!) {
             UpdateProductResponse.ResponseCase.SUCCESS -> success.product.toDTO()
-
-            UpdateProductResponse.ResponseCase.FAILURE -> {
-                when (failure.errorCase!!) {
-                    UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
-                        error(failure.message)
-
-                    UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
-                        throw ProductNotFoundException(failure.message)
-                }
-            }
-
+            UpdateProductResponse.ResponseCase.FAILURE -> failureCase()
             UpdateProductResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -94,4 +75,24 @@ object ProductProtoMapper {
             measurement
         )
     }
+
+    private fun FindProductByIdResponse.failureCase(): Nothing {
+        when (failure.errorCase!!) {
+            FindProductByIdResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
+                throw ProductNotFoundException(failure.message)
+
+            FindProductByIdResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+        }
+    }
+
+    private fun UpdateProductResponse.failureCase(): Nothing {
+        when (failure.errorCase!!) {
+            UpdateProductResponse.Failure.ErrorCase.ERROR_NOT_SET ->
+                error(failure.message)
+
+            UpdateProductResponse.Failure.ErrorCase.PRODUCT_NOT_FOUND ->
+                throw ProductNotFoundException(failure.message)
+        }
+    }
+
 }

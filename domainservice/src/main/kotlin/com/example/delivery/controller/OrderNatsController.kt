@@ -46,7 +46,7 @@ class OrderNatsController(
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_SAVE)
+    @NatsHandler(subject = NatsSubject.Order.SAVE)
     fun add(request: CreateOrderRequest): Mono<CreateOrderResponse> {
         return orderService.add(request.toCreateOrderDTO())
             .map { it.toCreateOrderResponse() }
@@ -56,7 +56,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.Order.FIND_BY_ID)
     fun findById(request: FindOrderByIdRequest): Mono<FindOrderByIdResponse> {
         return orderService.getById(request.id)
             .map { it.toFindOrderByIdResponse() }
@@ -66,7 +66,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_UPDATE)
+    @NatsHandler(subject = NatsSubject.Order.UPDATE)
     fun update(request: UpdateOrderRequest): Mono<UpdateOrderResponse> {
         return orderService.updateOrder(request.id, request.toUpdateOrderDTO())
             .map { it.toUpdateOrderResponse() }
@@ -76,7 +76,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_UPDATE_STATUS)
+    @NatsHandler(subject = NatsSubject.Order.UPDATE_STATUS)
     fun updateStatus(request: UpdateOrderStatusRequest): Mono<UpdateOrderStatusResponse> {
         return orderService.updateOrderStatus(request.id, request.status)
             .map { it.toUpdateOrderStatusResponse() }
@@ -86,7 +86,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_DELETE)
+    @NatsHandler(subject = NatsSubject.Order.DELETE)
     fun delete(request: DeleteOrderRequest): Mono<DeleteOrderResponse> {
         return orderService.deleteById(request.id)
             .map { toDeleteOrderResponse() }
@@ -96,7 +96,7 @@ class OrderNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.Order.ORDER_FIND_ALL_BY_USER_ID)
+    @NatsHandler(subject = NatsSubject.Order.FIND_ALL_BY_USER_ID)
     fun findAllByUserId(request: FindOrdersByUserIdRequest): Mono<FindOrdersByUserIdResponse> {
         return orderService.getAllByUserId(request.id)
             .collectList()

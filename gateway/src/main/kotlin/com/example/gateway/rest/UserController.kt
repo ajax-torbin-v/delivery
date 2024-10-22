@@ -33,7 +33,7 @@ class UserController(private val natsClient: NatsClient) {
     @PostMapping
     fun add(@RequestBody createUserDTO: CreateUserDTO): Mono<UserDTO> {
         return natsClient.doRequest(
-            NatsSubject.User.USER_SAVE,
+            NatsSubject.User.SAVE,
             createUserDTO.toCreateUserRequest(),
             CreateUserResponse.parser(),
         ).map { it.toDTO() }
@@ -42,7 +42,7 @@ class UserController(private val natsClient: NatsClient) {
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<UserDTO> {
         return natsClient.doRequest(
-            NatsSubject.User.USER_FIND_BY_ID,
+            NatsSubject.User.FIND_BY_ID,
             FindUserByIdRequest.newBuilder().apply { setId(id) }.build(),
             FindUserByIdResponse.parser()
         ).map { it.toDTO() }
@@ -51,7 +51,7 @@ class UserController(private val natsClient: NatsClient) {
     @PutMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody updateUserDTO: UpdateUserDTO): Mono<UserDTO> {
         return natsClient.doRequest(
-            NatsSubject.User.USER_UPDATE,
+            NatsSubject.User.UPDATE,
             updateUserRequest(id, updateUserDTO),
             UpdateUserResponse.parser()
         ).map { it.toDTO() }
@@ -61,7 +61,7 @@ class UserController(private val natsClient: NatsClient) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String): Mono<Unit> {
         return natsClient.doRequest(
-            NatsSubject.User.USER_DELETE,
+            NatsSubject.User.DELETE,
             DeleteUserRequest.newBuilder().setId(id).build(),
             DeleteUserResponse.parser()
         ).map { it.toDTO() }

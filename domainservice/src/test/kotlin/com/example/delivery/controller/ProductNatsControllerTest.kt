@@ -35,7 +35,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `save should return saved product`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_SAVE,
+            NatsSubject.Product.SAVE,
             createProductRequest,
             CreateProductResponse.parser()
         )
@@ -51,7 +51,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_FIND_BY_ID,
+            NatsSubject.Product.FIND_BY_ID,
             buildFindProductByIdRequest(product.id.toString()),
             FindProductByIdResponse.parser()
         )
@@ -64,7 +64,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `findById should return message with exception when product not found`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_FIND_BY_ID,
+            NatsSubject.Product.FIND_BY_ID,
             buildFindProductByIdRequest(randomProductId),
             FindProductByIdResponse.parser()
         )
@@ -80,7 +80,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_UPDATE,
+            NatsSubject.Product.UPDATE,
             buildUpdateProductRequest(product.id.toString()),
             UpdateProductResponse.parser()
         )
@@ -93,7 +93,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
     fun `update should return message with exception when product doesn't exist`() {
         // GIVEN // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_UPDATE,
+            NatsSubject.Product.UPDATE,
             buildUpdateProductRequest(randomProductId),
             UpdateProductResponse.parser()
         )
@@ -109,7 +109,7 @@ class ProductNatsControllerTest : AbstractNatsControllerTest() {
 
         // WHEN
         val actual = doRequest(
-            NatsSubject.Product.PRODUCT_DELETE,
+            NatsSubject.Product.DELETE,
             buildDeleteProductRequest(product.id.toString()),
             DeleteProductResponse.parser()
         )

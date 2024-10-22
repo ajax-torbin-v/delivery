@@ -26,14 +26,7 @@ object UserProtoMapper {
     fun FindUserByIdResponse.toDTO(): UserDTO {
         return when (this.responseCase!!) {
             FindUserByIdResponse.ResponseCase.SUCCESS -> success.user.toDTO()
-
-            FindUserByIdResponse.ResponseCase.FAILURE -> {
-                when (failure.errorCase!!) {
-                    ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                    ErrorCase.ERROR_NOT_SET -> error(failure.message)
-                }
-            }
-
+            FindUserByIdResponse.ResponseCase.FAILURE -> failureCase()
             FindUserByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
         }
     }
@@ -42,10 +35,7 @@ object UserProtoMapper {
         return when (this.responseCase!!) {
             UpdateUserResponse.ResponseCase.SUCCESS -> success.user.toDTO()
             UpdateUserResponse.ResponseCase.FAILURE -> {
-                when (failure.errorCase!!) {
-                    UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
-                    UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
-                }
+                failureCase()
             }
 
             UpdateUserResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
@@ -69,10 +59,10 @@ object UserProtoMapper {
     }
 
     fun CreateUserDTO.toCreateUserRequest(): CreateUserRequest {
-        return CreateUserRequest.newBuilder().apply {
-            fullName = fullName
-            phone = phone
-            password = password
+        return CreateUserRequest.newBuilder().also {
+            it.fullName = fullName
+            it.phone = phone
+            it.password = password
         }.build()
     }
 
@@ -82,5 +72,19 @@ object UserProtoMapper {
             fullName,
             phone
         )
+    }
+
+    private fun FindUserByIdResponse.failureCase(): Nothing {
+        when (failure.errorCase!!) {
+            ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
+            ErrorCase.ERROR_NOT_SET -> error(failure.message)
+        }
+    }
+
+    private fun UpdateUserResponse.failureCase(): Nothing {
+        when (failure.errorCase!!) {
+            UpdateUserResponse.Failure.ErrorCase.USER_NOT_FOUND -> throw UserNotFoundException(failure.message)
+            UpdateUserResponse.Failure.ErrorCase.ERROR_NOT_SET -> error(failure.message)
+        }
     }
 }

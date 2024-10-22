@@ -38,7 +38,7 @@ class UserNatsController(
     dispatcher: Dispatcher,
 ) : AbstractNatsController(connection, dispatcher) {
 
-    @NatsHandler(subject = NatsSubject.User.USER_SAVE)
+    @NatsHandler(subject = NatsSubject.User.SAVE)
     fun save(response: CreateUserRequest): Mono<CreateUserResponse> {
         return userService.add(response.toCreateUserDTO())
             .map { user -> user.toCreateUserResponse() }
@@ -48,7 +48,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.User.USER_FIND_BY_ID)
+    @NatsHandler(subject = NatsSubject.User.FIND_BY_ID)
     fun findById(request: FindUserByIdRequest): Mono<FindUserByIdResponse> {
         return userService.getById(request.id)
             .map { user -> user.toFindUserByIdResponse() }
@@ -58,7 +58,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.User.USER_UPDATE)
+    @NatsHandler(subject = NatsSubject.User.UPDATE)
     fun update(request: UpdateUserRequest): Mono<UpdateUserResponse> {
         return userService.update(request.id, request.toUpdateUserDTO())
             .map { user -> user.toUpdateUserResponse() }
@@ -68,7 +68,7 @@ class UserNatsController(
             }
     }
 
-    @NatsHandler(subject = NatsSubject.User.USER_DELETE)
+    @NatsHandler(subject = NatsSubject.User.DELETE)
     fun delete(request: DeleteUserRequest): Mono<DeleteUserResponse> {
         return userService.deleteById(request.id)
             .map { toDeleteUserResponse() }

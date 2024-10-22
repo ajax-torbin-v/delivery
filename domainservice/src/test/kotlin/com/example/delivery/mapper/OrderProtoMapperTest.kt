@@ -1,10 +1,16 @@
 package com.example.delivery.mapper
 
+import com.example.core.exception.OrderNotFoundException
+import com.example.core.exception.ProductAmountException
+import com.example.core.exception.ProductNotFoundException
+import com.example.core.exception.UserNotFoundException
 import com.example.delivery.OrderFixture
 import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdResponse
+import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateOrderResponse
 import com.example.internal.input.reqreply.order.create.CreateOrderResponse
 import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -31,20 +37,34 @@ class OrderProtoMapperTest {
         assertEquals(failureResponse, error.toFailureFindOrderByIdResponse())
     }
 
+    @ParameterizedTest
+    @MethodSource("failureUpdateOrderResponseProvider")
+    fun `should build failure message for UpdateOrderResponse`(
+        error: Throwable,
+        failureResponse: UpdateOrderResponse,
+    ) {
+        // WHEN // THEN
+        assertEquals(failureResponse, error.toFailureUpdateOrderResponse())
+    }
+
     companion object {
         @JvmStatic
         fun failureCreateOrderResponseProvider(): List<Arguments> {
             return listOf(
                 Arguments.of(
-                    OrderFixture.userNotFoundException,
+                    UserNotFoundException("User not found"),
                     OrderFixture.failureCreateOrderResponseWithUserNotFoundException
                 ),
                 Arguments.of(
-                    OrderFixture.productNotFoundException,
+                    ProductNotFoundException("Product not found"),
                     OrderFixture.failureCreateOrderResponseWithProductNotFoundException
                 ),
                 Arguments.of(
-                    OrderFixture.unexpectedException,
+                    ProductAmountException("Not enough product"),
+                    OrderFixture.failureCreateOrderResponseWithProductAmountException
+                ),
+                Arguments.of(
+                    NullPointerException(),
                     OrderFixture.failureCreateOrderResponseWithUnexpectedException
                 )
             )
@@ -54,12 +74,26 @@ class OrderProtoMapperTest {
         fun failureFindOrderByIdResponseProvider(): List<Arguments> {
             return listOf(
                 Arguments.of(
-                    OrderFixture.orderNotFoundException,
+                    OrderNotFoundException("Order not found"),
                     OrderFixture.failureFindOrderByIdWithOrderNotFoundException
                 ),
                 Arguments.of(
-                    OrderFixture.unexpectedException,
+                    NullPointerException(),
                     OrderFixture.failureFindOrderByIdWithUnexpectedException
+                )
+            )
+        }
+
+        @JvmStatic
+        fun failureUpdateOrderResponseProvider(): List<Arguments> {
+            return listOf(
+                Arguments.of(
+                    OrderNotFoundException("Order not found"),
+                    OrderFixture.failureUpdateOrderResponseWithOrderNotFoundException
+                ),
+                Arguments.of(
+                    NullPointerException(),
+                    OrderFixture.failureUpdateOrderResponseWitUnexpectedException
                 )
             )
         }
