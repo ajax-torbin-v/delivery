@@ -1,0 +1,11 @@
+# Use a base image with JDK and Gradle
+FROM amazoncorretto:22-alpine3.17-jdk
+
+# Set the working directory for the runtime environment
+WORKDIR /app
+
+# Copy the compiled JAR file from the build stage
+COPY gateway/build/libs/gateway-0.0.1-SNAPSHOT.jar gateway.jar
+
+# Command to run the JAR file
+ENTRYPOINT ["java", "-jar", "gateway.jar"]

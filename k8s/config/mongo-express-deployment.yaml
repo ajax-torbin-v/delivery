@@ -44,12 +44,12 @@ spec:
             - name: MONGO_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: delivery-configmap
+                  name: domain-configmap
                   key: host
             - name: MONGO_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: delivery-configmap
+                  name: domain-configmap
                   key: port
             - name: ME_CONFIG_MONGODB_URL
               value: "mongodb://$(MONGO_ADMINUSERNAME):$(MONGO_ADMINPASSWORD)@$(MONGO_HOST):$(MONGO_PORT)/?authSource=admin"

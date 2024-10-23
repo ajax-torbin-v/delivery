@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  delivery:
-    container_name: delivery-app
-    build:
-      context: .
-    env_file:
-      - .env
-    depends_on:
-      - mongo
-    ports:
-      - "8080:8080"
-
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -23,6 +12,22 @@ services:
       - mongo_db:/data/db
     ports:
       - "27017:27017"
+
+  nats:
+    image: nats
+    container_name: nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    restart: unless-stopped
+
+  nats-box:
+    image: synadia/nats-box:latest
+    container_name: nats-box
+    stdin_open: true
+    tty: true
+    depends_on:
+      - nats
 
 volumes:
   mongo_db:

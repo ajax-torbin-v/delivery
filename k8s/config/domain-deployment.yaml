@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delivery-app-deployment
+  name: domain-deployment
   labels:
-    app: delivery
+    app: domain
 spec:
-  replicas: 3
+  replicas: 4
   selector:
     matchLabels:
-      app: delivery
+      app: domain
   template:
     metadata:
       labels:
-        app: delivery
+        app: domain
     spec:
       containers:
-        - name: delivery-app
-          image: delivery:latest
+        - name: domain
+          image: domain:v1
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
@@ -35,29 +35,20 @@ spec:
             - name: HOST
               valueFrom:
                 configMapKeyRef:
-                  name: delivery-configmap
+                  name: domain-configmap
                   key: host
             - name: PORT
               valueFrom:
                 configMapKeyRef:
-                  name: delivery-configmap
+                  name: domain-configmap
                   key: port
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: delivery-configmap
+                  name: domain-configmap
                   key: db_name
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: delivery-app-service
-  labels:
-    app: delivery-app-service
-spec:
-  selector:
-    app: delivery
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+            - name: NATS_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: domain-configmap
+                  key: nats_uri
