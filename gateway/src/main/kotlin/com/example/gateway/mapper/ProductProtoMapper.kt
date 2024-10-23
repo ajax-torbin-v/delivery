@@ -4,13 +4,13 @@ import com.example.core.dto.request.CreateProductDTO
 import com.example.core.dto.request.UpdateProductDTO
 import com.example.core.dto.response.ProductDTO
 import com.example.core.exception.ProductNotFoundException
-import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductResponse
-import com.example.internal.commonmodels.product.product.Product
-import com.example.internal.input.reqreply.product.create.CreateProductRequest
-import com.example.internal.input.reqreply.product.create.CreateProductResponse
-import com.example.internal.input.reqreply.product.find.FindProductByIdResponse
-import com.example.internal.input.reqreply.product.update.UpdateProductRequest
-import com.example.internal.input.reqreply.product.update.UpdateProductResponse
+import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
+import com.example.internal.commonmodels.product.Product
+import com.example.internal.input.reqreply.product.CreateProductRequest
+import com.example.internal.input.reqreply.product.CreateProductResponse
+import com.example.internal.input.reqreply.product.FindProductByIdResponse
+import com.example.internal.input.reqreply.product.UpdateProductRequest
+import com.example.internal.input.reqreply.product.UpdateProductResponse
 import java.math.BigDecimal
 
 object ProductProtoMapper {

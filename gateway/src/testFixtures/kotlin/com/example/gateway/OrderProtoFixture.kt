@@ -16,20 +16,20 @@ import com.example.core.ProductFixture.randomPrice
 import com.example.core.ProductFixture.randomProductId
 import com.example.core.ProductFixture.randomProductName
 import com.example.core.UserFixture.randomUserId
-import com.example.internal.commonmodels.order.order.Order
-import com.example.internal.commonmodels.order.order_item.OrderItem
-import com.example.internal.commonmodels.order.shipment_details.ShipmentDetails
-import com.example.internal.commonmodels.product.product.Product
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.delete.DeleteOrderRequest
-import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdRequest
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdRequest
-import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
-import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusRequest
-import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusResponse
+import com.example.internal.commonmodels.order.Order
+import com.example.internal.commonmodels.order.OrderItem
+import com.example.internal.commonmodels.order.ShipmentDetails
+import com.example.internal.commonmodels.product.Product
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.DeleteOrderRequest
+import com.example.internal.input.reqreply.order.DeleteOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdRequest
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.FindOrdersByUserIdRequest
+import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
+import com.example.internal.input.reqreply.order.UpdateOrderStatusRequest
+import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 
 object OrderProtoFixture {
     val randomShipmentDetails = ShipmentDetails.newBuilder().apply {
@@ -51,7 +51,7 @@ object OrderProtoFixture {
             id = randomOrderId
             shipmentDetails = randomShipmentDetails
             userId = randomUserId
-            status = "NEW"
+            status = Order.Status.STATUS_NEW
             addItems(OrderItem.newBuilder().apply {
                 productId = randomProductId
                 price = randomPrice.toString()
@@ -81,7 +81,7 @@ object OrderProtoFixture {
             id = randomOrderId
             shipmentDetails = randomShipmentDetails
             userId = randomUserId
-            status = "NEW"
+            status = Order.Status.STATUS_NEW
             addItems(OrderItem.newBuilder().apply {
                 price = randomPrice.toString()
                 productFull = Product.newBuilder()
@@ -110,7 +110,7 @@ object OrderProtoFixture {
             id = randomOrderId
             shipmentDetails = randomUpdatedShipmentDetails
             userId = randomUserId
-            status = "NEW"
+            status = Order.Status.STATUS_NEW
             addItems(OrderItem.newBuilder().apply {
                 productId = randomProductId
                 price = randomPrice.toString()
@@ -135,7 +135,7 @@ object OrderProtoFixture {
             id = randomOrderId
             shipmentDetails = randomShipmentDetails
             userId = randomUserId
-            status = "NEW"
+            status = Order.Status.STATUS_NEW
             addItems(OrderItem.newBuilder().apply {
                 productId = randomProductId
                 price = randomPrice.toString()
@@ -158,7 +158,7 @@ object OrderProtoFixture {
             id = randomOrderId
             shipmentDetails = randomShipmentDetails
             userId = randomUserId
-            status = "COMPLETED"
+            status = Order.Status.STATUS_COMPLETED
             addItems(OrderItem.newBuilder().apply {
                 productId = randomProductId
                 price = randomPrice.toString()

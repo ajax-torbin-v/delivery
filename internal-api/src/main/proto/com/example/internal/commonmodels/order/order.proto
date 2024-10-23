@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.order.order;
+package com.example.internal.commonmodels.order;
 
 import "com/example/internal/commonmodels/order/order_item.proto";
 import "com/example/internal/commonmodels/order/shipment_details.proto";
@@ -9,8 +9,21 @@ option java_multiple_files = true;
 
 message Order {
     string id = 1;
-    repeated order_item.OrderItem items = 2;
-    shipment_details.ShipmentDetails shipment_details = 3;
-    string status = 4;
+    repeated OrderItem items = 2;
+    ShipmentDetails shipment_details = 3;
+    Status status = 4;
     string user_id = 5;
+
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_NEW = 1;
+        STATUS_SHIPPING = 2;
+        STATUS_COMPLETED = 3;
+        STATUS_CANCELED = 4;
+        /*
+        STATUS_UNKNOWN represents case when status in db is not valid
+        Added it to separate this case and when status is default value
+        */
+        STATUS_UNKNOWN = 5;
+    }
 }

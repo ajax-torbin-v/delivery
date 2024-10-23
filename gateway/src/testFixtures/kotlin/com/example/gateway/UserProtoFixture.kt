@@ -5,11 +5,11 @@ import com.example.core.UserFixture.randomPhone
 import com.example.core.UserFixture.randomUpdatedFullName
 import com.example.core.UserFixture.randomUpdatedPhone
 import com.example.core.UserFixture.randomUserId
-import com.example.internal.input.reqreply.user.create.CreateUserResponse
-import com.example.internal.input.reqreply.user.delete.DeleteUserRequest
-import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
-import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
-import com.example.internal.input.reqreply.user.update.UpdateUserResponse
+import com.example.internal.input.reqreply.user.CreateUserResponse
+import com.example.internal.input.reqreply.user.DeleteUserRequest
+import com.example.internal.input.reqreply.user.DeleteUserResponse
+import com.example.internal.input.reqreply.user.FindUserByIdResponse
+import com.example.internal.input.reqreply.user.UpdateUserResponse
 
 object UserProtoFixture {
     val createUserResponse = CreateUserResponse.newBuilder().apply {

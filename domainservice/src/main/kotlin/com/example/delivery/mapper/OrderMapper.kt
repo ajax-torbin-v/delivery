@@ -1,8 +1,6 @@
 package com.example.delivery.mapper
 
 import com.example.core.dto.request.UpdateOrderDTO
-import com.example.core.dto.response.OrderDTO
-import com.example.core.dto.response.OrderItemDTO
 import com.example.core.dto.response.ShipmentDetailsDTO
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.mongo.MongoOrder
@@ -10,14 +8,6 @@ import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object OrderMapper {
-
-    fun DomainOrder.toDTO(): OrderDTO = OrderDTO(
-        id,
-        items.map { it.toDTO() },
-        shipmentDetails.toDTO(),
-        status.name,
-        userId
-    )
 
     fun MongoOrder.toDomain(): DomainOrder = DomainOrder(
         id.toString(),
@@ -45,18 +35,14 @@ object OrderMapper {
             amount = amount ?: 0
         )
 
-    fun DomainOrder.DomainShipmentDetails.toDTO(): ShipmentDetailsDTO = ShipmentDetailsDTO(
-        city,
-        street,
-        building,
-        index
-    )
-
-    fun DomainOrder.DomainOrderItem.toDTO(): OrderItemDTO = OrderItemDTO(
-        price,
-        amount,
-        productId
-    )
+    fun MongoOrder.Status.toDomain(): DomainOrder.Status {
+        return when (this) {
+            MongoOrder.Status.NEW -> DomainOrder.Status.NEW
+            MongoOrder.Status.SHIPPING -> DomainOrder.Status.SHIPPING
+            MongoOrder.Status.COMPLETED -> DomainOrder.Status.COMPLETED
+            MongoOrder.Status.CANCELED -> DomainOrder.Status.CANCELED
+        }
+    }
 
     fun UpdateOrderDTO.toUpdate(): Update {
         val update = Update()

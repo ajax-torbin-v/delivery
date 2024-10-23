@@ -5,12 +5,15 @@ import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
 import com.example.core.exception.UserNotFoundException
 import com.example.delivery.OrderFixture
+import com.example.delivery.domain.DomainOrder
 import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateOrderResponse
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
+import com.example.delivery.mapper.OrderProtoMapper.toProto
+import com.example.internal.commonmodels.order.Order.Status
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -45,6 +48,16 @@ class OrderProtoMapperTest {
     ) {
         // WHEN // THEN
         assertEquals(failureResponse, error.toFailureUpdateOrderResponse())
+    }
+
+    @ParameterizedTest
+    @MethodSource("domainStatusToProtoProvider")
+    fun `should return proper status`(
+        domainStatus: DomainOrder.Status,
+        protoStatus: Status,
+    ) {
+        // WHEN // THEN
+        assertEquals(protoStatus, domainStatus.toProto())
     }
 
     companion object {
@@ -95,6 +108,17 @@ class OrderProtoMapperTest {
                     NullPointerException(),
                     OrderFixture.failureUpdateOrderResponseWitUnexpectedException
                 )
+            )
+        }
+
+        @JvmStatic
+        fun domainStatusToProtoProvider(): List<Arguments> {
+            return listOf(
+                Arguments.of(DomainOrder.Status.NEW, Status.STATUS_NEW),
+                Arguments.of(DomainOrder.Status.UNKNOWN, Status.STATUS_UNKNOWN),
+                Arguments.of(DomainOrder.Status.COMPLETED, Status.STATUS_COMPLETED),
+                Arguments.of(DomainOrder.Status.SHIPPING, Status.STATUS_SHIPPING),
+                Arguments.of(DomainOrder.Status.CANCELED, Status.STATUS_CANCELED),
             )
         }
     }

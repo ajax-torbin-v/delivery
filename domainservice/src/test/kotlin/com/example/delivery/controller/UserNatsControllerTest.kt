@@ -17,10 +17,10 @@ import com.example.delivery.mapper.UserProtoMapper.toFindUserByIdResponse
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
 import com.example.delivery.repository.UserRepository
 import com.example.internal.api.subject.NatsSubject
-import com.example.internal.input.reqreply.user.create.CreateUserResponse
-import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
-import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
-import com.example.internal.input.reqreply.user.update.UpdateUserResponse
+import com.example.internal.input.reqreply.user.CreateUserResponse
+import com.example.internal.input.reqreply.user.DeleteUserResponse
+import com.example.internal.input.reqreply.user.FindUserByIdResponse
+import com.example.internal.input.reqreply.user.UpdateUserResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

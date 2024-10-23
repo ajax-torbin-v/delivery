@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.input.reqreply.product.delete;
+package com.example.internal.commonmodels.input.reqreply.product;
 
 option java_multiple_files = true;
 

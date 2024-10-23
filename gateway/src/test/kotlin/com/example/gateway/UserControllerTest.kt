@@ -21,11 +21,11 @@ import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
 import com.example.gateway.rest.UserController
 import com.example.internal.api.subject.NatsSubject
-import com.example.internal.input.reqreply.user.create.CreateUserResponse
-import com.example.internal.input.reqreply.user.delete.DeleteUserResponse
-import com.example.internal.input.reqreply.user.find.FindUserByIdRequest
-import com.example.internal.input.reqreply.user.find.FindUserByIdResponse
-import com.example.internal.input.reqreply.user.update.UpdateUserResponse
+import com.example.internal.input.reqreply.user.CreateUserResponse
+import com.example.internal.input.reqreply.user.DeleteUserResponse
+import com.example.internal.input.reqreply.user.FindUserByIdRequest
+import com.example.internal.input.reqreply.user.FindUserByIdResponse
+import com.example.internal.input.reqreply.user.UpdateUserResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK

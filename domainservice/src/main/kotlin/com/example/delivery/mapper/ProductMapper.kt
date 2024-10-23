@@ -2,20 +2,12 @@ package com.example.delivery.mapper
 
 import com.example.core.dto.request.CreateProductDTO
 import com.example.core.dto.request.UpdateProductDTO
-import com.example.core.dto.response.ProductDTO
 import com.example.delivery.domain.DomainProduct
 import com.example.delivery.mongo.MongoProduct
 import org.springframework.data.mongodb.core.query.Update
 import java.math.BigDecimal
 
 object ProductMapper {
-    fun DomainProduct.toDTO(): ProductDTO = ProductDTO(
-        id,
-        name,
-        price,
-        amountAvailable,
-        measurement
-    )
 
     fun CreateProductDTO.toMongo(): MongoProduct = MongoProduct(
         id = null,

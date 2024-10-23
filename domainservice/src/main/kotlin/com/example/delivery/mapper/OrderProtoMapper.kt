@@ -11,17 +11,18 @@ import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.ProductProtoMapper.toProto
-import com.example.internal.commonmodels.order.order.Order
-import com.example.internal.commonmodels.order.order_item.OrderItem
-import com.example.internal.commonmodels.order.shipment_details.ShipmentDetails
-import com.example.internal.input.reqreply.order.create.CreateOrderRequest
-import com.example.internal.input.reqreply.order.create.CreateOrderResponse
-import com.example.internal.input.reqreply.order.delete.DeleteOrderResponse
-import com.example.internal.input.reqreply.order.find.FindOrderByIdResponse
-import com.example.internal.input.reqreply.order.find_by_user_id.FindOrdersByUserIdResponse
-import com.example.internal.input.reqreply.order.update.UpdateOrderRequest
-import com.example.internal.input.reqreply.order.update.UpdateOrderResponse
-import com.example.internal.input.reqreply.order.update_status.UpdateOrderStatusResponse
+import com.example.internal.commonmodels.order.Order
+import com.example.internal.commonmodels.order.Order.Status
+import com.example.internal.commonmodels.order.OrderItem
+import com.example.internal.commonmodels.order.ShipmentDetails
+import com.example.internal.input.reqreply.order.CreateOrderRequest
+import com.example.internal.input.reqreply.order.CreateOrderResponse
+import com.example.internal.input.reqreply.order.DeleteOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderRequest
+import com.example.internal.input.reqreply.order.UpdateOrderResponse
+import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 
 object OrderProtoMapper {
     fun DomainOrder.toCreateOrderResponse(): CreateOrderResponse {
@@ -46,7 +47,7 @@ object OrderProtoMapper {
         return FindOrderByIdResponse.newBuilder().apply {
             successBuilder.orderBuilder.also {
                 it.id = id
-                it.status = status
+                it.status = status.toProto()
                 it.userId = userId
                 it.shipmentDetails = shipmentDetails.toShipmentDetails()
                 it.addAllItems(items.map { item -> item.toOrderItemFull() })
@@ -163,10 +164,20 @@ object OrderProtoMapper {
     fun DomainOrder.toProto(): Order {
         return Order.newBuilder().also {
             it.id = id
-            it.status = status.toString()
+            it.status = status.toProto()
             it.userId = userId
             it.shipmentDetails = shipmentDetails.toShipmentDetails()
             it.addAllItems(items.map { item -> item.toOrderItem() })
         }.build()
+    }
+
+    fun DomainOrder.Status.toProto(): Status {
+        return when (this) {
+            DomainOrder.Status.NEW -> Status.STATUS_NEW
+            DomainOrder.Status.SHIPPING -> Status.STATUS_SHIPPING
+            DomainOrder.Status.COMPLETED -> Status.STATUS_COMPLETED
+            DomainOrder.Status.CANCELED -> Status.STATUS_CANCELED
+            DomainOrder.Status.UNKNOWN -> Status.STATUS_UNKNOWN
+        }
     }
 }

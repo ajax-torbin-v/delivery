@@ -12,10 +12,10 @@ import com.example.core.ProductFixture.randomUpdateProductName
 import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.domain.DomainProduct
 import com.example.delivery.mongo.MongoProduct
-import com.example.internal.commonmodels.input.reqreply.product.delete.DeleteProductRequest
-import com.example.internal.input.reqreply.product.create.CreateProductRequest
-import com.example.internal.input.reqreply.product.find.FindProductByIdRequest
-import com.example.internal.input.reqreply.product.update.UpdateProductRequest
+import com.example.internal.commonmodels.input.reqreply.product.DeleteProductRequest
+import com.example.internal.input.reqreply.product.CreateProductRequest
+import com.example.internal.input.reqreply.product.FindProductByIdRequest
+import com.example.internal.input.reqreply.product.UpdateProductRequest
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.query.Update
 
