@@ -20,5 +20,6 @@ message Order {
         STATUS_SHIPPING = 2;
         STATUS_COMPLETED = 3;
         STATUS_CANCELED = 4;
+        STATUS_UNKNOWN = 5;
     }
 }

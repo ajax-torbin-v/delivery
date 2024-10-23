@@ -8,7 +8,7 @@ data class DomainOrderWithProduct(
     val id: String,
     val items: List<DomainOrderItemWithProduct>,
     val shipmentDetails: DomainOrder.DomainShipmentDetails,
-    val status: String,
+    val status: DomainOrder.Status,
     val userId: String,
 ) {
 

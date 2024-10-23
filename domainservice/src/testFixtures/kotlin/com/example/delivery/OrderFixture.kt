@@ -87,7 +87,7 @@ object OrderFixture {
             ),
         ),
         shipmentDetails = randomDomainShipmentDetails,
-        status = "NEW",
+        status = DomainOrder.Status.NEW,
         userId = randomUserId
     )
 

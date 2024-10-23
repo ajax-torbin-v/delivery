@@ -12,6 +12,7 @@ import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.ProductProtoMapper.toProto
 import com.example.internal.commonmodels.order.Order
+import com.example.internal.commonmodels.order.Order.Status
 import com.example.internal.commonmodels.order.OrderItem
 import com.example.internal.commonmodels.order.ShipmentDetails
 import com.example.internal.input.reqreply.order.CreateOrderRequest
@@ -46,7 +47,7 @@ object OrderProtoMapper {
         return FindOrderByIdResponse.newBuilder().apply {
             successBuilder.orderBuilder.also {
                 it.id = id
-                it.status = Order.Status.valueOf("STATUS_$status")
+                it.status = status.toProto()
                 it.userId = userId
                 it.shipmentDetails = shipmentDetails.toShipmentDetails()
                 it.addAllItems(items.map { item -> item.toOrderItemFull() })
@@ -163,10 +164,20 @@ object OrderProtoMapper {
     fun DomainOrder.toProto(): Order {
         return Order.newBuilder().also {
             it.id = id
-            it.status = Order.Status.valueOf("STATUS_${status.name}")
+            it.status = status.toProto()
             it.userId = userId
             it.shipmentDetails = shipmentDetails.toShipmentDetails()
             it.addAllItems(items.map { item -> item.toOrderItem() })
         }.build()
+    }
+
+    fun DomainOrder.Status.toProto(): Status {
+        return when (this) {
+            DomainOrder.Status.NEW -> Status.STATUS_NEW
+            DomainOrder.Status.SHIPPING -> Status.STATUS_SHIPPING
+            DomainOrder.Status.COMPLETED -> Status.STATUS_COMPLETED
+            DomainOrder.Status.CANCELED -> Status.STATUS_CANCELED
+            DomainOrder.Status.UNKNOWN -> Status.STATUS_UNKNOWN
+        }
     }
 }

@@ -12,7 +12,7 @@ object OrderWithProductMapper {
         id.toString(),
         items = items?.map { it.toDomain() } ?: emptyList(),
         shipmentDetails = shipmentDetails?.toDomain() ?: DomainOrder.DomainShipmentDetails(),
-        status = status?.name ?: "UNKNOWN",
+        status = status?.toDomain() ?: DomainOrder.Status.UNKNOWN,
         userId = userId.toString(),
     )
 
