@@ -4,6 +4,7 @@ import com.example.core.dto.request.CreateOrderDTO
 import com.example.core.dto.request.CreateOrderItemDTO
 import com.example.core.dto.request.UpdateOrderDTO
 import com.example.core.dto.response.ShipmentDetailsDTO
+import com.example.core.exception.NotificationException
 import com.example.core.exception.OrderNotFoundException
 import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
@@ -14,6 +15,7 @@ import com.example.delivery.mapper.ProductProtoMapper.toProto
 import com.example.internal.commonmodels.order.Order
 import com.example.internal.commonmodels.order.Order.Status
 import com.example.internal.commonmodels.order.OrderItem
+import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
 import com.example.internal.commonmodels.order.ShipmentDetails
 import com.example.internal.input.reqreply.order.CreateOrderRequest
 import com.example.internal.input.reqreply.order.CreateOrderResponse
@@ -23,6 +25,8 @@ import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
 import com.example.internal.input.reqreply.order.UpdateOrderRequest
 import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
+import com.google.protobuf.Timestamp
+import java.time.Instant
 
 object OrderProtoMapper {
     fun DomainOrder.toCreateOrderResponse(): CreateOrderResponse {
@@ -178,6 +182,29 @@ object OrderProtoMapper {
             DomainOrder.Status.COMPLETED -> Status.STATUS_COMPLETED
             DomainOrder.Status.CANCELED -> Status.STATUS_CANCELED
             DomainOrder.Status.UNKNOWN -> Status.STATUS_UNKNOWN
+        }
+    }
+
+    fun Order.toNotification(): OrderStatusUpdateNotification {
+        return OrderStatusUpdateNotification.newBuilder().also {
+            it.orderId = id
+            it.userId = userId
+            it.status = status.toNotificationStatus()
+            it.timestamp = Timestamp.newBuilder().apply {
+                seconds = Instant.now().epochSecond
+            }.build()
+        }.build()
+    }
+
+    fun Status.toNotificationStatus(): OrderStatusUpdateNotification.Status {
+        return when (this) {
+            Status.STATUS_UNSPECIFIED -> OrderStatusUpdateNotification.Status.STATUS_UNSPECIFIED
+            Status.STATUS_NEW -> OrderStatusUpdateNotification.Status.STATUS_NEW
+            Status.STATUS_SHIPPING -> OrderStatusUpdateNotification.Status.STATUS_SHIPPING
+            Status.STATUS_COMPLETED -> OrderStatusUpdateNotification.Status.STATUS_COMPLETED
+            Status.STATUS_CANCELED -> OrderStatusUpdateNotification.Status.STATUS_CANCELED
+            Status.STATUS_UNKNOWN, Status.UNRECOGNIZED ->
+                throw NotificationException("Couldn't send notification with status $this")
         }
     }
 }

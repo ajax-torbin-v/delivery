@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package com.example.internal.commonmodels.order;
+
+import "src/google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+message OrderStatusUpdateNotification {
+    string user_id = 1;
+    string order_id = 2;
+    Status status = 3;
+    google.protobuf.Timestamp timestamp = 4;
+
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        STATUS_NEW = 1;
+        STATUS_SHIPPING = 2;
+        STATUS_COMPLETED = 3;
+        STATUS_CANCELED = 4;
+        STATUS_UNKNOWN = 5;
+    }
+
+}
