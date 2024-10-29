@@ -25,19 +25,22 @@ eval "$(minikube docker-env)"
 
 minikube addons enable ingress
 
-docker build -t delivery:latest .
+docker build -f ./domainservice/Dockerfile-domainservice -t domain:v1 .
+docker build -f ./gateway/Dockerfile-gateway -t gateway:v1 .
 
 kubectl apply -f k8s/config/mongo-secret.yaml
-kubectl apply -f k8s/config/delivery-configmap.yaml
+kubectl apply -f k8s/config/domain-configmap.yaml
 kubectl apply -f k8s/config/pv.yaml
 kubectl apply -f k8s/config/pvc.yaml
 
 kubectl apply -f k8s/config/mongo-deployment.yaml
+kubectl apply -f k8s/config/nats-deployment.yaml
 
 kubectl wait --for=condition=ready pod -l app=mongodb --timeout=300s
 
 kubectl apply -f k8s/config/mongo-express-deployment.yaml
-kubectl apply -f k8s/config/delivery-deployment.yaml
+kubectl apply -f k8s/config/domain-deployment.yaml
+kubectl apply -f k8s/config/gateway-deployment.yaml
 kubectl apply -f k8s/config/ingress.yaml
 
 kubectl wait --for=condition=ready pod --all --timeout=300s
