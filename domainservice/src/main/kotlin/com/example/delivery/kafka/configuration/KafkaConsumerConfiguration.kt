@@ -1,5 +1,6 @@
 package com.example.delivery.kafka.configuration
 
+import com.example.internal.api.KafkaTopic
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
@@ -13,6 +14,14 @@ class KafkaConsumerConfiguration(
 ) : KafkaConfiguration(bootstrapServers, kafkaProperties) {
     @Bean
     fun orderStatusUpdateReceiver(): KafkaReceiver<String, ByteArray> {
-        return createKafkaReceiver(baseConsumerProperties(), "order_update_event", "order_update_group")
+        return createKafkaReceiver(
+            baseConsumerProperties(),
+            KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE,
+            GROUP_ID
+        )
+    }
+
+    companion object {
+        const val GROUP_ID = "orderUpdateGroup"
     }
 }

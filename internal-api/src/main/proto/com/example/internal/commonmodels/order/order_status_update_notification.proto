@@ -20,5 +20,4 @@ message OrderStatusUpdateNotification {
         STATUS_CANCELED = 4;
         STATUS_UNKNOWN = 5;
     }
-
 }

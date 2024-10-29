@@ -1,8 +1,8 @@
 package com.example.delivery.kafka
 
+import com.example.internal.api.KafkaTopic
 import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.KafkaSender
@@ -14,20 +14,18 @@ class OrderUpdateStatusNotificationProducer(
     private val updateStatusNotificationSender: KafkaSender<String, ByteArray>,
 ) {
     fun notify(notification: OrderStatusUpdateNotification): Mono<Unit> {
-        log.info("Notification for user ${notification.userId}")
         return updateStatusNotificationSender.send(
-            SenderRecord.create(
-                ProducerRecord(
-                    "notifications",
-                    notification.userId,
-                    notification.toByteArray()
-                ),
-                null
-            ).toMono()
+            createMessage(notification)
         ).then(Unit.toMono())
     }
 
-    companion object {
-        private val log = LoggerFactory.getLogger(OrderUpdateStatusNotificationProducer::class.java)
-    }
+    private fun createMessage(notification: OrderStatusUpdateNotification) =
+        SenderRecord.create(
+            ProducerRecord(
+                KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS,
+                notification.userId,
+                notification.toByteArray()
+            ),
+            null
+        ).toMono()
 }

@@ -10,6 +10,7 @@ import com.example.delivery.kafka.configuration.KafkaConfiguration
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
 import com.example.delivery.service.UserService
+import com.example.internal.api.KafkaTopic
 import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -73,7 +74,6 @@ class Test {
         await()
             .atMost(15, TimeUnit.SECONDS)
             .untilAsserted {
-                println(receivedMessages)
                 assertTrue(receivedMessages.contains(expected))
             }
     }
@@ -89,9 +89,13 @@ class Test {
         fun kafkaTestReceiver(): KafkaReceiver<String, ByteArray> {
             return createKafkaReceiver(
                 baseConsumerProperties(),
-                "notifications",
-                "notifications_group",
+                KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS,
+                NOTIFICATION_GROUP
             )
         }
+    }
+
+    companion object {
+        const val NOTIFICATION_GROUP = "notificationsGroup"
     }
 }

@@ -16,7 +16,7 @@ import com.example.delivery.mapper.UserProtoMapper.toFailureUpdateUserResponse
 import com.example.delivery.mapper.UserProtoMapper.toFindUserByIdResponse
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
 import com.example.delivery.repository.UserRepository
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.user.CreateUserResponse
 import com.example.internal.input.reqreply.user.DeleteUserResponse
 import com.example.internal.input.reqreply.user.FindUserByIdResponse

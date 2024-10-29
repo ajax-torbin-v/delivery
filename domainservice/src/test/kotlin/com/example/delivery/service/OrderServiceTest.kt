@@ -42,11 +42,9 @@ internal class OrderServiceTest {
     @MockK
     private lateinit var orderRepository: OrderRepository
 
-    @SuppressWarnings("UnusedPrivateProperty")
     @MockK
     private lateinit var productRepository: ProductRepository
 
-    @SuppressWarnings("UnusedPrivateProperty")
     @MockK
     private lateinit var kafkaUpdateOrderStatusSender: OrderUpdateStatusProducer
 

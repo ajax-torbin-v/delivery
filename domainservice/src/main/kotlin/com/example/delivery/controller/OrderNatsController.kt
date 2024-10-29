@@ -18,7 +18,7 @@ import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderDTO
 import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
 import com.example.delivery.service.OrderService
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.order.CreateOrderRequest
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderRequest

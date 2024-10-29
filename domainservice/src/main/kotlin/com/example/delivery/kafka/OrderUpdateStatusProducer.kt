@@ -1,5 +1,6 @@
 package com.example.delivery.kafka
 
+import com.example.internal.api.KafkaTopic
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
@@ -16,7 +17,7 @@ class OrderUpdateStatusProducer(
         return kafkaUpdateStatusSender.send(
             SenderRecord.create(
                 ProducerRecord(
-                    "order_update_event",
+                    KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE,
                     response.success.order.userId,
                     response.toByteArray()
                 ),

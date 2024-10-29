@@ -53,7 +53,6 @@ abstract class AbstractNatsController(
 
     private fun buildErrorResponse(returnType: Class<*>, exception: Throwable): GeneratedMessage {
         val message = exception.message.orEmpty()
-        returnType.methods.forEach { println(it) }
         val builder = returnType.getMethod("newBuilder").invoke(null) as Message.Builder
         val descriptor = returnType.getMethod("getDescriptor").invoke(null) as Descriptors.Descriptor
 

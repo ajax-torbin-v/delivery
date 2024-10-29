@@ -85,13 +85,11 @@ class OrderService(
 
     fun updateOrderStatus(id: String, status: String): Mono<DomainOrder> {
         return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))
-            .map {
-                println("UPDATE HERE")
-                val domain = it.toDomain()
-                kafkaUpdateOrderStatusSender.sendOrderUpdateStatus(domain.toUpdateOrderStatusResponse())
-                    .doOnError { log.error("Couldn't send message to kafka!") }
-                    .subscribe()
-                return@map domain
+            .map { it.toDomain() }
+            .flatMap {
+                kafkaUpdateOrderStatusSender.sendOrderUpdateStatus(it.toUpdateOrderStatusResponse())
+                    .doOnError { log.error("Couldn't send message to kafka") }
+                    .thenReturn(it)
             }
             .switchIfEmpty { Mono.error(OrderNotFoundException("Order with id $id doesn't exists")) }
     }
