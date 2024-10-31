@@ -9,7 +9,7 @@ import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
 import com.example.gateway.mapper.OrderProtoMapper.toDTO
 import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
 import com.example.gateway.mapper.OrderProtoMapper.updateOrderRequest
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderRequest
 import com.example.internal.input.reqreply.order.DeleteOrderResponse

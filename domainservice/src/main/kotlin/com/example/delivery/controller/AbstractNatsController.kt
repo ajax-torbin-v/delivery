@@ -2,7 +2,9 @@ package com.example.delivery.controller
 
 import com.example.delivery.annotaion.NatsController
 import com.example.delivery.annotaion.NatsHandler
+import com.google.protobuf.Descriptors
 import com.google.protobuf.GeneratedMessage
+import com.google.protobuf.Message
 import com.google.protobuf.Parser
 import io.nats.client.Connection
 import io.nats.client.Dispatcher
@@ -41,8 +43,7 @@ abstract class AbstractNatsController(
                 try {
                     val request = parser.parseFrom(message.data)
                     val response = method.invoke(this, request) as Mono<GeneratedMessage>
-                    response
-                        .subscribe { connection.publish(message.replyTo, it.toByteArray()) }
+                    response.subscribe { connection.publish(message.replyTo, it.toByteArray()) }
                 } catch (e: RuntimeException) {
                     connection.publish(message.replyTo, buildErrorResponse(typeArgument, e).toByteArray())
                 }
@@ -51,19 +52,16 @@ abstract class AbstractNatsController(
     }
 
     private fun buildErrorResponse(returnType: Class<*>, exception: Throwable): GeneratedMessage {
-        val builder = returnType.getMethod("newBuilder").invoke(null)
+        val message = exception.message.orEmpty()
+        val builder = returnType.getMethod("newBuilder").invoke(null) as Message.Builder
+        val descriptor = returnType.getMethod("getDescriptor").invoke(null) as Descriptors.Descriptor
 
-        val failureBuilderMethod = builder.javaClass.getMethod("getFailureBuilder")
-        val failureBuilder = failureBuilderMethod.invoke(builder)
+        val failureDescriptor = descriptor.findFieldByName("failure")
+        val messageDescriptor = failureDescriptor.messageType.findFieldByName("message")
 
-        val setMessageMethod = failureBuilder.javaClass.getMethod("setMessage", String::class.java)
-        setMessageMethod.invoke(failureBuilder, exception.message ?: "Unknown error")
-
-        val failureMessage = failureBuilder.javaClass.getMethod("build").invoke(failureBuilder)
-
-        val setFailureMethod = builder.javaClass.getMethod("setFailure", failureMessage.javaClass)
-        setFailureMethod.invoke(builder, failureMessage)
-
-        return builder.javaClass.getMethod("build").invoke(builder) as GeneratedMessage
+        return builder.apply {
+            val failure = newBuilderForField(failureDescriptor).setField(messageDescriptor, message).build()
+            setField(failureDescriptor, failure)
+        }.build() as GeneratedMessage
     }
 }

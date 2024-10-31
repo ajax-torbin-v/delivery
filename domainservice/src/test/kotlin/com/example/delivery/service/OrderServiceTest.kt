@@ -19,6 +19,7 @@ import com.example.delivery.OrderFixture.updatedDomainOrder
 import com.example.delivery.OrderFixture.updatedOrder
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.UserFixture.user
+import com.example.delivery.kafka.OrderUpdateStatusProducer
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.repository.OrderRepository
@@ -41,9 +42,11 @@ internal class OrderServiceTest {
     @MockK
     private lateinit var orderRepository: OrderRepository
 
-    @SuppressWarnings("UnusedPrivateProperty")
     @MockK
     private lateinit var productRepository: ProductRepository
+
+    @MockK
+    private lateinit var kafkaUpdateOrderStatusSender: OrderUpdateStatusProducer
 
     @MockK
     private lateinit var userRepository: UserRepository
@@ -214,6 +217,7 @@ internal class OrderServiceTest {
         // GIVEN
         every { orderRepository.updateOrderStatus(randomOrderId, MongoOrder.Status.COMPLETED) }
             .returns(order.copy(status = MongoOrder.Status.COMPLETED).toMono())
+        every { kafkaUpdateOrderStatusSender.sendOrderUpdateStatus(any()) } returns Unit.toMono()
 
         // WHEN
         val actual = orderService.updateOrderStatus(randomOrderId, "COMPLETED")

@@ -16,7 +16,7 @@ import com.example.delivery.mapper.ProductProtoMapper.toFailureUpdateProductResp
 import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.repository.ProductRepository
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.CreateProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse

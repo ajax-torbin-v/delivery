@@ -19,7 +19,7 @@ import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
 import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
 import com.example.gateway.rest.ProductController
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.CreateProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse

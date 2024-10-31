@@ -7,7 +7,7 @@ import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
-import com.example.internal.api.subject.NatsSubject
+import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.user.CreateUserResponse
 import com.example.internal.input.reqreply.user.DeleteUserRequest
 import com.example.internal.input.reqreply.user.DeleteUserResponse

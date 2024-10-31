@@ -1,13 +1,18 @@
 package com.example.delivery.controller
 
-import com.example.delivery.repository.AbstractMongoTestContainer
+import com.example.delivery.annotation.MockKKafka
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.Parser
 import io.nats.client.Connection
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 
-abstract class AbstractNatsControllerTest : AbstractMongoTestContainer {
+@SpringBootTest
+@ActiveProfiles("test")
+@MockKKafka
+abstract class AbstractNatsControllerTest {
     @Autowired
     private lateinit var natsConnection: Connection
 

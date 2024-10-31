@@ -4,15 +4,21 @@ import com.example.core.UserFixture.randomUpdatedFullName
 import com.example.core.UserFixture.randomUpdatedPhone
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedUser
+import com.example.delivery.annotation.MockKKafka
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.query.Update
+import org.springframework.test.context.ActiveProfiles
 import reactor.kotlin.test.test
 
-class UserRepositoryTest : AbstractMongoTestContainer {
+@SpringBootTest
+@ActiveProfiles("test")
+@MockKKafka
+class UserRepositoryTest {
     @Autowired
     private lateinit var userRepository: UserRepository
 

@@ -10,9 +10,11 @@ import com.example.delivery.annotaion.LogInvoke
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.DomainProduct
 import com.example.delivery.domain.projection.DomainOrderWithProduct
+import com.example.delivery.kafka.OrderUpdateStatusProducer
 import com.example.delivery.mapper.OrderMapper.toDomain
 import com.example.delivery.mapper.OrderMapper.toMongoModel
 import com.example.delivery.mapper.OrderMapper.toUpdate
+import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
 import com.example.delivery.mapper.OrderWithProductMapper.toDomain
 import com.example.delivery.mapper.ProductMapper.toDomain
 import com.example.delivery.mongo.MongoOrder
@@ -22,6 +24,7 @@ import com.example.delivery.repository.OrderRepository
 import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
 import org.bson.types.ObjectId
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -32,6 +35,7 @@ class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
     private val productRepository: ProductRepository,
+    private val kafkaUpdateOrderStatusSender: OrderUpdateStatusProducer,
 ) {
 
     @LogInvoke
@@ -82,6 +86,13 @@ class OrderService(
     fun updateOrderStatus(id: String, status: String): Mono<DomainOrder> {
         return orderRepository.updateOrderStatus(id, MongoOrder.Status.valueOf(status))
             .map { it.toDomain() }
+            .flatMap {
+                kafkaUpdateOrderStatusSender.sendOrderUpdateStatus(it.toUpdateOrderStatusResponse())
+                    .doOnError { error ->
+                        log.error("Couldn't send message to Kafka for order ID: $id with status $status", error)
+                    }
+                    .thenReturn(it)
+            }
             .switchIfEmpty { Mono.error(OrderNotFoundException("Order with id $id doesn't exists")) }
     }
 
@@ -123,5 +134,9 @@ class OrderService(
             userId = user.id
         )
         return orderRepository.save(order).map { it.toDomain() }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(OrderService::class.java)
     }
 }

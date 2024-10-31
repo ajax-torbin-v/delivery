@@ -2,6 +2,8 @@ spring:
   data:
     mongodb:
       uri: mongodb://${MONGO_USER}:${MONGO_PASS}@${HOST}:${PORT}/${DB_NAME}?authSource=admin
+  kafka:
+    bootstrap-servers: http://localhost:9092
 
 nats.uri: ${NATS_URI}
 
