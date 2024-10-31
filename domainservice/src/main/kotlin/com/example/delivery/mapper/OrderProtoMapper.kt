@@ -25,7 +25,6 @@ import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
 import com.example.internal.input.reqreply.order.UpdateOrderRequest
 import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
-import com.google.protobuf.Timestamp
 import java.time.Instant
 
 object OrderProtoMapper {
@@ -190,9 +189,7 @@ object OrderProtoMapper {
             it.orderId = id
             it.userId = userId
             it.status = status.toNotificationStatus()
-            it.timestamp = Timestamp.newBuilder().apply {
-                seconds = Instant.now().epochSecond
-            }.build()
+            it.timestampBuilder.seconds = Instant.now().epochSecond
         }.build()
     }
 

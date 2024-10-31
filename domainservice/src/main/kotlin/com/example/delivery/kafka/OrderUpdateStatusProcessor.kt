@@ -10,7 +10,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kafka.receiver.KafkaReceiver
-import reactor.kafka.receiver.ReceiverRecord
 import reactor.kotlin.core.publisher.toMono
 
 @Component
@@ -22,25 +21,21 @@ class OrderUpdateStatusProcessor(
     fun consume() {
         orderStatusUpdateReceiver
             .receive()
-            .flatMap {
-                val order = UpdateOrderStatusResponse.parser().parseFrom(it.value()).success.order
-                sendNotification(order, it)
+            .flatMap { record ->
+                val order = UpdateOrderStatusResponse.parser().parseFrom(record.value()).success.order
+                sendNotification(order)
+                    .doFinally { record.receiverOffset().acknowledge() }
             }
             .subscribe()
     }
 
-    private fun sendNotification(
-        order: Order,
-        record: ReceiverRecord<String, ByteArray>,
-    ): Mono<ReceiverRecord<String, ByteArray>> =
+    private fun sendNotification(order: Order): Mono<Unit> =
         updateStatusNotificationSender.notify(order.toNotification())
             .onErrorResume(NotificationException::class.java) { error ->
-                log.error("Error while sending notification: ", error)
+                log.error("Error while sending notification for update of order {}", order, error)
                 Unit.toMono()
             }
-            .doFinally {
-                record.receiverOffset().acknowledge()
-            }.thenReturn(record)
+            .thenReturn(Unit)
 
     companion object {
         private val log = LoggerFactory.getLogger(OrderUpdateStatusProcessor::class.java)

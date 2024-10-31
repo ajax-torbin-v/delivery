@@ -6,6 +6,7 @@ import com.example.core.ProductFixture.createProductDTO
 import com.example.core.UserFixture.createUserDTO
 import com.example.core.dto.request.CreateOrderItemDTO
 import com.example.delivery.domain.DomainOrder
+import com.example.delivery.kafka.Test.MyKafkaTestConfiguration
 import com.example.delivery.kafka.configuration.KafkaConfiguration
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
@@ -27,7 +28,7 @@ import reactor.kafka.receiver.KafkaReceiver
 import java.util.concurrent.TimeUnit
 
 @ActiveProfiles("test")
-@Import(com.example.delivery.kafka.Test.MyKafkaTestConfiguration::class)
+@Import(MyKafkaTestConfiguration::class)
 @SpringBootTest
 class Test {
     @Autowired

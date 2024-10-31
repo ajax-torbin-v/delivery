@@ -88,7 +88,9 @@ class OrderService(
             .map { it.toDomain() }
             .flatMap {
                 kafkaUpdateOrderStatusSender.sendOrderUpdateStatus(it.toUpdateOrderStatusResponse())
-                    .doOnError { log.error("Couldn't send message to kafka") }
+                    .doOnError { error ->
+                        log.error("Couldn't send message to Kafka for order ID: $id with status $status", error)
+                    }
                     .thenReturn(it)
             }
             .switchIfEmpty { Mono.error(OrderNotFoundException("Order with id $id doesn't exists")) }
