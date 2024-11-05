@@ -21,8 +21,7 @@ class OrderUpdateStatusConsumerForNats(
     fun consume() {
         orderUpdateReceiverForNats.receive()
             .flatMap { record ->
-                val order = UpdateOrderStatusResponse.parser().parseFrom(record.value()).success.order
-                sendUpdate(order)
+                sendUpdate(UpdateOrderStatusResponse.parser().parseFrom(record.value()).success.order)
                     .doFinally { record.receiverOffset().acknowledge() }
             }.subscribeOn(Schedulers.boundedElastic())
             .subscribe()

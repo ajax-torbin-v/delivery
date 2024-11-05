@@ -45,6 +45,7 @@ class OrderGrpcServiceTest {
         // THEN
         actual.test()
             .expectNext(OrderProtoFixture.createOrderResponse.toGrpc())
+            .verifyComplete()
     }
 
     @Test

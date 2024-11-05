@@ -15,7 +15,7 @@ import org.junit.jupiter.api.assertThrows
 class OrderProtoMapperTest {
 
     @Test
-    fun `should return mapped internal proto`() {
+    fun `should return mapped internal proto CreateOrderRequest`() {
         // GIVEN
         val expected = createOrderDTO.toCreateOrderRequest()
 
@@ -24,7 +24,7 @@ class OrderProtoMapperTest {
     }
 
     @Test
-    fun `should return mapped grpc proto`() {
+    fun `should return mapped grpc CreateOrderRequest`() {
         // GIVEN
         val expected = OrderProtoFixture.grpcCreateOrderResponse
 
@@ -33,7 +33,7 @@ class OrderProtoMapperTest {
     }
 
     @Test
-    fun `for default instance should throw exception`() {
+    fun `should throw exception for default instance of CreateOrderResponse `() {
         // GIVEN
         val defaultInstance: CreateOrderResponse = CreateOrderResponse.getDefaultInstance()
 
@@ -42,7 +42,7 @@ class OrderProtoMapperTest {
     }
 
     @Test
-    fun `should return mapped grpc proto2`() {
+    fun `should return mapped grpc FindOrderByIdResponse`() {
         // GIVEN
         val expected = OrderProtoFixture.grpcFindOrderByIdResponse
 
@@ -51,7 +51,7 @@ class OrderProtoMapperTest {
     }
 
     @Test
-    fun `for default instance should throw exception2`() {
+    fun ` should throw exception for default instance of FindOrderByIdResponse`() {
         // GIVEN
         val defaultInstance: FindOrderByIdResponse = FindOrderByIdResponse.getDefaultInstance()
 
