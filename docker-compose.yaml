@@ -23,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: test
       MONGO_INITDB_DATABASE: test
     ports:
-      - "27017:27017"
+      - "27018:27017"
     profiles: [ gh-actions ]
 
   nats:

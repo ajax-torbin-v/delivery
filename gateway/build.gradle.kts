@@ -1,12 +1,13 @@
 plugins {
     id("spring-conventions")
-    jacoco
-    `java-test-fixtures`
+    id("grpc-conventions")
 }
 
 dependencies {
     implementation(project(":internal-api"))
+    implementation(project(":common-proto"))
     implementation(project(":core"))
+    implementation(project(":grpcapi"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.nats:jnats:2.16.14")

@@ -1,5 +1,8 @@
 package com.example.gateway.mapper
 
+import com.example.commonmodels.order.Order
+import com.example.commonmodels.order.OrderItem
+import com.example.commonmodels.order.ShipmentDetails
 import com.example.core.dto.request.CreateOrderDTO
 import com.example.core.dto.request.CreateOrderItemDTO
 import com.example.core.dto.request.UpdateOrderDTO
@@ -13,22 +16,23 @@ import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
 import com.example.core.exception.UserNotFoundException
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
-import com.example.internal.commonmodels.order.Order
-import com.example.internal.commonmodels.order.OrderItem
-import com.example.internal.commonmodels.order.ShipmentDetails
 import com.example.internal.input.reqreply.order.CreateOrderRequest
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderResponse
+import com.example.internal.input.reqreply.order.FindOrderByIdRequest
 import com.example.internal.input.reqreply.order.FindOrderByIdResponse
 import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
 import com.example.internal.input.reqreply.order.UpdateOrderRequest
 import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 import java.math.BigDecimal
+import com.example.grpcapi.reqres.order.CreateOrderRequest as GrpcCreateOrderRequest
+import com.example.grpcapi.reqres.order.CreateOrderResponse as GrpcCreateOrderResponse
+import com.example.grpcapi.reqres.order.FindOrderByIdRequest as GrpcFindOrderByIdRequest
+import com.example.grpcapi.reqres.order.FindOrderByIdResponse as GrpcFindOrderByIdResponse
 
 object OrderProtoMapper {
 
-    @SuppressWarnings("ThrowsCount")
     fun CreateOrderResponse.toDTO(): OrderDTO {
         return when (this.responseCase!!) {
             CreateOrderResponse.ResponseCase.SUCCESS -> success.order.toDTO()
@@ -110,7 +114,43 @@ object OrderProtoMapper {
         }.build()
     }
 
-    private fun Order.toDtoWithProduct(): OrderWithProductDTO {
+    fun GrpcCreateOrderRequest.toInternal(): CreateOrderRequest {
+        return CreateOrderRequest.newBuilder().also {
+            it.shipmentDetails = shipmentDetails
+            it.addAllItems(itemsList)
+            it.userId = userId
+        }.build()
+    }
+
+    fun CreateOrderResponse.toGrpc(): GrpcCreateOrderResponse {
+        return when (this.responseCase!!) {
+            CreateOrderResponse.ResponseCase.SUCCESS -> GrpcCreateOrderResponse.newBuilder().also {
+                it.successBuilder.order = success.order
+            }.build()
+
+            CreateOrderResponse.ResponseCase.FAILURE -> failure.asException()
+            CreateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
+        }
+    }
+
+    fun GrpcFindOrderByIdRequest.toInternal(): FindOrderByIdRequest {
+        return FindOrderByIdRequest.newBuilder().also {
+            it.id = id
+        }.build()
+    }
+
+    fun FindOrderByIdResponse.toGrpc(): GrpcFindOrderByIdResponse {
+        return when (this.responseCase!!) {
+            FindOrderByIdResponse.ResponseCase.SUCCESS -> GrpcFindOrderByIdResponse.newBuilder().also {
+                it.successBuilder.order = success.order
+            }.build()
+
+            FindOrderByIdResponse.ResponseCase.FAILURE -> failure.asException()
+            FindOrderByIdResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException("Acquired message is empty!")
+        }
+    }
+
+    fun Order.toDtoWithProduct(): OrderWithProductDTO {
         return OrderWithProductDTO(
             id,
             itemsList.map { it.toDtoWithProduct() },

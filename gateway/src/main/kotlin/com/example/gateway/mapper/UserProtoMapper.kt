@@ -1,10 +1,10 @@
 package com.example.gateway.mapper
 
+import com.example.commonmodels.user.User
 import com.example.core.dto.request.CreateUserDTO
 import com.example.core.dto.request.UpdateUserDTO
 import com.example.core.dto.response.UserDTO
 import com.example.core.exception.UserNotFoundException
-import com.example.internal.commonmodels.user.User
 import com.example.internal.input.reqreply.user.CreateUserRequest
 import com.example.internal.input.reqreply.user.CreateUserResponse
 import com.example.internal.input.reqreply.user.DeleteUserResponse

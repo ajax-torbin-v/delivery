@@ -4,7 +4,6 @@ import com.example.core.UserFixture.randomUpdatedFullName
 import com.example.core.UserFixture.randomUpdatedPhone
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedUser
-import com.example.delivery.annotation.MockKKafka
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,7 +16,6 @@ import reactor.kotlin.test.test
 
 @SpringBootTest
 @ActiveProfiles("test")
-@MockKKafka
 class UserRepositoryTest {
     @Autowired
     private lateinit var userRepository: UserRepository

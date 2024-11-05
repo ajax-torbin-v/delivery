@@ -5,7 +5,6 @@ import com.example.delivery.OrderFixture.unsavedOrder
 import com.example.delivery.ProductFixture.product
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.UserFixture.unsavedUser
-import com.example.delivery.annotation.MockKKafka
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.projection.MongoOrderWithProduct
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +19,6 @@ import java.math.BigDecimal
 
 @SpringBootTest
 @ActiveProfiles("test")
-@MockKKafka
 class OrderRepositoryTest {
     @Autowired
     private lateinit var orderRepository: OrderRepository

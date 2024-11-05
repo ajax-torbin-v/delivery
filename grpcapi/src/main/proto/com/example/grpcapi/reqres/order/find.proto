@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package com.example.grpcapi.reqres.order;
+
+import "com/example/commonmodels/error.proto";
+import "com/example/commonmodels/order/order.proto";
+
+option java_multiple_files = true;
+
+message FindOrderByIdRequest {
+    string id = 1;
+}
+
+message FindOrderByIdResponse {
+    oneof response {
+        Success success = 1;
+        Failure failure = 2;
+    }
+
+    message Success {
+        commonmodels.order.Order order = 1;
+    }
+
+    message Failure {
+        string message = 100;
+        oneof error {
+            commonmodels.Error order_not_found = 1;
+        }
+    }
+}

@@ -3,7 +3,7 @@ nats.uri: nats://localhost:4222
 spring:
   data:
     mongodb:
-      uri: mongodb://root:test@localhost:27017/test?authSource=admin
+      uri: mongodb://root:test@localhost:27018/test?authSource=admin
 
   kafka:
     consumer:

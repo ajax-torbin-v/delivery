@@ -1,6 +1,5 @@
 package com.example.delivery.controller
 
-import com.example.delivery.annotation.MockKKafka
 import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.Parser
 import io.nats.client.Connection
@@ -11,7 +10,6 @@ import java.time.Duration
 
 @SpringBootTest
 @ActiveProfiles("test")
-@MockKKafka
 abstract class AbstractNatsControllerTest {
     @Autowired
     private lateinit var natsConnection: Connection

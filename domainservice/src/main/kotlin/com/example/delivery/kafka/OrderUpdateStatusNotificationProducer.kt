@@ -1,7 +1,7 @@
 package com.example.delivery.kafka
 
+import com.example.commonmodels.order.OrderStatusUpdateNotification
 import com.example.internal.api.KafkaTopic
-import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono

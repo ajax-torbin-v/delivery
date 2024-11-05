@@ -1,13 +1,13 @@
 package com.example.delivery.mapper
 
+import com.example.commonmodels.product.Product
 import com.example.core.dto.request.CreateProductDTO
 import com.example.core.dto.request.UpdateProductDTO
 import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.domain.DomainProduct
-import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
-import com.example.internal.commonmodels.product.Product
 import com.example.internal.input.reqreply.product.CreateProductRequest
 import com.example.internal.input.reqreply.product.CreateProductResponse
+import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductRequest
 import com.example.internal.input.reqreply.product.UpdateProductResponse

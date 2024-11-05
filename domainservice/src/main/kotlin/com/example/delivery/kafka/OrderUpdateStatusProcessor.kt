@@ -1,8 +1,8 @@
 package com.example.delivery.kafka
 
+import com.example.commonmodels.order.Order
 import com.example.core.exception.NotificationException
 import com.example.delivery.mapper.OrderProtoMapper.toNotification
-import com.example.internal.commonmodels.order.Order
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent

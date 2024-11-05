@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.example.grpcapi.service;
+
+import "com/example/commonmodels/order/order.proto";
+import "com/example/grpcapi/reqres/order/create.proto";
+import "com/example/grpcapi/reqres/order/find.proto";
+import "com/example/grpcapi/reqres/order/update_status.proto";
+
+option java_multiple_files = true;
+
+service OrderService {
+    rpc CreateOrder (grpcapi.reqres.order.CreateOrderRequest) returns (grpcapi.reqres.order.CreateOrderResponse);
+
+    rpc GetOrderById (grpcapi.reqres.order.FindOrderByIdRequest) returns (grpcapi.reqres.order.FindOrderByIdResponse);
+
+    rpc UpdateOrderStatus (grpcapi.reqres.order.UpdateOrderStatusRequest)
+            returns (stream com.example.commonmodels.order.Order);
+}
+
