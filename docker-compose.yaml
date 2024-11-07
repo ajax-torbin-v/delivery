@@ -23,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: test
       MONGO_INITDB_DATABASE: test
     ports:
-      - "27017:27017"
+      - "27018:27017"
     profiles: [ gh-actions ]
 
   nats:
@@ -61,7 +61,6 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
     profiles: [ local ]
-
 
 volumes:
   mongo_db:

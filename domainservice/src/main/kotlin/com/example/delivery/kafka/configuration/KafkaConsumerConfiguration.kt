@@ -17,11 +17,21 @@ class KafkaConsumerConfiguration(
         return createKafkaReceiver(
             baseConsumerProperties(),
             KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE,
-            GROUP_ID
+            ORDER_UPDATE_GROUP
+        )
+    }
+
+    @Bean
+    fun orderUpdateReceiverForNats(): KafkaReceiver<String, ByteArray> {
+        return createKafkaReceiver(
+            baseConsumerProperties(),
+            KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE,
+            ORDER_UPDATE_NOTIFICATION_GROUP
         )
     }
 
     companion object {
-        const val GROUP_ID = "orderUpdateGroup"
+        const val ORDER_UPDATE_GROUP = "orderUpdateGroup"
+        const val ORDER_UPDATE_NOTIFICATION_GROUP = "orderUpdateNotificationGroup"
     }
 }

@@ -9,6 +9,7 @@ object NatsSubject {
         const val UPDATE_STATUS = "$ORDER_PREFIX.update_status"
         const val FIND_ALL_BY_USER_ID = "$ORDER_PREFIX.find_all_by_user_id"
         const val DELETE = "$ORDER_PREFIX.delete"
+        fun getUpdateStatusByUserId(userId: String) = "$UPDATE_STATUS.$userId"
     }
 
     object Product {

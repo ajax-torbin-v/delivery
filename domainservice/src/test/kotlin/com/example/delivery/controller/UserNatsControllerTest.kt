@@ -1,6 +1,7 @@
 package com.example.delivery.controller
 
 import com.example.core.UserFixture.randomUserId
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.UserFixture.buildDeleteUserRequest
 import com.example.delivery.UserFixture.buildFindUserByIdRequest
 import com.example.delivery.UserFixture.buildUpdateUserRequest
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
 
-class UserNatsControllerTest : AbstractNatsControllerTest() {
+class UserNatsControllerTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var userRepository: UserRepository

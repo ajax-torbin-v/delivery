@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package com.example.internal.input.reqreply.user;
 
-import "com/example/internal/commonmodels/user/user.proto";
+import "com/example/commonmodels/user/user.proto";
 
 option java_multiple_files = true;
 

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.order;
+package com.example.commonmodels.order;
 
-import "com/example/internal/commonmodels/product/product.proto";
+import "com/example/commonmodels/product/product.proto";
 
 option java_multiple_files = true;
 

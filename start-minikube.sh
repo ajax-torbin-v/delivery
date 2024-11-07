@@ -38,7 +38,9 @@ kubectl apply -f k8s/config/nats-deployment.yaml
 
 kubectl wait --for=condition=ready pod -l app=mongodb --timeout=300s
 
-kubectl apply -f k8s/config/mongo-express-deployment.yaml
+kubectl apply -f k8s/config/kafka.yaml
+kubectl wait --for=condition=ready pod -l app=kafka-headless --timeout=300s
+
 kubectl apply -f k8s/config/domain-deployment.yaml
 kubectl apply -f k8s/config/gateway-deployment.yaml
 kubectl apply -f k8s/config/ingress.yaml

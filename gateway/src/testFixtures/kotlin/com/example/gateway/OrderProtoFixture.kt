@@ -1,25 +1,21 @@
 package com.example.gateway
 
+import com.example.commonmodels.order.Order
+import com.example.commonmodels.order.OrderItem
+import com.example.commonmodels.order.ShipmentDetails
+import com.example.commonmodels.product.Product
 import com.example.core.OrderFixture.randomAmount
 import com.example.core.OrderFixture.randomBuilding
 import com.example.core.OrderFixture.randomCity
 import com.example.core.OrderFixture.randomIndex
 import com.example.core.OrderFixture.randomOrderId
 import com.example.core.OrderFixture.randomStreet
-import com.example.core.OrderFixture.randomUpdateBuilding
-import com.example.core.OrderFixture.randomUpdateCity
-import com.example.core.OrderFixture.randomUpdateIndex
-import com.example.core.OrderFixture.randomUpdateStreet
 import com.example.core.ProductFixture.randomAmountAvailable
 import com.example.core.ProductFixture.randomMeasurement
 import com.example.core.ProductFixture.randomPrice
 import com.example.core.ProductFixture.randomProductId
 import com.example.core.ProductFixture.randomProductName
 import com.example.core.UserFixture.randomUserId
-import com.example.internal.commonmodels.order.Order
-import com.example.internal.commonmodels.order.OrderItem
-import com.example.internal.commonmodels.order.ShipmentDetails
-import com.example.internal.commonmodels.product.Product
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderRequest
 import com.example.internal.input.reqreply.order.DeleteOrderResponse
@@ -30,6 +26,10 @@ import com.example.internal.input.reqreply.order.FindOrdersByUserIdResponse
 import com.example.internal.input.reqreply.order.UpdateOrderResponse
 import com.example.internal.input.reqreply.order.UpdateOrderStatusRequest
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
+import com.example.grpcapi.reqres.order.CreateOrderRequest as GrpcCreateOrderRequest
+import com.example.grpcapi.reqres.order.CreateOrderResponse as GrpcCreateOrderResponse
+import com.example.grpcapi.reqres.order.FindOrderByIdRequest as GrpcFindOrderByIdRequest
+import com.example.grpcapi.reqres.order.FindOrderByIdResponse as GrpcFindOrderByIdResponse
 
 object OrderProtoFixture {
     val randomShipmentDetails = ShipmentDetails.newBuilder().apply {
@@ -39,25 +39,8 @@ object OrderProtoFixture {
         index = randomIndex
     }.build()
 
-    val randomUpdatedShipmentDetails = ShipmentDetails.newBuilder().apply {
-        city = randomUpdateCity
-        street = randomUpdateStreet
-        building = randomUpdateBuilding
-        index = randomUpdateIndex
-    }.build()
-
     val createOrderResponse = CreateOrderResponse.newBuilder().apply {
-        successBuilder.orderBuilder.apply {
-            id = randomOrderId
-            shipmentDetails = randomShipmentDetails
-            userId = randomUserId
-            status = Order.Status.STATUS_NEW
-            addItems(OrderItem.newBuilder().apply {
-                productId = randomProductId
-                price = randomPrice.toString()
-                amount = randomAmount
-            })
-        }
+        successBuilder.order = createOrder()
     }.build()
 
     val createOrderResponseWithUnexpectedException = CreateOrderResponse.newBuilder().apply {
@@ -77,23 +60,8 @@ object OrderProtoFixture {
     val findOrderByIdRequest = FindOrderByIdRequest.newBuilder().setId(randomOrderId).build()
 
     val findOrderByIdResponse = FindOrderByIdResponse.newBuilder().apply {
-        successBuilder.orderBuilder.apply {
-            id = randomOrderId
-            shipmentDetails = randomShipmentDetails
-            userId = randomUserId
-            status = Order.Status.STATUS_NEW
-            addItems(OrderItem.newBuilder().apply {
-                price = randomPrice.toString()
-                productFull = Product.newBuilder()
-                    .setId(randomProductId)
-                    .setName(randomProductName)
-                    .setAmount(randomAmountAvailable)
-                    .setPrice(randomPrice.toString())
-                    .setMeasurement(randomMeasurement)
-                    .build()
-                amount = randomAmount
-            }.build())
-        }.build()
+        successBuilder.order = createFullOrder()
+
     }.build()
 
     val findOrderByIdResponseWithOrderNotFoundException = FindOrderByIdResponse.newBuilder().apply {
@@ -106,17 +74,7 @@ object OrderProtoFixture {
     }.build()
 
     val updateOrderResponse = UpdateOrderResponse.newBuilder().apply {
-        successBuilder.orderBuilder.apply {
-            id = randomOrderId
-            shipmentDetails = randomUpdatedShipmentDetails
-            userId = randomUserId
-            status = Order.Status.STATUS_NEW
-            addItems(OrderItem.newBuilder().apply {
-                productId = randomProductId
-                price = randomPrice.toString()
-                amount = randomAmount
-            })
-        }
+        successBuilder.order = createOrder()
     }.build()
 
     val updateOrderResponseWithOrderNotFoundException = UpdateOrderResponse.newBuilder().apply {
@@ -131,19 +89,8 @@ object OrderProtoFixture {
     val findOrdersByUserIdRequest = FindOrdersByUserIdRequest.newBuilder().setId(randomUserId).build()
 
     val findOrdersByUserIdResponse = FindOrdersByUserIdResponse.newBuilder().apply {
-        successBuilder.addOrder(Order.newBuilder().apply {
-            id = randomOrderId
-            shipmentDetails = randomShipmentDetails
-            userId = randomUserId
-            status = Order.Status.STATUS_NEW
-            addItems(OrderItem.newBuilder().apply {
-                productId = randomProductId
-                price = randomPrice.toString()
-                amount = randomAmount
-            }.build())
-        }.build())
+        successBuilder.addOrder(createOrder())
     }.build()
-
 
     val findOrdersByUserIdResponseWithUserNotFoundException = FindOrdersByUserIdResponse.newBuilder().apply {
         failureBuilder.message = "User not found"
@@ -154,17 +101,8 @@ object OrderProtoFixture {
         UpdateOrderStatusRequest.newBuilder().setId(randomOrderId).setStatus("COMPLETED").build()
 
     val updateOrderStatusResponse = UpdateOrderStatusResponse.newBuilder().apply {
-        successBuilder.orderBuilder.apply {
-            id = randomOrderId
-            shipmentDetails = randomShipmentDetails
-            userId = randomUserId
-            status = Order.Status.STATUS_COMPLETED
-            addItems(OrderItem.newBuilder().apply {
-                productId = randomProductId
-                price = randomPrice.toString()
-                amount = randomAmount
-            }.build())
-        }.build()
+        successBuilder.order = createOrder()
+        successBuilder.orderBuilder.status = Order.Status.STATUS_COMPLETED
     }.build()
 
     val updateOrderStatusResponseWithOrNotFoundException = UpdateOrderStatusResponse.newBuilder().apply {
@@ -185,4 +123,59 @@ object OrderProtoFixture {
     val deleteOrderResponseWithUnexpectedException = DeleteOrderResponse.newBuilder().apply {
         failureBuilder.message = "NPE"
     }.build()
+
+    val grpcCreateOrderRequest = GrpcCreateOrderRequest.newBuilder().also {
+        it.shipmentDetails = randomShipmentDetails
+        it.userId = randomUserId
+        it.addItems(OrderItem.newBuilder().apply {
+            productId = randomProductId
+            amount = randomAmount
+        }.build())
+    }.build()
+
+    val grpcCreateOrderResponse = GrpcCreateOrderResponse.newBuilder().also {
+        it.successBuilder.order = createOrder()
+    }.build()
+
+    val grpcFindOrderByIdRequest = GrpcFindOrderByIdRequest.newBuilder().also {
+        it.id = randomUserId
+    }.build()
+
+    val grpcFindOrderByIdResponse = GrpcFindOrderByIdResponse.newBuilder().apply {
+        successBuilder.order = createFullOrder()
+    }.build()
+
+    private fun createFullOrder(): Order {
+        return Order.newBuilder().also {
+            it.id = randomOrderId
+            it.shipmentDetails = randomShipmentDetails
+            it.userId = randomUserId
+            it.status = Order.Status.STATUS_NEW
+            it.addItems(OrderItem.newBuilder().apply {
+                price = randomPrice.toString()
+                amount = randomAmount
+                productFull = Product.newBuilder().apply {
+                    id = randomProductId
+                    name = randomProductName
+                    amount = randomAmountAvailable
+                    price = randomPrice.toString()
+                    measurement = randomMeasurement
+                }.build()
+            }.build())
+        }.build()
+    }
+
+    private fun createOrder(): Order {
+        return Order.newBuilder().also {
+            it.id = randomOrderId
+            it.status = Order.Status.STATUS_NEW
+            it.userId = randomUserId
+            it.shipmentDetails = randomShipmentDetails
+            it.addItems(OrderItem.newBuilder().apply {
+                productId = randomProductId
+                amount = randomAmount
+                price = randomPrice.toString()
+            }.build())
+        }.build()
+    }
 }

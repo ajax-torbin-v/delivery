@@ -8,9 +8,9 @@ import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
 import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
 import com.example.internal.api.NatsSubject
-import com.example.internal.commonmodels.input.reqreply.product.DeleteProductRequest
-import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.CreateProductResponse
+import com.example.internal.input.reqreply.product.DeleteProductRequest
+import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdRequest
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductResponse

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.order;
+package com.example.commonmodels.order;
 
-import "src/google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
 
