@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package com.example.internal.input.reqreply.order;
 
-import "com/example/internal/commonmodels/error.proto";
-import "com/example/internal/commonmodels/order/order.proto";
-import "com/example/internal/commonmodels/order/order_item.proto";
-import "com/example/internal/commonmodels/order/shipment_details.proto";
+import "com/example/commonmodels/error.proto";
+import "com/example/commonmodels/order/order.proto";
+import "com/example/commonmodels/order/order_item.proto";
+import "com/example/commonmodels/order/shipment_details.proto";
 
 option java_multiple_files = true;
 

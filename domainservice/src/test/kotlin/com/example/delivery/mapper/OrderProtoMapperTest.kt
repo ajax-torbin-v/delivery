@@ -1,5 +1,7 @@
 package com.example.delivery.mapper
 
+import com.example.commonmodels.order.Order.Status
+import com.example.commonmodels.order.OrderStatusUpdateNotification
 import com.example.core.exception.OrderNotFoundException
 import com.example.core.exception.ProductAmountException
 import com.example.core.exception.ProductNotFoundException
@@ -11,8 +13,6 @@ import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrderByIdRespon
 import com.example.delivery.mapper.OrderProtoMapper.toFailureUpdateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toNotificationStatus
 import com.example.delivery.mapper.OrderProtoMapper.toProto
-import com.example.internal.commonmodels.order.Order.Status
-import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.FindOrderByIdResponse
 import com.example.internal.input.reqreply.order.UpdateOrderResponse

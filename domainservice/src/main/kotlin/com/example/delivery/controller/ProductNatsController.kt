@@ -15,10 +15,10 @@ import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductDTO
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.service.ProductService
 import com.example.internal.api.NatsSubject
-import com.example.internal.commonmodels.input.reqreply.product.DeleteProductRequest
-import com.example.internal.commonmodels.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.CreateProductRequest
 import com.example.internal.input.reqreply.product.CreateProductResponse
+import com.example.internal.input.reqreply.product.DeleteProductRequest
+import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdRequest
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductRequest

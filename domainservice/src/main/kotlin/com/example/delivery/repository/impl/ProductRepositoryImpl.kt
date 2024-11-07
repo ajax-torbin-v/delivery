@@ -19,11 +19,6 @@ import reactor.core.publisher.Mono
 
 @Repository
 internal class ProductRepositoryImpl(val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
-    override fun existsById(id: String): Mono<Boolean> {
-        val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.exists(query, MongoProduct::class.java)
-    }
-
     override fun update(id: String, update: Update): Mono<MongoProduct> {
         val query = Query.query(Criteria.where("_id").isEqualTo(id))
         return mongoTemplate.findAndModify(

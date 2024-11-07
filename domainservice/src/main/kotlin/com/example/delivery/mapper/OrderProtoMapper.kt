@@ -1,5 +1,10 @@
 package com.example.delivery.mapper
 
+import com.example.commonmodels.order.Order
+import com.example.commonmodels.order.Order.Status
+import com.example.commonmodels.order.OrderItem
+import com.example.commonmodels.order.OrderStatusUpdateNotification
+import com.example.commonmodels.order.ShipmentDetails
 import com.example.core.dto.request.CreateOrderDTO
 import com.example.core.dto.request.CreateOrderItemDTO
 import com.example.core.dto.request.UpdateOrderDTO
@@ -12,11 +17,6 @@ import com.example.core.exception.UserNotFoundException
 import com.example.delivery.domain.DomainOrder
 import com.example.delivery.domain.projection.DomainOrderWithProduct
 import com.example.delivery.mapper.ProductProtoMapper.toProto
-import com.example.internal.commonmodels.order.Order
-import com.example.internal.commonmodels.order.Order.Status
-import com.example.internal.commonmodels.order.OrderItem
-import com.example.internal.commonmodels.order.OrderStatusUpdateNotification
-import com.example.internal.commonmodels.order.ShipmentDetails
 import com.example.internal.input.reqreply.order.CreateOrderRequest
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderResponse

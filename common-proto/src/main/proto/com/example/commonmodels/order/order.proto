@@ -1,16 +1,16 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.order;
+package com.example.commonmodels.order;
 
-import "com/example/internal/commonmodels/order/order_item.proto";
-import "com/example/internal/commonmodels/order/shipment_details.proto";
+import "com/example/commonmodels/order/order_item.proto";
+import "com/example/commonmodels/order/shipment_details.proto";
 
 option java_multiple_files = true;
 
 message Order {
     string id = 1;
-    repeated OrderItem items = 2;
-    ShipmentDetails shipment_details = 3;
+    repeated commonmodels.order.OrderItem items = 2;
+    commonmodels.order.ShipmentDetails shipment_details = 3;
     Status status = 4;
     string user_id = 5;
 

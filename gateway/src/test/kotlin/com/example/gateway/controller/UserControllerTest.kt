@@ -1,4 +1,4 @@
-package com.example.gateway
+package com.example.gateway.controller
 
 import com.example.core.UserFixture.createUserDTO
 import com.example.core.UserFixture.randomUserId

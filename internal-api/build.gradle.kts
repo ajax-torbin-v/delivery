@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     api("com.google.protobuf:protobuf-kotlin:4.28.2")
+    api(project(":common-proto"))
 }
 
 protobuf {

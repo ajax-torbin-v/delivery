@@ -1,2 +1,2 @@
 rootProject.name = "delivery"
-include("internal-api", "gateway", "domainservice", "core")
+include("core", "common-proto", "domainservice", "gateway", "grpcapi", "internal-api")

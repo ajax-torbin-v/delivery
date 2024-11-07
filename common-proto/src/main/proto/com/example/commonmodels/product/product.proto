@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.example.internal.commonmodels.product;
+package com.example.commonmodels.product;
 
 option java_multiple_files = true;
 
