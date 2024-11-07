@@ -6,6 +6,7 @@ import com.example.core.OrderFixture.randomAmount
 import com.example.core.ProductFixture.createProductDTO
 import com.example.core.UserFixture.createUserDTO
 import com.example.core.dto.request.CreateOrderItemDTO
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
@@ -16,16 +17,12 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Sinks
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
 
-@SpringBootTest
-@ActiveProfiles("test")
-class OrderUpdateStatusConsumerForNatsTest {
+class OrderUpdateStatusConsumerForNatsTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var dispatcher: Dispatcher
 

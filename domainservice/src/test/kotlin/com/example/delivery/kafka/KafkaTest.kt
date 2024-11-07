@@ -6,30 +6,20 @@ import com.example.core.OrderFixture.randomAmount
 import com.example.core.ProductFixture.createProductDTO
 import com.example.core.UserFixture.createUserDTO
 import com.example.core.dto.request.CreateOrderItemDTO
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.domain.DomainOrder
-import com.example.delivery.kafka.configuration.KafkaConfiguration
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
 import com.example.delivery.service.UserService
-import com.example.internal.api.KafkaTopic
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.test.context.ActiveProfiles
 import reactor.core.scheduler.Schedulers
 import reactor.kafka.receiver.KafkaReceiver
 import java.util.concurrent.TimeUnit
 
-@ActiveProfiles("test")
-@Import(KafkaTest.MyKafkaTestConfiguration::class)
-@SpringBootTest
-class KafkaTest {
+class KafkaTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var orderService: OrderService
 
@@ -76,23 +66,6 @@ class KafkaTest {
             .untilAsserted {
                 assertTrue(receivedMessages.contains(expected))
             }
-    }
-
-    class MyKafkaTestConfiguration(
-        @Value("\${spring.kafka.bootstrap-servers}") val bootstrapServer: String,
-        kafkaProperties: KafkaProperties,
-    ) : KafkaConfiguration(
-        bootstrapServer,
-        kafkaProperties
-    ) {
-        @Bean
-        fun kafkaTestReceiver(): KafkaReceiver<String, ByteArray> {
-            return createKafkaReceiver(
-                baseConsumerProperties(),
-                KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS,
-                NOTIFICATION_GROUP
-            )
-        }
     }
 
     companion object {

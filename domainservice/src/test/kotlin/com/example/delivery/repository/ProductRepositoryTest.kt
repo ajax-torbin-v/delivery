@@ -1,5 +1,6 @@
 package com.example.delivery.repository
 
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.ProductFixture.updateProductObject
 import com.example.delivery.ProductFixture.updatedProduct
@@ -8,14 +9,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import reactor.kotlin.test.test
 import reactor.test.StepVerifier
 
-@SpringBootTest
-@ActiveProfiles("test")
-class ProductRepositoryTest {
+class ProductRepositoryTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var productRepository: ProductRepository
 

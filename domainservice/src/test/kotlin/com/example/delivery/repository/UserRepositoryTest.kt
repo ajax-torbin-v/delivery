@@ -2,6 +2,7 @@ package com.example.delivery.repository
 
 import com.example.core.UserFixture.randomUpdatedFullName
 import com.example.core.UserFixture.randomUpdatedPhone
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.UserFixture.unsavedUser
 import com.example.delivery.UserFixture.updatedUser
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,14 +10,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.test.context.ActiveProfiles
 import reactor.kotlin.test.test
 
-@SpringBootTest
-@ActiveProfiles("test")
-class UserRepositoryTest {
+class UserRepositoryTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var userRepository: UserRepository
 

@@ -1,6 +1,7 @@
 package com.example.delivery.controller
 
 import com.example.core.ProductFixture.randomProductId
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.ProductFixture.buildDeleteProductRequest
 import com.example.delivery.ProductFixture.buildFindProductByIdRequest
 import com.example.delivery.ProductFixture.buildUpdateProductRequest
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
 
-class ProductNatsControllerTest : AbstractNatsControllerTest() {
+class ProductNatsControllerTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var productRepository: ProductRepository

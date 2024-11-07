@@ -1,5 +1,6 @@
 package com.example.delivery.repository
 
+import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.OrderFixture.mongoOrderWithProduct
 import com.example.delivery.OrderFixture.unsavedOrder
 import com.example.delivery.ProductFixture.product
@@ -11,15 +12,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.test.context.ActiveProfiles
 import reactor.kotlin.test.test
 import java.math.BigDecimal
 
-@SpringBootTest
-@ActiveProfiles("test")
-class OrderRepositoryTest {
+class OrderRepositoryTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var orderRepository: OrderRepository
 
