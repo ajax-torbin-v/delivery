@@ -43,7 +43,7 @@ class OrderGrpcService(
             }.map { it.toGrpc() }
     }
 
-    override fun updateOrderStatus(request: Mono<GrpcUpdateOrderStatusRequest>): Flux<Order> {
+    override fun subscribeToUpdateByUserId(request: Mono<GrpcUpdateOrderStatusRequest>): Flux<Order> {
         return request.flatMapMany { natsClient.subscribeByUserId(it.userId) }
     }
 }

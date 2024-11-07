@@ -72,7 +72,6 @@ class OrderUpdateStatusConsumerForNatsTest : AbstractIntegrationTest() {
                 sink.tryEmitNext(Order.parseFrom(message.data))
             }
         return sink.asFlux()
-            .log()
             .doFinally {
                 dispatcher.unsubscribe(subscription)
             }

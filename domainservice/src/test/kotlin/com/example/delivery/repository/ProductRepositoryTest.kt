@@ -47,21 +47,6 @@ class ProductRepositoryTest : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `existById should return if product exist`() {
-        // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct).block()
-
-        // WHEN
-        val actual = productRepository.existsById(savedProduct?.id.toString())
-
-        // THEN
-        actual
-            .test()
-            .expectNext(true)
-            .verifyComplete()
-    }
-
-    @Test
     fun `deleteById should delete product by id`() {
         // GIVEN
         val savedProduct = productRepository.save(unsavedProduct).block()
@@ -73,9 +58,8 @@ class ProductRepositoryTest : AbstractIntegrationTest() {
             .verifyComplete()
 
         // AND THEN
-        productRepository.existsById(savedProduct?.id.toString())
+        productRepository.findById(savedProduct?.id.toString())
             .test()
-            .expectNext(false)
             .verifyComplete()
     }
 

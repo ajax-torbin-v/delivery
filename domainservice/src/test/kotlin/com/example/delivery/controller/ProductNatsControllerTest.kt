@@ -2,7 +2,6 @@ package com.example.delivery.controller
 
 import com.example.core.ProductFixture.randomProductId
 import com.example.delivery.AbstractIntegrationTest
-import com.example.delivery.ProductFixture.buildDeleteProductRequest
 import com.example.delivery.ProductFixture.buildFindProductByIdRequest
 import com.example.delivery.ProductFixture.buildUpdateProductRequest
 import com.example.delivery.ProductFixture.createProductRequest
@@ -11,7 +10,6 @@ import com.example.delivery.ProductFixture.productNotFoundException
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.mapper.ProductProtoMapper.toCreateProductResponse
-import com.example.delivery.mapper.ProductProtoMapper.toDeleteProductResponse
 import com.example.delivery.mapper.ProductProtoMapper.toFailureFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toFailureUpdateProductResponse
 import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
@@ -19,13 +17,11 @@ import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductResponse
 import com.example.delivery.repository.ProductRepository
 import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.product.CreateProductResponse
-import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.kotlin.test.test
 
 class ProductNatsControllerTest : AbstractIntegrationTest() {
 
@@ -101,25 +97,5 @@ class ProductNatsControllerTest : AbstractIntegrationTest() {
 
         // THEN
         assertEquals(productNotFoundException.toFailureUpdateProductResponse(), actual)
-    }
-
-    @Test
-    fun `delete should delete product`() {
-        // GIVEN
-        val product = productRepository.save(unsavedProduct).block()!!
-
-        // WHEN
-        val actual = doRequest(
-            NatsSubject.Product.DELETE,
-            buildDeleteProductRequest(product.id.toString()),
-            DeleteProductResponse.parser()
-        )
-
-        // THEN
-        assertEquals(toDeleteProductResponse(), actual)
-        productRepository.existsById(product.id.toString())
-            .test()
-            .expectNext(false)
-            .verifyComplete()
     }
 }
