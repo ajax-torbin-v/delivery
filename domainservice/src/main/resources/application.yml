@@ -3,12 +3,7 @@ spring:
     mongodb:
       uri: mongodb://${MONGO_USER}:${MONGO_PASS}@${HOST}:${PORT}/${DB_NAME}?authSource=admin
   kafka:
-    bootstrap-servers: http://localhost:9092
-  redis:
-    database: 0
-    host: localhost
-    port: 6379
-    timeout: 10
+    bootstrap-servers: kafka-0.kafka-headless.kafka.svc.cluster.local:9092
 
 nats.uri: ${NATS_URI}
 
