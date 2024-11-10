@@ -25,6 +25,16 @@ object ProductMapper {
         measurement ?: "none"
     )
 
+    fun MongoProduct.toPartialUpdate(updateProductDTO: UpdateProductDTO): MongoProduct {
+        return MongoProduct(
+            id = id,
+            name = updateProductDTO.name ?: name,
+            price = updateProductDTO.price ?: price,
+            amountAvailable = updateProductDTO.amountAvailable ?: amountAvailable,
+            measurement = updateProductDTO.measurement ?: measurement
+        )
+    }
+
     fun UpdateProductDTO.toUpdate(): Update {
         val update = Update()
         name?.let { update.set(MongoProduct::name.name, it) }

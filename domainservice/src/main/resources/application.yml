@@ -5,6 +5,12 @@ spring:
   kafka:
     bootstrap-servers: kafka-0.kafka-headless.kafka.svc.cluster.local:9092
 
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    timeout: 10
+
 nats.uri: ${NATS_URI}
 
 server:
@@ -13,3 +19,23 @@ server:
 
 mongock:
   migration-scan-package: com.example.delivery.config
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 3
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 30000
+      failureRateThreshold: 25
+      recordExceptions:
+        - org.springframework.dao.QueryTimeoutException
+        - io.lettuce.core.RedisConnectionException
+  instances:
+    redisCircuitBreaker:
+      baseConfig: default
+
+logging:
+  level:
+    io.github.resilience4j: DEBUG

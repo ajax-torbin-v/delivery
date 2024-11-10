@@ -4,7 +4,6 @@ import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
 import org.springframework.data.mongodb.core.BulkOperations
-import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findAndRemove
@@ -18,15 +17,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class ProductRepositoryImpl(val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
-    override fun update(id: String, update: Update): Mono<MongoProduct> {
-        val query = Query.query(Criteria.where("_id").isEqualTo(id))
-        return mongoTemplate.findAndModify(
-            query,
-            update,
-            FindAndModifyOptions.options().returnNew(true),
-            MongoProduct::class.java
-        )
+internal class MongoProductRepository(val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
+
+    override fun update(product: MongoProduct): Mono<MongoProduct> {
+        return mongoTemplate.save(product)
     }
 
     override fun findAllByIds(productIds: List<String>): Flux<MongoProduct> {

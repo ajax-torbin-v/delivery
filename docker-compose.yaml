@@ -62,5 +62,14 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
     profiles: [ local ]
 
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: [ "redis-server", "--protected-mode", "no" ]
+    profiles: [ local, gh-actions ]
+
 volumes:
   mongo_db:

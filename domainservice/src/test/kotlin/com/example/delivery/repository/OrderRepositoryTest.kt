@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.mongodb.core.query.Update
 import reactor.kotlin.test.test
 import java.math.BigDecimal
@@ -21,6 +22,7 @@ class OrderRepositoryTest : AbstractIntegrationTest() {
     private lateinit var orderRepository: OrderRepository
 
     @Autowired
+    @Qualifier("redisProductRepository")
     private lateinit var productRepository: ProductRepository
 
     @Autowired

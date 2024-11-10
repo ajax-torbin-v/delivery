@@ -25,6 +25,7 @@ import com.example.delivery.repository.ProductRepository
 import com.example.delivery.repository.UserRepository
 import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -34,6 +35,7 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 class OrderService(
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
+    @Qualifier("redisProductRepository")
     private val productRepository: ProductRepository,
     private val kafkaUpdateOrderStatusSender: OrderUpdateStatusProducer,
 ) {

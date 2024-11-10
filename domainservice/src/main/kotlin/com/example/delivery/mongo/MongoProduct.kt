@@ -1,5 +1,7 @@
 package com.example.delivery.mongo
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
@@ -9,6 +11,7 @@ import java.math.BigDecimal
 @TypeAlias("Product")
 @Document(collection = MongoProduct.COLLECTION_NAME)
 data class MongoProduct(
+    @JsonSerialize(using = ToStringSerializer::class)
     @Id val id: ObjectId? = null,
     val name: String? = null,
     val price: BigDecimal? = null,
