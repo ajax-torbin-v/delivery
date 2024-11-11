@@ -89,7 +89,7 @@ internal class OrderServiceTest {
         every { orderRepository.save(any()) } returns Mono.just(order)
         every { userRepository.findById(randomUserId) } returns user.toMono()
         every { productRepository.findAllByIds(listOf(randomProductId)) } returns Flux.just(product)
-        every { productRepository.updateProductsAmount(any()) } returns Mono.empty()
+        every { productRepository.updateProductsAmount(any()) } returns Unit.toMono()
 
         // WHEN
         val actual = orderService.add(createOrderDTO)

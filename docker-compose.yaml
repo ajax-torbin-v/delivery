@@ -62,6 +62,14 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
     profiles: [ local ]
 
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    profiles: [ local, gh-actions ]
 
 volumes:
   mongo_db:

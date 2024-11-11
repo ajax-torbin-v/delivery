@@ -10,7 +10,6 @@ import io.lettuce.core.RedisConnectionException
 import org.slf4j.LoggerFactory
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.redis.core.ReactiveRedisTemplate
-import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -44,20 +43,12 @@ internal class RedisProductRepository(
             .multiGet(productIds)
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
             .flatMapMany { cachedProducts ->
-                if (cachedProducts.size < productIds.size) {
-                    val cachedProductIds = cachedProducts.map { it.id.toString() }
-                    val nonExistingIds = productIds.filter { cachedProductIds.contains(it) }
-                    mongoProductRepository.findAllByIds(nonExistingIds)
-                        .collectList()
-                        .doOnNext { mongoProducts ->
-                            reactiveRedisTemplate.execute(
-                                RedisScript.of<Unit>(multiSetWithExpire),
-                                mongoProducts.map { it.id.toString() },
-                                mongoProducts.map { byteArrayOf() }
-                            )
-                        }.flatMapMany { it.toFlux().mergeWith(cachedProducts.toFlux()) }
-                } else {
+                val cachedProductIds = cachedProducts.map { it.id.toString() }
+                val nonCachedIds = productIds - cachedProductIds
+                if (nonCachedIds.isEmpty()) {
                     cachedProducts.toFlux()
+                } else {
+                    mongoProductRepository.findAllByIds(nonCachedIds).mergeWith(cachedProducts.toFlux())
                 }
             }
     }
@@ -85,18 +76,24 @@ internal class RedisProductRepository(
             .then(mongoProductRepository.update(product))
     }
 
+    @SuppressWarnings("SpreadOperator")
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackUpdateProductsAmount")
     override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>): Mono<Unit> {
         return reactiveRedisTemplate.opsForValue()
             .multiGet(products.map { it.productId.toString() })
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
-            .map { productsList ->
+            .handle { item, sink ->
+                if (item.isEmpty()) {
+                    sink.complete()
+                } else {
+                    sink.next(item)
+                }
+            }
+            .flatMap { productsList ->
                 val keys = productsList.map { it.id.toString() }
-                val args = productsList.map { byteArrayOf() }
-                reactiveRedisTemplate.execute(RedisScript.of<Unit>(multiSetWithExpire), keys, args)
-                    .then(productsList.toMono())
-            }.flatMap {
-                mongoProductRepository.updateProductsAmount(products)
+                reactiveRedisTemplate.delete(*keys.toTypedArray()).then(Mono.empty<Unit>())
+            }.switchIfEmpty {
+                mongoProductRepository.updateProductsAmount(products).then(Unit.toMono())
             }
     }
 
@@ -199,11 +196,6 @@ internal class RedisProductRepository(
     }
 
     companion object {
-        private val multiSetWithExpire = """
-                  for i = 1, #KEYS do 
-                        redis.call('SET', KEYS[i], ARGV[i], 'EX', ${Duration.ofHours(1)}) 
-                  end
-                  """
         private val log = LoggerFactory.getLogger(RedisProductRepository::class.java)
         private val TIMEOUT_DURATION = Duration.ofHours(1)
         private val SHORT_TIMEOUT_DURATION = Duration.ofMinutes(5)

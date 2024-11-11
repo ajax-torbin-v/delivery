@@ -128,14 +128,16 @@ class OrderService(
         createOrderDTO: CreateOrderDTO,
         user: MongoUser,
     ): Mono<DomainOrder> {
-        productRepository.updateProductsAmount(items)
-        val order = MongoOrder(
-            items = items,
-            shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
-            status = MongoOrder.Status.NEW,
-            userId = user.id
-        )
-        return orderRepository.save(order).map { it.toDomain() }
+        return productRepository.updateProductsAmount(items)
+            .flatMap {
+                val order = MongoOrder(
+                    items = items,
+                    shipmentDetails = createOrderDTO.shipmentDetails.toMongoModel(),
+                    status = MongoOrder.Status.NEW,
+                    userId = user.id
+                )
+                orderRepository.save(order).map { it.toDomain() }
+            }
     }
 
     companion object {
