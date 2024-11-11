@@ -1,9 +1,10 @@
 package com.example.delivery.repository.impl
 
+import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import io.lettuce.core.RedisConnectionException
@@ -24,8 +25,8 @@ import java.time.Duration
 internal class RedisProductRepository(
     val mongoProductRepository: MongoProductRepository,
     val reactiveRedisTemplate: ReactiveRedisTemplate<String, ByteArray>,
+    val mapper: ObjectMapper,
 ) : ProductRepository by mongoProductRepository {
-    private val mapper = jacksonObjectMapper()
 
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackSave")
     override fun save(product: MongoProduct): Mono<MongoProduct> {
@@ -59,7 +60,7 @@ internal class RedisProductRepository(
             .get(id)
             .handle { product, sink ->
                 if (product.isEmpty()) {
-                    sink.complete()
+                    sink.error(ProductNotFoundException("Product with id $id doesn't exist"))
                 } else {
                     runCatching { mapper.readValue<MongoProduct>(product) }
                         .onSuccess(sink::next)
