@@ -187,11 +187,11 @@ internal class RedisProductRepository(
     private fun Mono<MongoProduct>.writeToRedis(id: String): Mono<MongoProduct> {
         return this.flatMap { item ->
             reactiveRedisTemplate.opsForValue()
-                .get(createProductKey(id))
+                .set(createProductKey(id), mapper.writeValueAsBytes(item), TIMEOUT_DURATION)
                 .thenReturn(item)
         }.switchIfEmpty {
             reactiveRedisTemplate.opsForValue()
-                .get(createProductKey(id))
+                .set(createProductKey(id), byteArrayOf(), SHORT_TIMEOUT_DURATION)
                 .then(Mono.empty())
         }
     }
