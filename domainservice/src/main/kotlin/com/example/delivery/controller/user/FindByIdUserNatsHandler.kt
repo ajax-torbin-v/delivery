@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
-
 @Component
 internal class FindByIdUserNatsHandler(
     private val userService: UserService,

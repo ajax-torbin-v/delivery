@@ -3,7 +3,6 @@ package com.example.gateway.rest
 import com.example.core.dto.request.CreateUserDTO
 import com.example.core.dto.request.UpdateUserDTO
 import com.example.core.dto.response.UserDTO
-import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
@@ -25,14 +24,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val natsClient: NatsClient) {
+class UserController(private val natsPublisher: NatsMessagePublisher) {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createUserDTO: CreateUserDTO): Mono<UserDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.User.SAVE,
             createUserDTO.toCreateUserRequest(),
             CreateUserResponse.parser(),
@@ -41,7 +41,7 @@ class UserController(private val natsClient: NatsClient) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<UserDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.User.FIND_BY_ID,
             FindUserByIdRequest.newBuilder().apply { setId(id) }.build(),
             FindUserByIdResponse.parser()
@@ -50,7 +50,7 @@ class UserController(private val natsClient: NatsClient) {
 
     @PutMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody updateUserDTO: UpdateUserDTO): Mono<UserDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.User.UPDATE,
             updateUserRequest(id, updateUserDTO),
             UpdateUserResponse.parser()
@@ -60,7 +60,7 @@ class UserController(private val natsClient: NatsClient) {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String): Mono<Unit> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.User.DELETE,
             DeleteUserRequest.newBuilder().setId(id).build(),
             DeleteUserResponse.parser()

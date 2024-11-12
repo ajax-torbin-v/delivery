@@ -4,7 +4,6 @@ import com.example.core.dto.request.CreateOrderDTO
 import com.example.core.dto.request.UpdateOrderDTO
 import com.example.core.dto.response.OrderDTO
 import com.example.core.dto.response.OrderWithProductDTO
-import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
 import com.example.gateway.mapper.OrderProtoMapper.toDTO
 import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
@@ -33,15 +32,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @RestController
 @RequestMapping("/orders")
-class OrderController(private val natsClient: NatsClient) {
+class OrderController(private val natsPublisher: NatsMessagePublisher) {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     fun add(@RequestBody createOrderDTO: CreateOrderDTO): Mono<OrderDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.SAVE,
             createOrderDTO.toCreateOrderRequest(),
             CreateOrderResponse.parser()
@@ -50,7 +50,7 @@ class OrderController(private val natsClient: NatsClient) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): Mono<OrderWithProductDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.FIND_BY_ID,
             FindOrderByIdRequest.newBuilder().setId(id).build(),
             FindOrderByIdResponse.parser()
@@ -62,7 +62,7 @@ class OrderController(private val natsClient: NatsClient) {
         @PathVariable id: String,
         @RequestBody updateOrderDTO: UpdateOrderDTO,
     ): Mono<OrderDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.UPDATE,
             updateOrderRequest(id, updateOrderDTO),
             UpdateOrderResponse.parser()
@@ -74,7 +74,7 @@ class OrderController(private val natsClient: NatsClient) {
         @PathVariable id: String,
         @RequestParam status: String,
     ): Mono<OrderDTO> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.UPDATE_STATUS,
             UpdateOrderStatusRequest.newBuilder().setStatus(status).setId(id).build(),
             UpdateOrderStatusResponse.parser()
@@ -84,7 +84,7 @@ class OrderController(private val natsClient: NatsClient) {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String): Mono<Unit> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.DELETE,
             DeleteOrderRequest.newBuilder().setId(id).build(),
             DeleteOrderResponse.parser()
@@ -93,7 +93,7 @@ class OrderController(private val natsClient: NatsClient) {
 
     @GetMapping("/user/{id}")
     fun findAllByUserId(@PathVariable id: String): Mono<List<OrderDTO>> {
-        return natsClient.doRequest(
+        return natsPublisher.request(
             NatsSubject.Order.FIND_ALL_BY_USER_ID,
             FindOrdersByUserIdRequest.newBuilder().setId(id).build(),
             FindOrdersByUserIdResponse.parser()

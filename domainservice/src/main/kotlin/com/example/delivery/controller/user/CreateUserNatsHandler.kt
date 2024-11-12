@@ -8,13 +8,13 @@ import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.user.CreateUserRequest
 import com.example.internal.input.reqreply.user.CreateUserResponse
 import com.google.protobuf.Parser
-import kotlin.reflect.KClass
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
+import kotlin.reflect.KClass
 
 @Component
 internal class CreateUserNatsHandler(

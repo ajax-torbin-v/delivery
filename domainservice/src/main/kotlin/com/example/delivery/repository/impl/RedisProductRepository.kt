@@ -1,8 +1,10 @@
 package com.example.delivery.repository.impl
 
+import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import io.lettuce.core.RedisConnectionException
@@ -89,6 +91,7 @@ internal class RedisProductRepository(
                 }
             }
             .flatMap { productsList ->
+                val keys = productsList.map { createProductKey(it.id.toString()) }
                 reactiveRedisTemplate.delete(*keys.toTypedArray()).then(Mono.empty<Unit>())
             }.switchIfEmpty {
                 mongoProductRepository.updateProductsAmount(products).then(Unit.toMono())
@@ -184,9 +187,11 @@ internal class RedisProductRepository(
     private fun Mono<MongoProduct>.writeToRedis(id: String): Mono<MongoProduct> {
         return this.flatMap { item ->
             reactiveRedisTemplate.opsForValue()
+                .get(createProductKey(id))
                 .thenReturn(item)
         }.switchIfEmpty {
             reactiveRedisTemplate.opsForValue()
+                .get(createProductKey(id))
                 .then(Mono.empty())
         }
     }

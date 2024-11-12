@@ -15,7 +15,6 @@ import com.example.gateway.UserProtoFixture.findUserByIdResponseWithUnexpectedEx
 import com.example.gateway.UserProtoFixture.updateUserResponse
 import com.example.gateway.UserProtoFixture.updateUserResponseWithUnexpectedException
 import com.example.gateway.UserProtoFixture.updateUserResponseWithUserNotFoundException
-import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
 import com.example.gateway.mapper.UserProtoMapper.toDTO
 import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
@@ -36,11 +35,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class UserControllerTest {
     @MockK
-    private lateinit var natsClient: NatsClient
+    private lateinit var natsMessagePublisher: NatsMessagePublisher
 
     @InjectMockKs
     private lateinit var userController: UserController
@@ -49,7 +49,7 @@ class UserControllerTest {
     fun `save should return user DTO`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
@@ -67,7 +67,7 @@ class UserControllerTest {
     fun `save should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
@@ -84,7 +84,7 @@ class UserControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.SAVE,
                 payload = createUserDTO.toCreateUserRequest(),
                 parser = CreateUserResponse.parser()
@@ -101,7 +101,7 @@ class UserControllerTest {
     fun `findById should return existing user`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
@@ -119,7 +119,7 @@ class UserControllerTest {
     fun `findById should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
@@ -136,7 +136,7 @@ class UserControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
@@ -153,7 +153,7 @@ class UserControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.FIND_BY_ID,
                 payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
                 parser = FindUserByIdResponse.parser()
@@ -170,7 +170,7 @@ class UserControllerTest {
     fun `update should return updated user`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
@@ -188,7 +188,7 @@ class UserControllerTest {
     fun `update should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
@@ -205,7 +205,7 @@ class UserControllerTest {
     fun `update should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
@@ -222,7 +222,7 @@ class UserControllerTest {
     fun `update should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.UPDATE,
                 updateUserRequest(randomUserId, updateUserDTO),
                 UpdateUserResponse.parser()
@@ -239,7 +239,7 @@ class UserControllerTest {
     fun `delete should delete user`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
@@ -251,7 +251,7 @@ class UserControllerTest {
 
         // THEN
         verify(exactly = 1) {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
@@ -263,7 +263,7 @@ class UserControllerTest {
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()
@@ -280,7 +280,7 @@ class UserControllerTest {
     fun `delete should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.User.DELETE,
                 deleteUserRequest,
                 DeleteUserResponse.parser()

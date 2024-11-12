@@ -29,7 +29,6 @@ import com.example.gateway.OrderProtoFixture.updateOrderStatusRequest
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponse
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithOrNotFoundException
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithUnexpectedException
-import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
 import com.example.gateway.mapper.OrderProtoMapper.toDTO
 import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
@@ -52,11 +51,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class OrderControllerTest {
     @MockK
-    private lateinit var natsClient: NatsClient
+    private lateinit var natsMessagePublisher: NatsMessagePublisher
 
     @InjectMockKs
     private lateinit var orderController: OrderController
@@ -65,7 +65,7 @@ class OrderControllerTest {
     fun `save should return order DTO`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
@@ -83,7 +83,7 @@ class OrderControllerTest {
     fun `save should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
@@ -100,7 +100,7 @@ class OrderControllerTest {
     fun `save should throw exception when product doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
@@ -117,7 +117,7 @@ class OrderControllerTest {
     fun `save should rethrow exception when message contains unexpected error`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
@@ -134,7 +134,7 @@ class OrderControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.SAVE,
                 payload = createOrderDTO.toCreateOrderRequest(),
                 parser = CreateOrderResponse.parser()
@@ -151,7 +151,7 @@ class OrderControllerTest {
     fun `findById should return existing order`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
@@ -169,7 +169,7 @@ class OrderControllerTest {
     fun `findById should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
@@ -186,7 +186,7 @@ class OrderControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
@@ -203,7 +203,7 @@ class OrderControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_BY_ID,
                 payload = findOrderByIdRequest,
                 parser = FindOrderByIdResponse.parser()
@@ -220,7 +220,7 @@ class OrderControllerTest {
     fun `update should return updated order`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
@@ -238,7 +238,7 @@ class OrderControllerTest {
     fun `update should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
@@ -255,7 +255,7 @@ class OrderControllerTest {
     fun `update should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
@@ -272,7 +272,7 @@ class OrderControllerTest {
     fun `update should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE,
                 payload = updateOrderRequest(randomOrderId, updateOrderDTO),
                 parser = UpdateOrderResponse.parser()
@@ -289,7 +289,7 @@ class OrderControllerTest {
     fun `findAllByUserId should return all orders for user`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
@@ -307,7 +307,7 @@ class OrderControllerTest {
     fun `findAllByUserId should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
@@ -324,7 +324,7 @@ class OrderControllerTest {
     fun `findAllByUserId should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.FIND_ALL_BY_USER_ID,
                 payload = findOrdersByUserIdRequest,
                 parser = FindOrdersByUserIdResponse.parser()
@@ -341,7 +341,7 @@ class OrderControllerTest {
     fun `updateStatus should return order with updated status`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
@@ -359,7 +359,7 @@ class OrderControllerTest {
     fun `updateStatus should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
@@ -376,7 +376,7 @@ class OrderControllerTest {
     fun `updateStatus should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
@@ -393,7 +393,7 @@ class OrderControllerTest {
     fun `updateStatus should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.UPDATE_STATUS,
                 payload = updateOrderStatusRequest,
                 parser = UpdateOrderStatusResponse.parser()
@@ -410,7 +410,7 @@ class OrderControllerTest {
     fun `delete should delete order`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
@@ -422,7 +422,7 @@ class OrderControllerTest {
 
         // THEN
         verify(exactly = 1) {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
@@ -434,7 +434,7 @@ class OrderControllerTest {
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
@@ -451,7 +451,7 @@ class OrderControllerTest {
     fun `delete should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Order.DELETE,
                 deleteOrderRequest,
                 DeleteOrderResponse.parser()
