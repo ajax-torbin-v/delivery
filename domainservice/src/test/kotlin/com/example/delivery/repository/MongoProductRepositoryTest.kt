@@ -1,19 +1,22 @@
 package com.example.delivery.repository
 
+import com.example.core.ProductFixture.updateProductDTO
 import com.example.delivery.AbstractIntegrationTest
 import com.example.delivery.ProductFixture.unsavedProduct
-import com.example.delivery.ProductFixture.updateProductObject
 import com.example.delivery.ProductFixture.updatedProduct
+import com.example.delivery.mapper.ProductMapper.toPartialUpdate
 import com.example.delivery.mongo.MongoOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import reactor.kotlin.test.test
 import reactor.test.StepVerifier
 
-class ProductRepositoryTest : AbstractIntegrationTest() {
+class MongoProductRepositoryTest : AbstractIntegrationTest() {
     @Autowired
+    @Qualifier("mongoProductRepository")
     private lateinit var productRepository: ProductRepository
 
     @Test
@@ -66,20 +69,15 @@ class ProductRepositoryTest : AbstractIntegrationTest() {
     @Test
     fun `update should update product`() {
         // GIVEN
-        val savedProduct = productRepository.save(unsavedProduct).block()
+        val savedProduct = productRepository.save(unsavedProduct).block()!!
 
         // WHEN
-        val actual = productRepository.update(savedProduct?.id.toString(), updateProductObject)
+        val actual = productRepository.update(savedProduct.toPartialUpdate(updateProductDTO))
 
         // THEN
         actual
             .test()
-            .assertNext { product ->
-                assertEquals(
-                    updatedProduct.copy(id = savedProduct?.id),
-                    product
-                )
-            }
+            .expectNext(updatedProduct.copy(id = savedProduct.id))
             .verifyComplete()
     }
 

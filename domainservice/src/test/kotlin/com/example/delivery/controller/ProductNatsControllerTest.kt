@@ -22,10 +22,12 @@ import com.example.internal.input.reqreply.product.UpdateProductResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 
 class ProductNatsControllerTest : AbstractIntegrationTest() {
 
     @Autowired
+    @Qualifier("redisProductRepository")
     private lateinit var productRepository: ProductRepository
 
     @Test

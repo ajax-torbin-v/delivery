@@ -12,3 +12,8 @@ spring:
         session.timeout.ms: 10000
         max.poll.interval.ms: 10000
     bootstrap-servers: http://localhost:9092
+
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 10

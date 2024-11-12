@@ -5,7 +5,6 @@ import com.example.core.ProductFixture.updateProductDTO
 import com.example.core.exception.NotFoundException
 import com.example.delivery.ProductFixture.domainProduct
 import com.example.delivery.ProductFixture.product
-import com.example.delivery.ProductFixture.updateProductObject
 import com.example.delivery.ProductFixture.updatedDomainProduct
 import com.example.delivery.ProductFixture.updatedProduct
 import com.example.delivery.repository.ProductRepository
@@ -77,7 +76,8 @@ internal class ProductServiceTest {
     @Test
     fun `should update product with proper dto when product exists`() {
         // GIVEN
-        every { productRepository.update("1", updateProductObject) } returns updatedProduct.toMono()
+        every { productRepository.findById("1") } returns product.toMono()
+        every { productRepository.update(updatedProduct) } returns updatedProduct.toMono()
 
         // WHEN
         val actual = productService.update("1", updateProductDTO)
@@ -87,13 +87,12 @@ internal class ProductServiceTest {
             .test()
             .expectNext(updatedDomainProduct)
             .verifyComplete()
-        verify(exactly = 1) { productRepository.update("1", updateProductObject) }
     }
 
     @Test
     fun `should throw exception if product doesn't exists on update`() {
         // GIVEN
-        every { productRepository.update("1", updateProductObject) } returns Mono.empty()
+        every { productRepository.findById("1") } returns Mono.empty()
 
         // WHEN
         val actual = productService.update("1", updateProductDTO)
