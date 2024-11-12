@@ -33,7 +33,7 @@ internal class RedisProductRepository(
         return mongoProductRepository.save(product)
             .flatMap {
                 reactiveRedisTemplate.opsForValue()
-                    .set(it.id.toString(), mapper.writeValueAsBytes(it), TIMEOUT_DURATION)
+                    .set(createProductKey(it.id.toString()), mapper.writeValueAsBytes(it), TIMEOUT_DURATION)
                     .thenReturn(it)
             }
     }
@@ -41,7 +41,7 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackFindAllByIds")
     override fun findAllByIds(productIds: List<String>): Flux<MongoProduct> {
         return reactiveRedisTemplate.opsForValue()
-            .multiGet(productIds)
+            .multiGet(productIds.map { createProductKey(it) })
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
             .flatMapMany { cachedProducts ->
                 val cachedProductIds = cachedProducts.map { it.id.toString() }
@@ -57,7 +57,7 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackFindById")
     override fun findById(id: String): Mono<MongoProduct> {
         return reactiveRedisTemplate.opsForValue()
-            .get(id)
+            .get(createProductKey(id))
             .handle { product, sink ->
                 if (product.isEmpty()) {
                     sink.error(ProductNotFoundException("Product with id $id doesn't exist"))
@@ -73,7 +73,7 @@ internal class RedisProductRepository(
 
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackUpdate")
     override fun update(product: MongoProduct): Mono<MongoProduct> {
-        return reactiveRedisTemplate.delete(product.id.toString())
+        return reactiveRedisTemplate.delete(createProductKey(product.id.toString()))
             .then(mongoProductRepository.update(product))
     }
 
@@ -81,7 +81,7 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackUpdateProductsAmount")
     override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>): Mono<Unit> {
         return reactiveRedisTemplate.opsForValue()
-            .multiGet(products.map { it.productId.toString() })
+            .multiGet(products.map { createProductKey(it.productId.toString()) })
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
             .handle { item, sink ->
                 if (item.isEmpty()) {
@@ -91,7 +91,7 @@ internal class RedisProductRepository(
                 }
             }
             .flatMap { productsList ->
-                val keys = productsList.map { it.id.toString() }
+                val keys = productsList.map { createProductKey(it.id.toString()) }
                 reactiveRedisTemplate.delete(*keys.toTypedArray()).then(Mono.empty<Unit>())
             }.switchIfEmpty {
                 mongoProductRepository.updateProductsAmount(products).then(Unit.toMono())
@@ -187,16 +187,19 @@ internal class RedisProductRepository(
     private fun Mono<MongoProduct>.writeToRedis(id: String): Mono<MongoProduct> {
         return this.flatMap { item ->
             reactiveRedisTemplate.opsForValue()
-                .set(id, mapper.writeValueAsBytes(item), TIMEOUT_DURATION)
+                .set(createProductKey(id), mapper.writeValueAsBytes(item), TIMEOUT_DURATION)
                 .thenReturn(item)
         }.switchIfEmpty {
             reactiveRedisTemplate.opsForValue()
-                .set(id, byteArrayOf(), SHORT_TIMEOUT_DURATION)
+                .set(createProductKey(id), byteArrayOf(), SHORT_TIMEOUT_DURATION)
                 .then(Mono.empty())
         }
     }
 
+    private fun createProductKey(key: String): String = "$KEY_PREFIX:$key"
+
     companion object {
+        private const val KEY_PREFIX = "product"
         private val log = LoggerFactory.getLogger(RedisProductRepository::class.java)
         private val TIMEOUT_DURATION = Duration.ofHours(1)
         private val SHORT_TIMEOUT_DURATION = Duration.ofMinutes(5)

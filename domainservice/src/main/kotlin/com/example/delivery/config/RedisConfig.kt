@@ -2,7 +2,6 @@ package com.example.delivery.config
 
 import io.lettuce.core.ClientOptions
 import io.lettuce.core.TimeoutOptions
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory
@@ -17,25 +16,18 @@ import java.time.Duration
 
 @Configuration
 class RedisConfig(
-    @Value("\${spring.redis.host}")
-    private val host: String,
-    @Value("\${spring.redis.port}")
-    private val port: Int,
-    @Value("\${spring.redis.timeout}")
-    private val timeout: Long,
-    @Value("\${spring.redis.database}")
-    private val database: Int,
+    private val redisProperties: RedisProperties,
 ) {
     @Bean
     fun reactiveRedisConnectionFactory(): ReactiveRedisConnectionFactory {
-        val config = RedisStandaloneConfiguration(host, port)
-        config.database = database
+        val config = RedisStandaloneConfiguration(redisProperties.host, redisProperties.port)
+        config.database = redisProperties.database
 
         val clientOptions: ClientOptions = ClientOptions.builder()
             .timeoutOptions(
                 TimeoutOptions.builder()
                     .timeoutCommands(true)
-                    .fixedTimeout(Duration.ofMillis(timeout))
+                    .fixedTimeout(Duration.ofMillis(redisProperties.timeout))
                     .build()
             ).build()
 
