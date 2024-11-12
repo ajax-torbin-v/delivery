@@ -16,7 +16,4 @@ spring:
     redis:
       host: localhost
       port: 6379
-      timeout:
-        millis: 10
-      ttl:
-        minutes: 3
+      timeout: 10

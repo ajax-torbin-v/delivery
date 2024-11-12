@@ -17,7 +17,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class MongoProductRepository(val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
+internal class MongoProductRepository(private val mongoTemplate: ReactiveMongoTemplate) : ProductRepository {
 
     override fun update(product: MongoProduct): Mono<MongoProduct> {
         return mongoTemplate.save(product)

@@ -5,6 +5,7 @@ import com.example.delivery.ProductFixture.product
 import com.example.delivery.ProductFixture.unsavedProduct
 import com.example.delivery.repository.impl.MongoProductRepository
 import com.example.delivery.repository.impl.RedisProductRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.lettuce.core.RedisConnectionException
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -30,6 +31,10 @@ class ProductRepositoryFallbackUnitTest {
 
     @MockK
     private lateinit var reactiveRedisTemplate: ReactiveRedisTemplate<String, ByteArray>
+
+    @MockK
+    @SuppressWarnings("UnusedPrivateProperty")
+    private lateinit var mapper: ObjectMapper
 
     @Test
     fun `fallbackSave should return saved mongo product when redis fails`() {

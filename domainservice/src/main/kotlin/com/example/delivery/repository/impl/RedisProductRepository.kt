@@ -3,7 +3,6 @@ package com.example.delivery.repository.impl
 import com.example.delivery.mongo.MongoOrder
 import com.example.delivery.mongo.MongoProduct
 import com.example.delivery.repository.ProductRepository
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import io.lettuce.core.RedisConnectionException
@@ -24,15 +23,15 @@ import java.time.Duration
 internal class RedisProductRepository(
     val mongoProductRepository: MongoProductRepository,
     val reactiveRedisTemplate: ReactiveRedisTemplate<String, ByteArray>,
+    val mapper: ObjectMapper,
 ) : ProductRepository by mongoProductRepository {
-    private val mapper = jacksonObjectMapper()
 
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackSave")
     override fun save(product: MongoProduct): Mono<MongoProduct> {
         return mongoProductRepository.save(product)
             .flatMap {
                 reactiveRedisTemplate.opsForValue()
-                    .set(it.id.toString(), mapper.writeValueAsBytes(it), TIMEOUT_DURATION)
+                    .set(createProductKey(it.id.toString()), mapper.writeValueAsBytes(it), TIMEOUT_DURATION)
                     .thenReturn(it)
             }
     }
@@ -40,7 +39,7 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackFindAllByIds")
     override fun findAllByIds(productIds: List<String>): Flux<MongoProduct> {
         return reactiveRedisTemplate.opsForValue()
-            .multiGet(productIds)
+            .multiGet(productIds.map { createProductKey(it) })
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
             .flatMapMany { cachedProducts ->
                 val cachedProductIds = cachedProducts.map { it.id.toString() }
@@ -56,10 +55,10 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackFindById")
     override fun findById(id: String): Mono<MongoProduct> {
         return reactiveRedisTemplate.opsForValue()
-            .get(id)
+            .get(createProductKey(id))
             .handle { product, sink ->
                 if (product.isEmpty()) {
-                    sink.complete()
+                    sink.error(ProductNotFoundException("Product with id $id doesn't exist"))
                 } else {
                     runCatching { mapper.readValue<MongoProduct>(product) }
                         .onSuccess(sink::next)
@@ -72,7 +71,7 @@ internal class RedisProductRepository(
 
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackUpdate")
     override fun update(product: MongoProduct): Mono<MongoProduct> {
-        return reactiveRedisTemplate.delete(product.id.toString())
+        return reactiveRedisTemplate.delete(createProductKey(product.id.toString()))
             .then(mongoProductRepository.update(product))
     }
 
@@ -80,7 +79,7 @@ internal class RedisProductRepository(
     @CircuitBreaker(name = "redisCircuitBreaker", fallbackMethod = "fallbackUpdateProductsAmount")
     override fun updateProductsAmount(products: List<MongoOrder.MongoOrderItem>): Mono<Unit> {
         return reactiveRedisTemplate.opsForValue()
-            .multiGet(products.map { it.productId.toString() })
+            .multiGet(products.map { createProductKey(it.productId.toString()) })
             .map { list -> list.filterNotNull().map { mapper.readValue<MongoProduct>(it) } }
             .handle { item, sink ->
                 if (item.isEmpty()) {
@@ -90,7 +89,6 @@ internal class RedisProductRepository(
                 }
             }
             .flatMap { productsList ->
-                val keys = productsList.map { it.id.toString() }
                 reactiveRedisTemplate.delete(*keys.toTypedArray()).then(Mono.empty<Unit>())
             }.switchIfEmpty {
                 mongoProductRepository.updateProductsAmount(products).then(Unit.toMono())
@@ -186,16 +184,17 @@ internal class RedisProductRepository(
     private fun Mono<MongoProduct>.writeToRedis(id: String): Mono<MongoProduct> {
         return this.flatMap { item ->
             reactiveRedisTemplate.opsForValue()
-                .set(id, mapper.writeValueAsBytes(item), TIMEOUT_DURATION)
                 .thenReturn(item)
         }.switchIfEmpty {
             reactiveRedisTemplate.opsForValue()
-                .set(id, byteArrayOf(), SHORT_TIMEOUT_DURATION)
                 .then(Mono.empty())
         }
     }
 
+    private fun createProductKey(key: String): String = "$KEY_PREFIX:$key"
+
     companion object {
+        private const val KEY_PREFIX = "product"
         private val log = LoggerFactory.getLogger(RedisProductRepository::class.java)
         private val TIMEOUT_DURATION = Duration.ofHours(1)
         private val SHORT_TIMEOUT_DURATION = Duration.ofMinutes(5)
