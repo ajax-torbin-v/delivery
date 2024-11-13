@@ -13,6 +13,7 @@ dependencies {
     implementation("io.nats:jnats:2.16.14")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.projectreactor:reactor-core:3.6.10")
+    implementation("systems.ajax:nats-spring-boot-starter:4.1.0.186.MASTER-SNAPSHOT")
     testImplementation(testFixtures(project(":core")))
     testImplementation("io.mockk:mockk:1.13.12")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")

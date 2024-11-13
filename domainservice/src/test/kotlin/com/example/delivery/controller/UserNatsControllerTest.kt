@@ -26,23 +26,30 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 class UserNatsControllerTest : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    @Autowired
+    private lateinit var natsMessagePublisher: NatsMessagePublisher
+
     @Test
     fun `save should return saved user`() {
         // GIVEN // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.SAVE,
             createUserRequest,
             CreateUserResponse.parser()
-        )
+        ).block()!!
 
         // THEN
-        assertEquals(domainUser.copy(id = actual.success.user.id).toCreateUserResponse(), actual)
+        assertEquals(
+            domainUser.toCreateUserResponse().success.user.toBuilder().clearId().build(),
+            actual.success.user.toBuilder().clearId().build()
+        )
     }
 
     @Test
@@ -51,27 +58,31 @@ class UserNatsControllerTest : AbstractIntegrationTest() {
         val user = userRepository.save(unsavedUser).block()!!
 
         // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.FIND_BY_ID,
             buildFindUserByIdRequest(user.id.toString()),
             FindUserByIdResponse.parser()
         )
 
         // THEN
-        assertEquals(domainUser.copy(id = user.id.toString()).toFindUserByIdResponse(), actual)
+        actual.test()
+            .expectNext(domainUser.copy(id = user.id.toString()).toFindUserByIdResponse())
+            .verifyComplete()
     }
 
     @Test
     fun `findById should return message with exception when user doesn't exist`() {
         // GIVEN // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.FIND_BY_ID,
             buildFindUserByIdRequest(randomUserId),
             FindUserByIdResponse.parser()
         )
 
         // THEN
-        assertEquals(userNotFoundException.toFailureFindUserByIdResponse(), actual)
+        actual.test()
+            .expectNext(userNotFoundException.toFailureFindUserByIdResponse())
+            .verifyComplete()
     }
 
     @Test
@@ -80,27 +91,31 @@ class UserNatsControllerTest : AbstractIntegrationTest() {
         val user = userRepository.save(unsavedUser).block()!!
 
         // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.UPDATE,
             buildUpdateUserRequest(user.id.toString()),
             UpdateUserResponse.parser()
         )
 
         // THEN
-        assertEquals(updatedDomainUser.copy(id = user.id.toString()).toUpdateUserResponse(), actual)
+        actual.test()
+            .expectNext(updatedDomainUser.copy(id = user.id.toString()).toUpdateUserResponse())
+            .verifyComplete()
     }
 
     @Test
     fun `update should throw exception when user doesn't exist`() {
         // GIVEN // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.UPDATE,
             buildUpdateUserRequest(randomUserId),
             UpdateUserResponse.parser()
         )
 
         // THEN
-        assertEquals(userNotFoundException.toFailureUpdateUserResponse(), actual)
+        actual.test()
+            .expectNext(userNotFoundException.toFailureUpdateUserResponse())
+            .verifyComplete()
     }
 
     @Test
@@ -109,14 +124,16 @@ class UserNatsControllerTest : AbstractIntegrationTest() {
         val user = userRepository.save(unsavedUser).block()!!
 
         // WHEN
-        val actual = doRequest(
+        val actual = natsMessagePublisher.request(
             NatsSubject.User.DELETE,
             buildDeleteUserRequest(user.id.toString()),
             DeleteUserResponse.parser()
         )
 
         // THEN
-        assertEquals(toDeleteUserResponse(), actual)
+        actual.test()
+            .expectNext(toDeleteUserResponse())
+            .verifyComplete()
         userRepository.existsById(user.id.toString())
             .test()
             .expectNext(false)

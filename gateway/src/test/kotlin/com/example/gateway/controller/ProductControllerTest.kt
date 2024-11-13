@@ -14,7 +14,6 @@ import com.example.gateway.ProductProtoFixture.findProductByIdResponse
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithProductNotFoundException
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithUnexpectedException
 import com.example.gateway.ProductProtoFixture.updateProductResponse
-import com.example.gateway.client.NatsClient
 import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
 import com.example.gateway.mapper.ProductProtoMapper.toDTO
 import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
@@ -33,11 +32,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class ProductControllerTest {
     @MockK
-    private lateinit var natsClient: NatsClient
+    private lateinit var natsMessagePublisher: NatsMessagePublisher
 
     @InjectMockKs
     private lateinit var productController: ProductController
@@ -46,7 +46,7 @@ class ProductControllerTest {
     fun `save should return product DTO`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
@@ -64,7 +64,7 @@ class ProductControllerTest {
     fun `save should rethrow exception when message contains unexpected error`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
@@ -81,7 +81,7 @@ class ProductControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.SAVE,
                 payload = createProductDTO.toCreateProductRequest(),
                 parser = CreateProductResponse.parser()
@@ -98,7 +98,7 @@ class ProductControllerTest {
     fun `findById should return existing product`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
@@ -116,7 +116,7 @@ class ProductControllerTest {
     fun `findById should throw exception when product doesn't exist`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
@@ -133,7 +133,7 @@ class ProductControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
@@ -150,7 +150,7 @@ class ProductControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.FIND_BY_ID,
                 findProductByIdRequest,
                 FindProductByIdResponse.parser()
@@ -167,7 +167,7 @@ class ProductControllerTest {
     fun `update should return updated product`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.UPDATE,
                 updateProductRequest(randomUserId, updateProductDTO),
                 UpdateProductResponse.parser()
@@ -185,7 +185,7 @@ class ProductControllerTest {
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsClient.doRequest(
+            natsMessagePublisher.request(
                 NatsSubject.Product.DELETE,
                 deleteProductRequest,
                 DeleteProductResponse.parser()
