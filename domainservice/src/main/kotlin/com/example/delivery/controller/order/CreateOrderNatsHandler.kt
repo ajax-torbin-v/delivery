@@ -1,8 +1,5 @@
 package com.example.delivery.controller.order
 
-import com.example.core.exception.ProductAmountException
-import com.example.core.exception.ProductNotFoundException
-import com.example.core.exception.UserNotFoundException
 import com.example.delivery.mapper.OrderProtoMapper.toCreateOrderDTO
 import com.example.delivery.mapper.OrderProtoMapper.toCreateOrderResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFailureCreateOrderResponse
@@ -24,10 +21,10 @@ internal class CreateOrderNatsHandler(
 ) : ProtoNatsMessageHandler<CreateOrderRequest, CreateOrderResponse> {
     override val log: Logger = LoggerFactory.getLogger(CreateOrderNatsHandler::class.java)
     override val parser: Parser<CreateOrderRequest> = CreateOrderRequest.parser()
-    override val queue: String = "order_group"
+    override val queue: String = ORDER_QUEUE_GROUP
     override val subject: String = NatsSubject.Order.SAVE
+
     override fun doOnUnexpectedError(inMsg: CreateOrderRequest?, e: Exception): Mono<CreateOrderResponse> {
-        log.error("Error while executing save for order {}", inMsg, e)
         return CreateOrderResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -36,18 +33,13 @@ internal class CreateOrderNatsHandler(
     override fun doHandle(inMsg: CreateOrderRequest): Mono<CreateOrderResponse> {
         return orderService.add(inMsg.toCreateOrderDTO())
             .map { it.toCreateOrderResponse() }
-            .onErrorResume(isExpectedError) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing save for order {}", inMsg, error)
                 error.toFailureCreateOrderResponse().toMono()
             }
     }
 
-    private val isExpectedError: (Throwable) -> Boolean =
-        {
-            it::class in setOf(
-                UserNotFoundException::class,
-                ProductNotFoundException::class,
-                ProductAmountException::class
-            )
-        }
+    companion object {
+        private const val ORDER_QUEUE_GROUP = "orderQueueGroup"
+    }
 }

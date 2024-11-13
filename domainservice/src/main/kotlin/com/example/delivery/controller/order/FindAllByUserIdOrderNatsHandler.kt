@@ -1,6 +1,5 @@
 package com.example.delivery.controller.order
 
-import com.example.core.exception.UserNotFoundException
 import com.example.delivery.mapper.OrderProtoMapper.toFailureFindOrdersByUserIdResponse
 import com.example.delivery.mapper.OrderProtoMapper.toFindOrdersByUserIdResponse
 import com.example.delivery.service.OrderService
@@ -16,18 +15,19 @@ import reactor.kotlin.core.publisher.toMono
 import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
-internal class FindAllByUserIdOrderNatsHandler(private val orderService: OrderService) :
+internal class FindAllByUserIdOrderNatsHandler(
+    private val orderService: OrderService,
+) :
     ProtoNatsMessageHandler<FindOrdersByUserIdRequest, FindOrdersByUserIdResponse> {
     override val log: Logger = LoggerFactory.getLogger(FindAllByUserIdOrderNatsHandler::class.java)
     override val parser: Parser<FindOrdersByUserIdRequest> = FindOrdersByUserIdRequest.parser()
-    override val queue: String = "order_group"
+    override val queue: String = ORDER_QUEUE_GROUP
     override val subject: String = NatsSubject.Order.FIND_ALL_BY_USER_ID
 
     override fun doOnUnexpectedError(
         inMsg: FindOrdersByUserIdRequest?,
         e: Exception,
     ): Mono<FindOrdersByUserIdResponse> {
-        log.error("Error while executing findAll for {}", inMsg, e)
         return FindOrdersByUserIdResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -37,13 +37,13 @@ internal class FindAllByUserIdOrderNatsHandler(private val orderService: OrderSe
         return orderService.getAllByUserId(inMsg.id)
             .collectList()
             .map { orders -> toFindOrdersByUserIdResponse(orders) }
-            .onErrorResume(isExpectedError) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing findAll for {}", inMsg, error)
                 error.toFailureFindOrdersByUserIdResponse().toMono()
             }
     }
 
-    private val isExpectedError: (Throwable) -> Boolean = {
-        it::class in setOf(UserNotFoundException::class)
+    companion object {
+        private const val ORDER_QUEUE_GROUP = "orderQueueGroup"
     }
 }

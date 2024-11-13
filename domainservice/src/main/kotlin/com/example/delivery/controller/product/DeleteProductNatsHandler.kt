@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
-import kotlin.reflect.KClass
 
 @Component
 internal class DeleteProductNatsHandler(
@@ -21,11 +20,10 @@ internal class DeleteProductNatsHandler(
 ) : ProtoNatsMessageHandler<DeleteProductRequest, DeleteProductResponse> {
     override val log: Logger = LoggerFactory.getLogger(DeleteProductNatsHandler::class.java)
     override val parser: Parser<DeleteProductRequest> = DeleteProductRequest.parser()
-    override val queue: String = "product_group"
+    override val queue: String = PRODUCT_QUEUE_GROUP
     override val subject: String = NatsSubject.Product.DELETE
 
     override fun doOnUnexpectedError(inMsg: DeleteProductRequest?, e: Exception): Mono<DeleteProductResponse> {
-        log.error("Error while executing delete for {}", inMsg, e)
         return DeleteProductResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -34,13 +32,13 @@ internal class DeleteProductNatsHandler(
     override fun doHandle(inMsg: DeleteProductRequest): Mono<DeleteProductResponse> {
         return productService.deleteById(inMsg.id)
             .map { toDeleteProductResponse() }
-            .onErrorResume(isExpectedException) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing delete for {}", inMsg, error)
                 error.toFailureDeleteProductResponse().toMono()
             }
     }
 
-    private val isExpectedException: (Throwable) -> Boolean = {
-        it::class in setOf<KClass<Throwable>>()
+    companion object {
+        private const val PRODUCT_QUEUE_GROUP = "productQueueGroup"
     }
 }

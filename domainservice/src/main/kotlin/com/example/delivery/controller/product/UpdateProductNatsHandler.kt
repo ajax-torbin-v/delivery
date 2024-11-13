@@ -1,6 +1,5 @@
 package com.example.delivery.controller.product
 
-import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.controller.user.UpdateUserNatsHandler
 import com.example.delivery.mapper.ProductProtoMapper.toFailureUpdateProductResponse
 import com.example.delivery.mapper.ProductProtoMapper.toUpdateProductDTO
@@ -23,11 +22,10 @@ internal class UpdateProductNatsHandler(
 ) : ProtoNatsMessageHandler<UpdateProductRequest, UpdateProductResponse> {
     override val log: Logger = LoggerFactory.getLogger(UpdateUserNatsHandler::class.java)
     override val parser: Parser<UpdateProductRequest> = UpdateProductRequest.parser()
-    override val queue: String = "product_group"
+    override val queue: String = PRODUCT_QUEUE_GROUP
     override val subject: String = NatsSubject.Product.UPDATE
 
     override fun doOnUnexpectedError(inMsg: UpdateProductRequest?, e: Exception): Mono<UpdateProductResponse> {
-        log.error("Error while executing update for {}", inMsg, e)
         return UpdateProductResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -36,13 +34,13 @@ internal class UpdateProductNatsHandler(
     override fun doHandle(inMsg: UpdateProductRequest): Mono<UpdateProductResponse> {
         return productService.update(inMsg.id, inMsg.toUpdateProductDTO())
             .map { product -> product.toUpdateProductResponse() }
-            .onErrorResume(isExpectedException) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing update for {}", inMsg, error)
                 error.toFailureUpdateProductResponse().toMono()
             }
     }
 
-    private val isExpectedException: (Throwable) -> Boolean = {
-        it::class in setOf(ProductNotFoundException::class)
+    companion object {
+        private const val PRODUCT_QUEUE_GROUP = "productQueueGroup"
     }
 }

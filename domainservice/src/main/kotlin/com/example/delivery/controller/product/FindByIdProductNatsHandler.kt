@@ -1,6 +1,5 @@
 package com.example.delivery.controller.product
 
-import com.example.core.exception.ProductNotFoundException
 import com.example.delivery.mapper.ProductProtoMapper.toFailureFindProductByIdResponse
 import com.example.delivery.mapper.ProductProtoMapper.toFindProductByIdResponse
 import com.example.delivery.service.ProductService
@@ -21,11 +20,10 @@ internal class FindByIdProductNatsHandler(
 ) : ProtoNatsMessageHandler<FindProductByIdRequest, FindProductByIdResponse> {
     override val log: Logger = LoggerFactory.getLogger(FindByIdProductNatsHandler::class.java)
     override val parser: Parser<FindProductByIdRequest> = FindProductByIdRequest.parser()
-    override val queue: String = "product_group"
+    override val queue: String = PRODUCT_QUEUE_GROUP
     override val subject: String = NatsSubject.Product.FIND_BY_ID
 
     override fun doOnUnexpectedError(inMsg: FindProductByIdRequest?, e: Exception): Mono<FindProductByIdResponse> {
-        log.error("Error while executing findById for {}", inMsg, e)
         return FindProductByIdResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -34,13 +32,13 @@ internal class FindByIdProductNatsHandler(
     override fun doHandle(inMsg: FindProductByIdRequest): Mono<FindProductByIdResponse> {
         return productService.getById(inMsg.id)
             .map { product -> product.toFindProductByIdResponse() }
-            .onErrorResume(isExpectedException) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing findById for {}", inMsg, error)
                 error.toFailureFindProductByIdResponse().toMono()
             }
     }
 
-    private val isExpectedException: (Throwable) -> Boolean = {
-        it::class in setOf(ProductNotFoundException::class)
+    companion object {
+        private const val PRODUCT_QUEUE_GROUP = "productQueueGroup"
     }
 }
