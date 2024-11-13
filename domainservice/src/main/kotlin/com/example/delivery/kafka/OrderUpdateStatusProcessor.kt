@@ -20,6 +20,9 @@ class OrderUpdateStatusProcessor(
 
     override fun handle(kafkaEvent: KafkaEvent<UpdateOrderStatusResponse>): Mono<Unit> {
         return updateStatusNotificationSender.notify(kafkaEvent.data.success.order.toNotification())
+            .doOnSuccess {
+                kafkaEvent.ack()
+            }
     }
 
     companion object {

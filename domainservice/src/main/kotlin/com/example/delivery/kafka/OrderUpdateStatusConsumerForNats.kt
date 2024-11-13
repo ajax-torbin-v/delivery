@@ -23,7 +23,9 @@ class OrderUpdateStatusConsumerForNats(
         return publisher.publish(
             NatsSubject.Order.getUpdateStatusByUserId(kafkaEvent.data.success.order.userId),
             kafkaEvent.data
-        )
+        ).doOnSuccess {
+            kafkaEvent.ack()
+        }
     }
 
     companion object {
