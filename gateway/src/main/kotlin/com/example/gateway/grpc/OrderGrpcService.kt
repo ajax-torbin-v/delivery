@@ -7,6 +7,7 @@ import com.example.grpcapi.service.ReactorOrderServiceGrpc
 import com.example.internal.api.NatsSubject
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.FindOrderByIdResponse
+import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
 import net.devh.boot.grpc.server.service.GrpcService
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -48,7 +49,7 @@ class OrderGrpcService(
     override fun subscribeToUpdateByUserId(request: Mono<GrpcUpdateOrderStatusRequest>): Flux<Order> {
         return request.flatMapMany {
             manager.subscribe(it.userId) { message ->
-                Order.parseFrom(message.data)
+                UpdateOrderStatusResponse.parseFrom(message.data).success.order
             }
         }
     }
