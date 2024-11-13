@@ -1,6 +1,5 @@
 package com.example.delivery.controller.user
 
-import com.example.core.exception.UserNotFoundException
 import com.example.delivery.mapper.UserProtoMapper.toFailureUpdateUserResponse
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserDTO
 import com.example.delivery.mapper.UserProtoMapper.toUpdateUserResponse
@@ -22,11 +21,10 @@ internal class UpdateUserNatsHandler(
 ) : ProtoNatsMessageHandler<UpdateUserRequest, UpdateUserResponse> {
     override val log: Logger = LoggerFactory.getLogger(UpdateUserNatsHandler::class.java)
     override val parser: Parser<UpdateUserRequest> = UpdateUserRequest.parser()
-    override val queue: String = "user_group"
+    override val queue: String = USER_QUEUE_GROUP
     override val subject: String = NatsSubject.User.UPDATE
 
     override fun doOnUnexpectedError(inMsg: UpdateUserRequest?, e: Exception): Mono<UpdateUserResponse> {
-        log.error("Error while executing update for {}", inMsg, e)
         return UpdateUserResponse.newBuilder().apply {
             failureBuilder.message = e.message.orEmpty()
         }.build().toMono()
@@ -35,13 +33,13 @@ internal class UpdateUserNatsHandler(
     override fun doHandle(inMsg: UpdateUserRequest): Mono<UpdateUserResponse> {
         return userService.update(inMsg.id, inMsg.toUpdateUserDTO())
             .map { user -> user.toUpdateUserResponse() }
-            .onErrorResume(isExpectedError) { error ->
+            .onErrorResume { error ->
                 log.error("Error while executing update for {}", inMsg, error)
                 error.toFailureUpdateUserResponse().toMono()
             }
     }
 
-    val isExpectedError: (Throwable) -> Boolean = {
-        it::class in setOf(UserNotFoundException::class)
+    companion object {
+        private const val USER_QUEUE_GROUP = "userQueueGroup"
     }
 }
