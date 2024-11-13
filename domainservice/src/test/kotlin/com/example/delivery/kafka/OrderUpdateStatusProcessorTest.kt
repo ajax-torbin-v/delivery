@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import systems.ajax.kafka.mock.KafkaMockExtension
 
 @ResourceLock(KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS)
-class KafkaTest : AbstractIntegrationTest() {
+class OrderUpdateStatusProcessorTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var orderService: OrderService
 
