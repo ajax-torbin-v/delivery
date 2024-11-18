@@ -11,7 +11,11 @@ spring:
     port: 6379
     timeout: 10
 
-nats.uri: ${NATS_URI}
+nats:
+  spring:
+    io.nats.client:
+      servers: "nats://localhost:4222"
+
 
 server:
   servlet:

@@ -1,43 +1,31 @@
 package com.example.delivery.kafka
 
-import com.example.commonmodels.order.Order
-import com.example.core.exception.NotificationException
 import com.example.delivery.mapper.OrderProtoMapper.toNotification
+import com.example.internal.api.KafkaTopic
 import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
-import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
+import com.google.protobuf.Parser
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.kafka.receiver.KafkaReceiver
-import reactor.kotlin.core.publisher.toMono
+import systems.ajax.kafka.handler.KafkaEvent
+import systems.ajax.kafka.handler.KafkaHandler
+import systems.ajax.kafka.handler.subscription.topic.TopicSingle
 
 @Component
 class OrderUpdateStatusProcessor(
-    private val orderStatusUpdateReceiver: KafkaReceiver<String, ByteArray>,
     private val updateStatusNotificationSender: OrderUpdateStatusNotificationProducer,
-) {
-    @EventListener(ApplicationReadyEvent::class)
-    fun consume() {
-        orderStatusUpdateReceiver
-            .receive()
-            .flatMap { record ->
-                val order = UpdateOrderStatusResponse.parser().parseFrom(record.value()).success.order
-                sendNotification(order)
-                    .doFinally { record.receiverOffset().acknowledge() }
+) : KafkaHandler<UpdateOrderStatusResponse, TopicSingle> {
+    override val groupId: String = UPDATE_STATUS_CONSUMER_GROUP
+    override val parser: Parser<UpdateOrderStatusResponse> = UpdateOrderStatusResponse.parser()
+    override val subscriptionTopics: TopicSingle = TopicSingle(KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE)
+
+    override fun handle(kafkaEvent: KafkaEvent<UpdateOrderStatusResponse>): Mono<Unit> {
+        return updateStatusNotificationSender.notify(kafkaEvent.data.success.order.toNotification())
+            .doOnSuccess {
+                kafkaEvent.ack()
             }
-            .subscribe()
     }
 
-    private fun sendNotification(order: Order): Mono<Unit> =
-        updateStatusNotificationSender.notify(order.toNotification())
-            .onErrorResume(NotificationException::class.java) { error ->
-                log.error("Error while sending notification for update of order {}", order, error)
-                Unit.toMono()
-            }
-            .thenReturn(Unit)
-
     companion object {
-        private val log = LoggerFactory.getLogger(OrderUpdateStatusProcessor::class.java)
+        private const val UPDATE_STATUS_CONSUMER_GROUP = "updateOrderStatusConsumerGroup"
     }
 }

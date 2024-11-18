@@ -1,6 +1,5 @@
 package com.example.delivery.kafka
 
-import com.example.commonmodels.order.Order
 import com.example.core.OrderFixture.createOrderDTO
 import com.example.core.OrderFixture.randomAmount
 import com.example.core.ProductFixture.createProductDTO
@@ -11,21 +10,20 @@ import com.example.delivery.mapper.OrderProtoMapper.toUpdateOrderStatusResponse
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
 import com.example.delivery.service.UserService
+import com.example.internal.api.KafkaTopic
 import com.example.internal.api.NatsSubject
-import io.nats.client.Dispatcher
+import com.example.internal.input.reqreply.order.UpdateOrderStatusResponse
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.parallel.ResourceLock
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Sinks
-import reactor.core.scheduler.Schedulers
+import systems.ajax.nats.mock.junit5.NatsMockExtension
 import java.time.Duration
 
+@ResourceLock(KafkaTopic.KafkaOrderStatusUpdateEvents.UPDATE)
 class OrderUpdateStatusConsumerForNatsTest : AbstractIntegrationTest() {
-    @Autowired
-    private lateinit var dispatcher: Dispatcher
-
     @Autowired
     private lateinit var orderService: OrderService
 
@@ -45,35 +43,27 @@ class OrderUpdateStatusConsumerForNatsTest : AbstractIntegrationTest() {
         val savedProduct = productService.add(createProductDTO).block()!!
         val items = listOf(CreateOrderItemDTO(savedProduct.id, randomAmount))
         val savedOrder = orderService.add(createOrderDTO.copy(userId = savedUser.id, items = items)).block()!!
-        val receivedMessages = mutableListOf<Order>()
         val updateOrderStatusResponse = savedOrder.toUpdateOrderStatusResponse()
-        subscribe(savedUser.id)
-            .doOnNext { receivedMessages.add(it) }
-            .subscribeOn(Schedulers.boundedElastic())
-            .subscribe()
+
+        val captor = natsMockExt.subscribe(
+            NatsSubject.Order.getUpdateStatusByUserId(savedUser.id),
+            parser = UpdateOrderStatusResponse.parser()
+        ).capture()
 
         // WHEN
-        updateProducer.sendOrderUpdateStatus(updateOrderStatusResponse)
-            .subscribeOn(Schedulers.boundedElastic())
-            .subscribe()
+        updateProducer.sendOrderUpdateStatus(updateOrderStatusResponse).subscribe()
 
         // THEN
         await()
             .atMost(Duration.ofSeconds(5))
             .untilAsserted {
-                assertTrue(receivedMessages.isNotEmpty())
+                assertThat(captor.getCapturedMessages()).contains(updateOrderStatusResponse)
             }
     }
 
-    private fun subscribe(userId: String): Flux<Order> {
-        val sink = Sinks.many().unicast().onBackpressureBuffer<Order>()
-        val subscription =
-            dispatcher.subscribe(NatsSubject.Order.getUpdateStatusByUserId(userId)) { message ->
-                sink.tryEmitNext(Order.parseFrom(message.data))
-            }
-        return sink.asFlux()
-            .doFinally {
-                dispatcher.unsubscribe(subscription)
-            }
+    companion object {
+        @JvmField
+        @RegisterExtension
+        val natsMockExt: NatsMockExtension = NatsMockExtension()
     }
 }

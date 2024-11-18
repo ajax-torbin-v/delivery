@@ -11,15 +11,16 @@ import com.example.delivery.domain.DomainOrder
 import com.example.delivery.service.OrderService
 import com.example.delivery.service.ProductService
 import com.example.delivery.service.UserService
-import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Assertions.assertTrue
+import com.example.internal.api.KafkaTopic
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.parallel.ResourceLock
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.core.scheduler.Schedulers
-import reactor.kafka.receiver.KafkaReceiver
-import java.util.concurrent.TimeUnit
+import systems.ajax.kafka.mock.KafkaMockExtension
 
-class KafkaTest : AbstractIntegrationTest() {
+@ResourceLock(KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS)
+class OrderUpdateStatusProcessorTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var orderService: OrderService
 
@@ -29,9 +30,6 @@ class KafkaTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var productService: ProductService
 
-    @Autowired
-    private lateinit var kafkaTestReceiver: KafkaReceiver<String, ByteArray>
-
     @Test
     fun `should produce message on entity update`() {
         // GIVEN
@@ -39,36 +37,28 @@ class KafkaTest : AbstractIntegrationTest() {
         val savedProduct = productService.add(createProductDTO).block()!!
         val items = listOf(CreateOrderItemDTO(savedProduct.id, randomAmount))
         val savedOrder = orderService.add(createOrderDTO.copy(userId = savedUser.id, items = items)).block()!!
-        val receivedMessages = mutableListOf<OrderStatusUpdateNotification>()
         val expected = OrderStatusUpdateNotification.newBuilder().apply {
             orderId = savedOrder.id
             userId = savedUser.id
             status = OrderStatusUpdateNotification.Status.STATUS_SHIPPING
         }.build()
 
-        kafkaTestReceiver.receive()
-            .doOnNext { record ->
-                receivedMessages.add(
-                    OrderStatusUpdateNotification.parseFrom(record.value()).toBuilder()
-                        .clearTimestamp()
-                        .build()
-                )
-            }
-            .subscribeOn(Schedulers.boundedElastic())
-            .subscribe()
-
         // WHEN
         orderService.updateOrderStatus(savedOrder.id, DomainOrder.Status.SHIPPING.toString()).block()!!
 
         // THEN
-        await()
-            .atMost(15, TimeUnit.SECONDS)
-            .untilAsserted {
-                assertTrue(receivedMessages.contains(expected))
-            }
+        val eventProvider = kafkaMockExtension.listen<OrderStatusUpdateNotification>(
+            KafkaTopic.KafkaOrderStatusUpdateEvents.NOTIFICATIONS,
+            OrderStatusUpdateNotification.parser()
+        )
+
+        val event = eventProvider.awaitFirst({ it.toBuilder().clearTimestamp().build() == expected })
+        assertThat(event).isNotNull
     }
 
     companion object {
-        const val NOTIFICATION_GROUP = "notificationsGroupTest"
+        @JvmField
+        @RegisterExtension
+        val kafkaMockExtension: KafkaMockExtension = KafkaMockExtension()
     }
 }
