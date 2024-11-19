@@ -3,11 +3,10 @@ package com.example.gateway.service
 import com.example.gateway.OrderProtoFixture
 import com.example.gateway.OrderProtoFixture.findOrderByIdResponse
 import com.example.gateway.OrderProtoFixture.grpcFindOrderByIdResponse
-import com.example.gateway.grpc.OrderGrpcService
-import com.example.gateway.mapper.OrderProtoMapper.toGrpc
-import com.example.internal.input.reqreply.order.CreateOrderResponse
-import com.example.internal.input.reqreply.order.FindOrderByIdResponse
-import com.google.protobuf.Parser
+import com.example.gateway.application.port.output.OrderOutputPort
+import com.example.gateway.infrastructure.grpc.OrderGrpcService
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toGrpc
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toInternal
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -18,12 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import systems.ajax.nats.handler.api.NatsHandlerManager
-import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class OrderGrpcServiceTest {
     @MockK
-    private lateinit var natsMessagePublisher: NatsMessagePublisher
+    private lateinit var orderOutputPort: OrderOutputPort
 
     @SuppressWarnings("UnusedPrivateProperty")
     @MockK
@@ -37,11 +35,7 @@ class OrderGrpcServiceTest {
         // GIVEN
         val request = OrderProtoFixture.grpcCreateOrderRequest
         every {
-            natsMessagePublisher.request(
-                any(),
-                any(),
-                any<Parser<CreateOrderResponse>>()
-            )
+            orderOutputPort.create(request.toInternal())
         } returns OrderProtoFixture.createOrderResponse.toMono()
 
         // WHEN
@@ -58,11 +52,7 @@ class OrderGrpcServiceTest {
         // GIVEN
         val request = OrderProtoFixture.grpcFindOrderByIdRequest
         every {
-            natsMessagePublisher.request(
-                any(),
-                any(),
-                any<Parser<FindOrderByIdResponse>>()
-            )
+            orderOutputPort.findById(request.toInternal())
         } returns findOrderByIdResponse.toMono()
 
         // WHEN

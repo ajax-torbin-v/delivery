@@ -15,11 +15,11 @@ import com.example.gateway.UserProtoFixture.findUserByIdResponseWithUnexpectedEx
 import com.example.gateway.UserProtoFixture.updateUserResponse
 import com.example.gateway.UserProtoFixture.updateUserResponseWithUnexpectedException
 import com.example.gateway.UserProtoFixture.updateUserResponseWithUserNotFoundException
-import com.example.gateway.mapper.UserProtoMapper.toCreateUserRequest
-import com.example.gateway.mapper.UserProtoMapper.toDTO
-import com.example.gateway.mapper.UserProtoMapper.updateUserRequest
-import com.example.gateway.rest.UserController
-import com.example.internal.api.NatsSubject
+import com.example.gateway.application.port.output.UserOutputPort
+import com.example.gateway.infrastructure.mapper.UserProtoMapper.toCreateUserRequest
+import com.example.gateway.infrastructure.mapper.UserProtoMapper.toDTO
+import com.example.gateway.infrastructure.mapper.UserProtoMapper.updateUserRequest
+import com.example.gateway.infrastructure.rest.UserController
 import com.example.internal.input.reqreply.user.CreateUserResponse
 import com.example.internal.input.reqreply.user.DeleteUserResponse
 import com.example.internal.input.reqreply.user.FindUserByIdRequest
@@ -35,12 +35,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
-import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class UserControllerTest {
     @MockK
-    private lateinit var natsMessagePublisher: NatsMessagePublisher
+    private lateinit var userOutputPort: UserOutputPort
 
     @InjectMockKs
     private lateinit var userController: UserController
@@ -49,11 +48,7 @@ class UserControllerTest {
     fun `save should return user DTO`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.SAVE,
-                payload = createUserDTO.toCreateUserRequest(),
-                parser = CreateUserResponse.parser()
-            )
+            userOutputPort.create(createUserDTO.toCreateUserRequest())
         } returns createUserResponse.toMono()
 
         // WHEN // THEN
@@ -67,11 +62,7 @@ class UserControllerTest {
     fun `save should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.SAVE,
-                payload = createUserDTO.toCreateUserRequest(),
-                parser = CreateUserResponse.parser()
-            )
+            userOutputPort.create(createUserDTO.toCreateUserRequest())
         } returns createUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -84,11 +75,7 @@ class UserControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.SAVE,
-                payload = createUserDTO.toCreateUserRequest(),
-                parser = CreateUserResponse.parser()
-            )
+            userOutputPort.create(createUserDTO.toCreateUserRequest())
         } returns CreateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -101,11 +88,7 @@ class UserControllerTest {
     fun `findById should return existing user`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.FIND_BY_ID,
-                payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
-                parser = FindUserByIdResponse.parser()
-            )
+            userOutputPort.findById(FindUserByIdRequest.newBuilder().setId(randomUserId).build())
         } returns findUserByIdResponse.toMono()
 
         // WHEN
@@ -119,11 +102,7 @@ class UserControllerTest {
     fun `findById should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.FIND_BY_ID,
-                payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
-                parser = FindUserByIdResponse.parser()
-            )
+            userOutputPort.findById(FindUserByIdRequest.newBuilder().setId(randomUserId).build())
         } returns findUserByIdResponseWithNotFoundException.toMono()
 
         // WHEN // THEN
@@ -136,11 +115,7 @@ class UserControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.FIND_BY_ID,
-                payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
-                parser = FindUserByIdResponse.parser()
-            )
+            userOutputPort.findById(FindUserByIdRequest.newBuilder().setId(randomUserId).build())
         } returns findUserByIdResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -153,11 +128,7 @@ class UserControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.FIND_BY_ID,
-                payload = FindUserByIdRequest.newBuilder().setId(randomUserId).build(),
-                parser = FindUserByIdResponse.parser()
-            )
+            userOutputPort.findById(FindUserByIdRequest.newBuilder().setId(randomUserId).build())
         } returns FindUserByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -170,11 +141,7 @@ class UserControllerTest {
     fun `update should return updated user`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.UPDATE,
-                updateUserRequest(randomUserId, updateUserDTO),
-                UpdateUserResponse.parser()
-            )
+            userOutputPort.update(updateUserRequest(randomUserId, updateUserDTO))
         } returns updateUserResponse.toMono()
 
         // WHEN // THEN
@@ -188,11 +155,7 @@ class UserControllerTest {
     fun `update should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.UPDATE,
-                updateUserRequest(randomUserId, updateUserDTO),
-                UpdateUserResponse.parser()
-            )
+            userOutputPort.update(updateUserRequest(randomUserId, updateUserDTO))
         } returns updateUserResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
@@ -205,11 +168,7 @@ class UserControllerTest {
     fun `update should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.UPDATE,
-                updateUserRequest(randomUserId, updateUserDTO),
-                UpdateUserResponse.parser()
-            )
+            userOutputPort.update(updateUserRequest(randomUserId, updateUserDTO))
         } returns updateUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -222,11 +181,7 @@ class UserControllerTest {
     fun `update should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.UPDATE,
-                updateUserRequest(randomUserId, updateUserDTO),
-                UpdateUserResponse.parser()
-            )
+            userOutputPort.update(updateUserRequest(randomUserId, updateUserDTO))
         } returns UpdateUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -239,11 +194,7 @@ class UserControllerTest {
     fun `delete should delete user`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.DELETE,
-                deleteUserRequest,
-                DeleteUserResponse.parser()
-            )
+            userOutputPort.delete(deleteUserRequest)
         } returns deleteUserResponse.toMono()
 
         // WHEN
@@ -251,11 +202,7 @@ class UserControllerTest {
 
         // THEN
         verify(exactly = 1) {
-            natsMessagePublisher.request(
-                NatsSubject.User.DELETE,
-                deleteUserRequest,
-                DeleteUserResponse.parser()
-            )
+            userOutputPort.delete(deleteUserRequest)
         }
     }
 
@@ -263,11 +210,7 @@ class UserControllerTest {
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.DELETE,
-                deleteUserRequest,
-                DeleteUserResponse.parser()
-            )
+            userOutputPort.delete(deleteUserRequest)
         } returns deleteUserResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -280,11 +223,7 @@ class UserControllerTest {
     fun `delete should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.User.DELETE,
-                deleteUserRequest,
-                DeleteUserResponse.parser()
-            )
+            userOutputPort.delete(deleteUserRequest)
         } returns DeleteUserResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN

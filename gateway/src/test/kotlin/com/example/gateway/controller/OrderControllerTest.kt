@@ -1,13 +1,11 @@
 package com.example.gateway.controller
 
-import com.example.core.OrderFixture.createOrderDTO
-import com.example.core.OrderFixture.orderDTO
 import com.example.core.OrderFixture.randomOrderId
-import com.example.core.OrderFixture.updateOrderDTO
 import com.example.core.UserFixture.randomUserId
 import com.example.core.exception.OrderNotFoundException
 import com.example.core.exception.ProductNotFoundException
 import com.example.core.exception.UserNotFoundException
+import com.example.gateway.OrderProtoFixture.createOrderDTO
 import com.example.gateway.OrderProtoFixture.createOrderResponse
 import com.example.gateway.OrderProtoFixture.createOrderResponseWithProductNotFoundException
 import com.example.gateway.OrderProtoFixture.createOrderResponseWithUnexpectedException
@@ -22,6 +20,8 @@ import com.example.gateway.OrderProtoFixture.findOrderByIdResponseWithUnexpected
 import com.example.gateway.OrderProtoFixture.findOrdersByUserIdRequest
 import com.example.gateway.OrderProtoFixture.findOrdersByUserIdResponse
 import com.example.gateway.OrderProtoFixture.findOrdersByUserIdResponseWithUserNotFoundException
+import com.example.gateway.OrderProtoFixture.orderDTO
+import com.example.gateway.OrderProtoFixture.updateOrderDTO
 import com.example.gateway.OrderProtoFixture.updateOrderResponse
 import com.example.gateway.OrderProtoFixture.updateOrderResponseWithOrderNotFoundException
 import com.example.gateway.OrderProtoFixture.updateOrderResponseWithUnexpectedException
@@ -29,12 +29,12 @@ import com.example.gateway.OrderProtoFixture.updateOrderStatusRequest
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponse
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithOrNotFoundException
 import com.example.gateway.OrderProtoFixture.updateOrderStatusResponseWithUnexpectedException
-import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
-import com.example.gateway.mapper.OrderProtoMapper.toDTO
-import com.example.gateway.mapper.OrderProtoMapper.toDtoWithProduct
-import com.example.gateway.mapper.OrderProtoMapper.updateOrderRequest
-import com.example.gateway.rest.OrderController
-import com.example.internal.api.NatsSubject
+import com.example.gateway.application.port.output.OrderOutputPort
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toCreateOrderRequest
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toDTO
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toDtoWithProduct
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.updateOrderRequest
+import com.example.gateway.infrastructure.rest.OrderController
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderResponse
 import com.example.internal.input.reqreply.order.FindOrderByIdResponse
@@ -51,12 +51,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
-import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class OrderControllerTest {
     @MockK
-    private lateinit var natsMessagePublisher: NatsMessagePublisher
+    private lateinit var orderOutputPort: OrderOutputPort
 
     @InjectMockKs
     private lateinit var orderController: OrderController
@@ -65,11 +64,7 @@ class OrderControllerTest {
     fun `save should return order DTO`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.SAVE,
-                payload = createOrderDTO.toCreateOrderRequest(),
-                parser = CreateOrderResponse.parser()
-            )
+            orderOutputPort.create(createOrderDTO.toCreateOrderRequest())
         } returns createOrderResponse.toMono()
 
         // WHEN //THEN
@@ -83,11 +78,7 @@ class OrderControllerTest {
     fun `save should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.SAVE,
-                payload = createOrderDTO.toCreateOrderRequest(),
-                parser = CreateOrderResponse.parser()
-            )
+            orderOutputPort.create(createOrderDTO.toCreateOrderRequest())
         } returns createOrderResponseWithUserNotFoundException.toMono()
 
         // WHEN //THEN
@@ -100,10 +91,8 @@ class OrderControllerTest {
     fun `save should throw exception when product doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.SAVE,
-                payload = createOrderDTO.toCreateOrderRequest(),
-                parser = CreateOrderResponse.parser()
+            orderOutputPort.create(
+                createOrderDTO.toCreateOrderRequest(),
             )
         } returns createOrderResponseWithProductNotFoundException.toMono()
 
@@ -117,11 +106,7 @@ class OrderControllerTest {
     fun `save should rethrow exception when message contains unexpected error`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.SAVE,
-                payload = createOrderDTO.toCreateOrderRequest(),
-                parser = CreateOrderResponse.parser()
-            )
+            orderOutputPort.create(createOrderDTO.toCreateOrderRequest())
         } returns createOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
@@ -134,11 +119,7 @@ class OrderControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.SAVE,
-                payload = createOrderDTO.toCreateOrderRequest(),
-                parser = CreateOrderResponse.parser()
-            )
+            orderOutputPort.create(createOrderDTO.toCreateOrderRequest())
         } returns CreateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
@@ -151,11 +132,7 @@ class OrderControllerTest {
     fun `findById should return existing order`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_BY_ID,
-                payload = findOrderByIdRequest,
-                parser = FindOrderByIdResponse.parser()
-            )
+            orderOutputPort.findById(findOrderByIdRequest)
         } returns findOrderByIdResponse.toMono()
 
         // WHEN // THEN
@@ -169,11 +146,7 @@ class OrderControllerTest {
     fun `findById should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_BY_ID,
-                payload = findOrderByIdRequest,
-                parser = FindOrderByIdResponse.parser()
-            )
+            orderOutputPort.findById(findOrderByIdRequest)
         } returns findOrderByIdResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
@@ -186,11 +159,7 @@ class OrderControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_BY_ID,
-                payload = findOrderByIdRequest,
-                parser = FindOrderByIdResponse.parser()
-            )
+            orderOutputPort.findById(findOrderByIdRequest)
         } returns findOrderByIdResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
@@ -203,11 +172,7 @@ class OrderControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_BY_ID,
-                payload = findOrderByIdRequest,
-                parser = FindOrderByIdResponse.parser()
-            )
+            orderOutputPort.findById(findOrderByIdRequest)
         } returns FindOrderByIdResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
@@ -220,11 +185,7 @@ class OrderControllerTest {
     fun `update should return updated order`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE,
-                payload = updateOrderRequest(randomOrderId, updateOrderDTO),
-                parser = UpdateOrderResponse.parser()
-            )
+            orderOutputPort.update(updateOrderRequest(randomOrderId, updateOrderDTO))
         } returns updateOrderResponse.toMono()
 
         // WHEN // THEN
@@ -238,11 +199,7 @@ class OrderControllerTest {
     fun `update should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE,
-                payload = updateOrderRequest(randomOrderId, updateOrderDTO),
-                parser = UpdateOrderResponse.parser()
-            )
+            orderOutputPort.update(updateOrderRequest(randomOrderId, updateOrderDTO))
         } returns updateOrderResponseWithOrderNotFoundException.toMono()
 
         // WHEN //THEN
@@ -255,11 +212,7 @@ class OrderControllerTest {
     fun `update should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE,
-                payload = updateOrderRequest(randomOrderId, updateOrderDTO),
-                parser = UpdateOrderResponse.parser()
-            )
+            orderOutputPort.update(updateOrderRequest(randomOrderId, updateOrderDTO))
         } returns updateOrderResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
@@ -272,11 +225,7 @@ class OrderControllerTest {
     fun `update should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE,
-                payload = updateOrderRequest(randomOrderId, updateOrderDTO),
-                parser = UpdateOrderResponse.parser()
-            )
+            orderOutputPort.update(updateOrderRequest(randomOrderId, updateOrderDTO))
         } returns UpdateOrderResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
@@ -289,11 +238,7 @@ class OrderControllerTest {
     fun `findAllByUserId should return all orders for user`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_ALL_BY_USER_ID,
-                payload = findOrdersByUserIdRequest,
-                parser = FindOrdersByUserIdResponse.parser()
-            )
+            orderOutputPort.findAllByUserId(findOrdersByUserIdRequest)
         } returns findOrdersByUserIdResponse.toMono()
 
         // WHEN // THEN
@@ -307,11 +252,7 @@ class OrderControllerTest {
     fun `findAllByUserId should throw exception when user doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_ALL_BY_USER_ID,
-                payload = findOrdersByUserIdRequest,
-                parser = FindOrdersByUserIdResponse.parser()
-            )
+            orderOutputPort.findAllByUserId(findOrdersByUserIdRequest)
         } returns findOrdersByUserIdResponseWithUserNotFoundException.toMono()
 
         // WHEN // THEN
@@ -324,11 +265,7 @@ class OrderControllerTest {
     fun `findAllByUserId should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.FIND_ALL_BY_USER_ID,
-                payload = findOrdersByUserIdRequest,
-                parser = FindOrdersByUserIdResponse.parser()
-            )
+            orderOutputPort.findAllByUserId(findOrdersByUserIdRequest)
         } returns FindOrdersByUserIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -341,11 +278,7 @@ class OrderControllerTest {
     fun `updateStatus should return order with updated status`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE_STATUS,
-                payload = updateOrderStatusRequest,
-                parser = UpdateOrderStatusResponse.parser()
-            )
+            orderOutputPort.updateStatus(updateOrderStatusRequest)
         } returns updateOrderStatusResponse.toMono()
 
         // WHEN //THEN
@@ -359,11 +292,7 @@ class OrderControllerTest {
     fun `updateStatus should throw exception when order doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE_STATUS,
-                payload = updateOrderStatusRequest,
-                parser = UpdateOrderStatusResponse.parser()
-            )
+            orderOutputPort.updateStatus(updateOrderStatusRequest)
         } returns updateOrderStatusResponseWithOrNotFoundException.toMono()
 
         // WHEN // THEN
@@ -376,11 +305,7 @@ class OrderControllerTest {
     fun `updateStatus should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE_STATUS,
-                payload = updateOrderStatusRequest,
-                parser = UpdateOrderStatusResponse.parser()
-            )
+            orderOutputPort.updateStatus(updateOrderStatusRequest)
         } returns updateOrderStatusResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -393,11 +318,7 @@ class OrderControllerTest {
     fun `updateStatus should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.UPDATE_STATUS,
-                payload = updateOrderStatusRequest,
-                parser = UpdateOrderStatusResponse.parser()
-            )
+            orderOutputPort.updateStatus(updateOrderStatusRequest)
         } returns UpdateOrderStatusResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -410,35 +331,21 @@ class OrderControllerTest {
     fun `delete should delete order`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.DELETE,
-                deleteOrderRequest,
-                DeleteOrderResponse.parser()
-            )
+            orderOutputPort.delete(deleteOrderRequest)
         } returns deleteOrderResponse.toMono()
 
         // WHEN
         orderController.delete(randomOrderId).block()
 
         // THEN
-        verify(exactly = 1) {
-            natsMessagePublisher.request(
-                NatsSubject.Order.DELETE,
-                deleteOrderRequest,
-                DeleteOrderResponse.parser()
-            )
-        }
+        verify(exactly = 1) { orderOutputPort.delete(deleteOrderRequest) }
     }
 
     @Test
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.DELETE,
-                deleteOrderRequest,
-                DeleteOrderResponse.parser()
-            )
+            orderOutputPort.delete(deleteOrderRequest)
         } returns deleteOrderResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -451,11 +358,7 @@ class OrderControllerTest {
     fun `delete should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Order.DELETE,
-                deleteOrderRequest,
-                DeleteOrderResponse.parser()
-            )
+            orderOutputPort.delete(deleteOrderRequest)
         } returns DeleteOrderResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN

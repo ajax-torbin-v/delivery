@@ -9,6 +9,8 @@ import com.example.core.ProductFixture.randomUpdateAmountAvailable
 import com.example.core.ProductFixture.randomUpdateMeasurement
 import com.example.core.ProductFixture.randomUpdatePrice
 import com.example.core.ProductFixture.randomUpdateProductName
+import com.example.core.dto.request.CreateProductDTO
+import com.example.core.dto.request.UpdateProductDTO
 import com.example.internal.input.reqreply.product.CreateProductResponse
 import com.example.internal.input.reqreply.product.DeleteProductRequest
 import com.example.internal.input.reqreply.product.DeleteProductResponse
@@ -17,6 +19,20 @@ import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductResponse
 
 object ProductProtoFixture {
+    val createProductDTO = CreateProductDTO(
+        name = randomProductName,
+        price = randomPrice,
+        amount = randomAmountAvailable,
+        measurement = randomMeasurement
+    )
+
+    val updateProductDTO = UpdateProductDTO(
+        name = randomUpdateProductName,
+        price = randomUpdatePrice,
+        amountAvailable = randomUpdateAmountAvailable,
+        measurement = randomUpdateMeasurement
+    )
+
     val createProductResponse = CreateProductResponse.newBuilder().apply {
         successBuilder.productBuilder.apply {
             name = randomProductName

@@ -1,5 +1,7 @@
 nats:
-  url: "nats://localhost:4222"
+  spring:
+    io.nats.client:
+      servers: "nats://localhost:4222"
 
 grpc:
   server:

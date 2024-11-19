@@ -1,10 +1,9 @@
 package com.example.gateway.controller
 
-import com.example.core.ProductFixture.createProductDTO
 import com.example.core.ProductFixture.randomProductId
-import com.example.core.ProductFixture.updateProductDTO
 import com.example.core.UserFixture.randomUserId
 import com.example.core.exception.ProductNotFoundException
+import com.example.gateway.ProductProtoFixture.createProductDTO
 import com.example.gateway.ProductProtoFixture.createProductResponse
 import com.example.gateway.ProductProtoFixture.createProductResponseWithUnexpectedException
 import com.example.gateway.ProductProtoFixture.deleteProductRequest
@@ -13,16 +12,15 @@ import com.example.gateway.ProductProtoFixture.findProductByIdRequest
 import com.example.gateway.ProductProtoFixture.findProductByIdResponse
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithProductNotFoundException
 import com.example.gateway.ProductProtoFixture.findProductByIdResponseWithUnexpectedException
+import com.example.gateway.ProductProtoFixture.updateProductDTO
 import com.example.gateway.ProductProtoFixture.updateProductResponse
-import com.example.gateway.mapper.ProductProtoMapper.toCreateProductRequest
-import com.example.gateway.mapper.ProductProtoMapper.toDTO
-import com.example.gateway.mapper.ProductProtoMapper.updateProductRequest
-import com.example.gateway.rest.ProductController
-import com.example.internal.api.NatsSubject
+import com.example.gateway.application.port.output.ProductOutputPort
+import com.example.gateway.infrastructure.mapper.ProductProtoMapper.toCreateProductRequest
+import com.example.gateway.infrastructure.mapper.ProductProtoMapper.toDTO
+import com.example.gateway.infrastructure.mapper.ProductProtoMapper.updateProductRequest
+import com.example.gateway.infrastructure.rest.ProductController
 import com.example.internal.input.reqreply.product.CreateProductResponse
-import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
-import com.example.internal.input.reqreply.product.UpdateProductResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -32,12 +30,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
-import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class ProductControllerTest {
     @MockK
-    private lateinit var natsMessagePublisher: NatsMessagePublisher
+    private lateinit var productOutputPort: ProductOutputPort
 
     @InjectMockKs
     private lateinit var productController: ProductController
@@ -46,11 +43,7 @@ class ProductControllerTest {
     fun `save should return product DTO`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.SAVE,
-                payload = createProductDTO.toCreateProductRequest(),
-                parser = CreateProductResponse.parser()
-            )
+            productOutputPort.create(createProductDTO.toCreateProductRequest())
         } returns createProductResponse.toMono()
 
         // WHEN //THEN
@@ -64,11 +57,7 @@ class ProductControllerTest {
     fun `save should rethrow exception when message contains unexpected error`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.SAVE,
-                payload = createProductDTO.toCreateProductRequest(),
-                parser = CreateProductResponse.parser()
-            )
+            productOutputPort.create(createProductDTO.toCreateProductRequest())
         } returns createProductResponseWithUnexpectedException.toMono()
 
         // WHEN //THEN
@@ -81,11 +70,7 @@ class ProductControllerTest {
     fun `save should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.SAVE,
-                payload = createProductDTO.toCreateProductRequest(),
-                parser = CreateProductResponse.parser()
-            )
+            productOutputPort.create(createProductDTO.toCreateProductRequest())
         } returns CreateProductResponse.getDefaultInstance().toMono()
 
         // WHEN //THEN
@@ -98,11 +83,7 @@ class ProductControllerTest {
     fun `findById should return existing product`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.FIND_BY_ID,
-                findProductByIdRequest,
-                FindProductByIdResponse.parser()
-            )
+            productOutputPort.findById(findProductByIdRequest)
         } returns findProductByIdResponse.toMono()
 
         // WHEN // THEN
@@ -116,11 +97,7 @@ class ProductControllerTest {
     fun `findById should throw exception when product doesn't exist`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.FIND_BY_ID,
-                findProductByIdRequest,
-                FindProductByIdResponse.parser()
-            )
+            productOutputPort.findById(findProductByIdRequest)
         } returns findProductByIdResponseWithProductNotFoundException.toMono()
 
         // WHEN // THEN
@@ -133,11 +110,7 @@ class ProductControllerTest {
     fun `findById should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.FIND_BY_ID,
-                findProductByIdRequest,
-                FindProductByIdResponse.parser()
-            )
+            productOutputPort.findById(findProductByIdRequest)
         } returns findProductByIdResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
@@ -150,11 +123,7 @@ class ProductControllerTest {
     fun `findById should throw exception when message is empty`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.FIND_BY_ID,
-                findProductByIdRequest,
-                FindProductByIdResponse.parser()
-            )
+            productOutputPort.findById(findProductByIdRequest)
         } returns FindProductByIdResponse.getDefaultInstance().toMono()
 
         // WHEN // THEN
@@ -167,11 +136,7 @@ class ProductControllerTest {
     fun `update should return updated product`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.UPDATE,
-                updateProductRequest(randomUserId, updateProductDTO),
-                UpdateProductResponse.parser()
-            )
+            productOutputPort.update(updateProductRequest(randomUserId, updateProductDTO))
         } returns updateProductResponse.toMono()
 
         // WHEN // THEN
@@ -185,11 +150,7 @@ class ProductControllerTest {
     fun `delete should rethrow unexpected exception`() {
         // GIVEN
         every {
-            natsMessagePublisher.request(
-                NatsSubject.Product.DELETE,
-                deleteProductRequest,
-                DeleteProductResponse.parser()
-            )
+            productOutputPort.delete(deleteProductRequest)
         } returns deleteProductResponseWithUnexpectedException.toMono()
 
         // WHEN // THEN
