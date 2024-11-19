@@ -1,6 +1,7 @@
 package com.example.domainservice.product.infrastructure.nats
 
 import com.example.core.ProductFixture.randomProductId
+import com.example.core.exception.ProductNotFoundException
 import com.example.domainservice.ProductFixture.buildDeleteProductRequest
 import com.example.domainservice.ProductFixture.buildFindProductByIdRequest
 import com.example.domainservice.ProductFixture.buildUpdateProductRequest
@@ -22,6 +23,7 @@ import com.example.internal.input.reqreply.product.CreateProductResponse
 import com.example.internal.input.reqreply.product.DeleteProductResponse
 import com.example.internal.input.reqreply.product.FindProductByIdResponse
 import com.example.internal.input.reqreply.product.UpdateProductResponse
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,15 +77,19 @@ class ProductNatsControllerTest : AbstractIntegrationTest() {
     @Test
     fun `findById should return message with exception when product not found`() {
         // GIVEN // WHEN
+        val nonExistingId = ObjectId.get().toString()
         val actual = natsMessagePublisher.request(
             NatsSubject.Product.FIND_BY_ID,
-            buildFindProductByIdRequest(randomProductId),
+            buildFindProductByIdRequest(nonExistingId),
             FindProductByIdResponse.parser()
         )
 
         // THEN
         actual.test()
-            .expectNext(productNotFoundException.toFailureFindProductByIdResponse())
+            .expectNext(
+                ProductNotFoundException("Product with id $nonExistingId doesn't exist")
+                    .toFailureFindProductByIdResponse()
+            )
             .verifyComplete()
     }
 
