@@ -1,7 +1,5 @@
 package com.example.core
 
-import com.example.core.dto.request.CreateProductDTO
-import com.example.core.dto.request.UpdateProductDTO
 import io.github.serpro69.kfaker.Faker
 import org.bson.types.ObjectId
 import java.math.BigDecimal
@@ -16,18 +14,4 @@ object ProductFixture {
     val randomUpdateAmountAvailable = Faker().random.nextInt(100, 1000)
     val randomMeasurement = Faker().food.measurements()
     val randomUpdateMeasurement = Faker().food.measurements()
-
-    val createProductDTO = CreateProductDTO(
-        name = randomProductName,
-        price = randomPrice,
-        amount = randomAmountAvailable,
-        measurement = randomMeasurement
-    )
-
-    val updateProductDTO = UpdateProductDTO(
-        name = randomUpdateProductName,
-        price = randomUpdatePrice,
-        amountAvailable = randomUpdateAmountAvailable,
-        measurement = randomUpdateMeasurement
-    )
 }

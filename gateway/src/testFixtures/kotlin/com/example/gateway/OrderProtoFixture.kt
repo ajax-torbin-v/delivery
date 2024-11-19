@@ -10,12 +10,22 @@ import com.example.core.OrderFixture.randomCity
 import com.example.core.OrderFixture.randomIndex
 import com.example.core.OrderFixture.randomOrderId
 import com.example.core.OrderFixture.randomStreet
+import com.example.core.OrderFixture.randomUpdateBuilding
+import com.example.core.OrderFixture.randomUpdateCity
+import com.example.core.OrderFixture.randomUpdateIndex
+import com.example.core.OrderFixture.randomUpdateStreet
 import com.example.core.ProductFixture.randomAmountAvailable
 import com.example.core.ProductFixture.randomMeasurement
 import com.example.core.ProductFixture.randomPrice
 import com.example.core.ProductFixture.randomProductId
 import com.example.core.ProductFixture.randomProductName
 import com.example.core.UserFixture.randomUserId
+import com.example.core.dto.request.CreateOrderDTO
+import com.example.core.dto.request.CreateOrderItemDTO
+import com.example.core.dto.request.UpdateOrderDTO
+import com.example.core.dto.response.OrderDTO
+import com.example.core.dto.response.OrderItemDTO
+import com.example.core.dto.response.ShipmentDetailsDTO
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.DeleteOrderRequest
 import com.example.internal.input.reqreply.order.DeleteOrderResponse
@@ -32,6 +42,47 @@ import com.example.grpcapi.reqres.order.FindOrderByIdRequest as GrpcFindOrderByI
 import com.example.grpcapi.reqres.order.FindOrderByIdResponse as GrpcFindOrderByIdResponse
 
 object OrderProtoFixture {
+
+    val randomShipmentDetailsDTO = ShipmentDetailsDTO(
+        city = randomCity,
+        street = randomStreet,
+        building = randomBuilding,
+        index = randomIndex
+    )
+
+    val randomUpdateShipmentDetailsDTO = ShipmentDetailsDTO(
+        city = randomUpdateCity,
+        street = randomUpdateStreet,
+        building = randomUpdateBuilding,
+        index = randomUpdateIndex
+    )
+
+    val updateOrderDTO = UpdateOrderDTO(
+        shipmentDetails = randomUpdateShipmentDetailsDTO
+    )
+
+    val orderDTO = OrderDTO(
+        id = randomOrderId,
+        items = listOf(
+            OrderItemDTO(
+                price = randomPrice,
+                amount = randomAmount,
+                productId = randomProductId
+            )
+        ),
+        shipmentDetails = randomShipmentDetailsDTO,
+        status = "NEW",
+        userId = randomUserId
+
+    )
+
+    val createOrderDTO = CreateOrderDTO(
+        items = listOf(CreateOrderItemDTO(randomProductId, randomAmount)),
+        shipmentDetails = randomShipmentDetailsDTO,
+        userId = randomUserId
+    )
+
+
     val randomShipmentDetails = ShipmentDetails.newBuilder().apply {
         city = randomCity
         street = randomStreet

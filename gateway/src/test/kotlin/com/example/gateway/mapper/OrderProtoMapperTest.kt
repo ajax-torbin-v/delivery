@@ -1,11 +1,11 @@
 package com.example.gateway.mapper
 
-import com.example.core.OrderFixture.createOrderDTO
 import com.example.gateway.OrderProtoFixture
+import com.example.gateway.OrderProtoFixture.createOrderDTO
 import com.example.gateway.OrderProtoFixture.grpcCreateOrderRequest
-import com.example.gateway.mapper.OrderProtoMapper.toCreateOrderRequest
-import com.example.gateway.mapper.OrderProtoMapper.toGrpc
-import com.example.gateway.mapper.OrderProtoMapper.toInternal
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toCreateOrderRequest
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toGrpc
+import com.example.gateway.infrastructure.mapper.OrderProtoMapper.toInternal
 import com.example.internal.input.reqreply.order.CreateOrderResponse
 import com.example.internal.input.reqreply.order.FindOrderByIdResponse
 import org.junit.jupiter.api.Assertions.assertEquals

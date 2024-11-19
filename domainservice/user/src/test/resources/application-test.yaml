@@ -1,0 +1,14 @@
+nats.uri: nats://localhost:4222
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:test@localhost:27018/test?authSource=admin
+
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 10
+
+mongock:
+  enabled: false

@@ -6,6 +6,11 @@ plugins {
 
 dependencies {
     implementation(project(":internal-api"))
+    implementation(project(":domainservice:core"))
+    implementation(project(":domainservice:product"))
+    implementation(project(":domainservice:order"))
+    implementation(project(":domainservice:user"))
+    implementation(project(":domainservice:migration"))
     implementation(project(":core"))
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive:3.3.4")

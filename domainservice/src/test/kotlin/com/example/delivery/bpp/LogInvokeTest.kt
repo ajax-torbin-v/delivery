@@ -1,7 +1,7 @@
 package com.example.delivery.bpp
 
-import com.example.delivery.annotaion.LogInvoke
-import com.example.delivery.config.LogInvokeAnnotationBeanPostProcessor
+import com.example.domainservice.core.annotaion.LogInvoke
+import com.example.domainservice.core.config.LogInvokeAnnotationBeanPostProcessor
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
